@@ -1,0 +1,143 @@
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="com.grahm.livepost.fragments.ProfileFragment">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <RelativeLayout
+            android:id="@+id/viewHeader"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingBottom="15dp">
+
+            <ImageView
+                android:id="@+id/img_profile"
+                android:layout_width="100dp"
+                android:layout_height="100dp"
+                android:layout_centerHorizontal="true"
+                android:paddingTop="15dp"
+                android:src="@drawable/ic_no_profile" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/img_profile"
+                android:paddingTop="5dp"
+                android:text="Javier Gonzalez"
+                android:textAlignment="center"
+                android:textColor="@color/blakc_username"
+                android:textSize="20dp" />
+
+            <Button
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentRight="true"
+                android:layout_marginRight="10dp"
+                android:layout_marginTop="10dp"
+                android:text="@string/btn_edit_profile"
+                android:textAllCaps="false"/>
+        </RelativeLayout>
+
+        <LinearLayout
+            android:id="@+id/tab_buttons"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/viewHeader"
+            android:orientation="horizontal">
+            <Button
+                android:id="@+id/btn_created"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="0.5"
+                android:textAllCaps="false"
+                android:background="#dd4d2e"
+                android:textColor="#FFFFFF"
+                android:text="Stories i've Created"
+                android:layout_gravity="center"/>
+            <Button
+                android:id="@+id/btn_contributed"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="0.5"
+                android:textAllCaps="false"
+                android:background="#DADADA"
+                android:text="Stories i've Contributed to"
+                android:layout_gravity="center"/>
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/view_zero_created"
+            android:layout_below="@+id/tab_buttons"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:paddingTop="25dp">
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/zero_created_header"
+                android:textSize="24dp"
+                android:textAlignment="center"
+                android:textColor="#444"/>
+            <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="90dp"
+                android:src="@drawable/img_zero_posts"
+                android:layout_gravity="center"
+                android:paddingTop="15dp"/>
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/zero_created_second"
+                android:textSize="24dp"
+                android:textAlignment="center"
+                android:textColor="#444"
+                android:paddingTop="15dp"/>
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/zero_created_bottom"
+                android:textSize="16dp"
+                android:textAlignment="center"
+                android:textColor="#666"
+                android:paddingTop="40dp"/>
+
+        </LinearLayout>
+        <LinearLayout
+            android:id="@+id/view_zero_contributed"
+            android:layout_below="@+id/tab_buttons"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:visibility="gone"
+            android:paddingTop="25dp">
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/zero_contributed_header"
+                android:textSize="24dp"
+                android:textAlignment="center"
+                android:textColor="#444"/>
+            <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="90dp"
+                android:src="@drawable/img_zero_posts"
+                android:layout_gravity="center"
+                android:paddingTop="15dp"/>
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/zero_contributed_bottom"
+                android:textSize="16dp"
+                android:textAlignment="center"
+                android:textColor="#666"
+                android:paddingTop="50dp"/>
+
+        </LinearLayout>
+    </RelativeLayout>
+
+</FrameLayout>
