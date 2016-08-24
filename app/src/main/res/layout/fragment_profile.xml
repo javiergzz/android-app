@@ -54,7 +54,7 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="0.5"
                 android:textAllCaps="false"
-                android:background="#dd4d2e"
+                android:background="#364457"
                 android:textColor="#FFFFFF"
                 android:text="Stories i've Created"
                 android:layout_gravity="center"/>

@@ -13,6 +13,7 @@ public class SplashScreen extends AppCompatActivity {
     private static final int SPLASH_DISPLAY_LENGTH = 3000;
     public static final String PREFS_NAME = "PrefsFile";
     public static final String PREFS_LOGIN = "isLogin";
+    public static final String PREFS_ONBOARDING = "onboarding";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -20,13 +21,13 @@ public class SplashScreen extends AppCompatActivity {
 
         SharedPreferences settings = getSharedPreferences(PREFS_NAME, 0);
         final boolean isLogin = settings.getBoolean(PREFS_LOGIN, false);
-
+        final boolean onboarding = settings.getBoolean(PREFS_ONBOARDING, false);
+//        final Class activity = (onboarding) ? (isLogin) ? MainActivity.class : SignUpPage.class : Onboarding.class;
         setContentView(R.layout.activity_splash_screen);
 
         new Handler().postDelayed(new Runnable() {
             @Override
             public void run() {
-//                Class activity = (isLogin) ? SplashScreen.class : SignUpPage.class;
                 Class activity = MainActivity.class;
                 Intent mainIntent = new Intent(SplashScreen.this, activity);
                 SplashScreen.this.startActivity(mainIntent);

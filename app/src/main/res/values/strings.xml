@@ -20,4 +20,20 @@
     <string name="zero_created_bottom">Tip: Click on the image to cerate a new post.</string>
     <string name="zero_contributed_header">You still have not contributed \n to any posts.</string>
     <string name="zero_contributed_bottom">Tip: To contribute to a post you have to be invited by \n a post admin.</string>
+
+    <string name="title_activity_onboarding">OnboardingActivity</string>
+    <string name="dummy_button">Dummy Button</string>
+    <string name="dummy_content">DUMMY\nCONTENT</string>
+
+    <!--Onboarding as on-->
+    <string name="on_story_title">Your 1st Story</string>
+    <string name="on_board_1">Hey welcome to LivePost! LivePost is all about covering news stories in real time and sharing them with the world.</string>
+    <string name="on_board_2">We\'re going to do a quick walkthrough of how to create a story. Let\'s start off by clicking on “Your 1st Story” to give it a catchy title.</string>
+    <string name="on_board_3">Awesome! Now click on “Pick a Category” up top to choose what your story is about.</string>
+    <string name="on_board_4">Looking good! We added an image to your story, but you can change it later by long pressing it and adding your own.</string>
+    <string name="on_board_5">Ok, so now all that\'s missing is your profile. Click on the profile picture to set it up.</string>
+    <string name="on_board_6">Nice pic! Now hit “Publish” to choose if you want to publish your story on your blog or on the LivePost News website.</string>
+    <string name="on_board_7">Great you\’re ready to start telling your story. Let\’s try sending a photo.</string>
+    <string name="on_board_8">Click on the camera button down below to open your phone\’s camera and take a photo.</string>
+    <string name="on_board_9">Nice! Tip: Long pressing images will give you several options. Try deleting that last image.</string>
 </resources>

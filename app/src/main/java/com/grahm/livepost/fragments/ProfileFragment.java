@@ -41,7 +41,7 @@ public class ProfileFragment extends Fragment {
             public void onClick(View v) {
                 zeroContributed.setVisibility(View.GONE);
                 zeroCreated.setVisibility(View.VISIBLE);
-                btnCreated.setBackgroundColor(Color.rgb(221, 77, 46));
+                btnCreated.setBackgroundColor(Color.rgb(54, 68, 87));
                 btnCreated.setTextColor(Color.WHITE);
                 btnContributed.setBackgroundColor(Color.rgb(218, 218, 218));
                 btnContributed.setTextColor(Color.BLACK);
@@ -52,7 +52,7 @@ public class ProfileFragment extends Fragment {
             public void onClick(View v) {
                 zeroCreated.setVisibility(View.GONE);
                 zeroContributed.setVisibility(View.VISIBLE);
-                btnContributed.setBackgroundColor(Color.rgb(221, 77, 46));
+                btnContributed.setBackgroundColor(Color.rgb(54, 68, 87));
                 btnContributed.setTextColor(Color.WHITE);
                 btnCreated.setBackgroundColor(Color.rgb(218, 218, 218));
                 btnCreated.setTextColor(Color.BLACK);
