@@ -22,13 +22,13 @@ public class SplashScreen extends AppCompatActivity {
         SharedPreferences settings = getSharedPreferences(PREFS_NAME, 0);
         final boolean isLogin = settings.getBoolean(PREFS_LOGIN, false);
         final boolean onboarding = settings.getBoolean(PREFS_ONBOARDING, false);
-//        final Class activity = (onboarding) ? (isLogin) ? MainActivity.class : SignUpPage.class : Onboarding.class;
+        final Class activity = (onboarding) ? (isLogin) ? MainActivity.class : Login.class : Onboarding.class;
         setContentView(R.layout.activity_splash_screen);
 
         new Handler().postDelayed(new Runnable() {
             @Override
             public void run() {
-                Class activity = MainActivity.class;
+                Class activity = Login.class;
                 Intent mainIntent = new Intent(SplashScreen.this, activity);
                 SplashScreen.this.startActivity(mainIntent);
                 SplashScreen.this.finish();

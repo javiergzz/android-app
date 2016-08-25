@@ -6,6 +6,8 @@ import android.os.AsyncTask;
 import android.util.Log;
 import android.widget.ImageView;
 
+import com.grahm.livepost.interfaces.CallbackImage;
+
 import java.io.InputStream;
 
 /**
@@ -13,10 +15,11 @@ import java.io.InputStream;
  */
 
 public class DownloadImageTask extends AsyncTask<String, Void, Bitmap> {
-    ImageView bmImage;
-
-    public DownloadImageTask(ImageView bmImage) {
+    private ImageView bmImage;
+    private CallbackImage image;
+    public DownloadImageTask(ImageView bmImage, CallbackImage callback) {
         this.bmImage = bmImage;
+        this.image = callback;
     }
 
     protected Bitmap doInBackground(String... urls) {
@@ -33,8 +36,10 @@ public class DownloadImageTask extends AsyncTask<String, Void, Bitmap> {
     }
 
     protected void onPostExecute(Bitmap result) {
-        if(result != null){
+        if(result != null) {
             bmImage.setImageBitmap(result);
+            image.callback(result);
         }
     }
+
 }
