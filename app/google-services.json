@@ -1,0 +1,55 @@
+{
+  "project_info": {
+    "project_number": "616735093180",
+    "firebase_url": "https://livepost-dev.firebaseio.com",
+    "project_id": "livepost-dev",
+    "storage_bucket": "livepost-dev.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:616735093180:android:7bfcaa44e7b30e38",
+        "android_client_info": {
+          "package_name": "com.grahm.livepost"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "616735093180-77140m4lb96brr4d12je1l95nmdsanv1.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.grahm.livepost",
+            "certificate_hash": "653FD5C6CE48DD6EB1D60194D04849FD84B91BB2"
+          }
+        },
+        {
+          "client_id": "616735093180-f9v9r6ouq1325vmhgn4cth8gre04e7r2.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCjDX07MPGj18t7H4w9MgetsbVEuhmyn7w"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 2,
+          "other_platform_oauth_client": [
+            {
+              "client_id": "616735093180-f9v9r6ouq1325vmhgn4cth8gre04e7r2.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

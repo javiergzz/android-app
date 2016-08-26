@@ -1,12 +1,13 @@
 package com.grahm.livepost.objects;
 
+import java.io.Serializable;
 import java.sql.Timestamp;
 
 /**
  * Created by javiergonzalez on 6/21/16.
  */
 
-public class Story {
+public class Story implements Serializable {
 
     public String getAuthor() {
         return author;
@@ -117,4 +118,20 @@ public class Story {
     private Timestamp timestamp;
     private String title;
 
+    public Story (){}
+
+    public Story(String author, String author_name, String category, String last_message, Timestamp last_time, double lat, double lng, String location, String posts_picture, String subcategory, Timestamp timestamp, String title) {
+        this.author = author;
+        this.author_name = author_name;
+        this.category = category;
+        this.last_message = last_message;
+        this.last_time = last_time;
+        this.lat = lat;
+        this.lng = lng;
+        this.location = location;
+        this.posts_picture = posts_picture;
+        this.subcategory = subcategory;
+        this.timestamp = timestamp;
+        this.title = title;
+    }
 }

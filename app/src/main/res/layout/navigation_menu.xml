@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.v7.widget.Toolbar xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/nav_menu"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_alignParentBottom="true"
+    android:background="@android:color/black"
+    android:gravity="center_horizontal">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <ImageButton
+            android:id="@+id/home"
+            android:layout_weight="1"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@drawable/nav_button"
+            android:src="@drawable/ic_home_white_36dp" />
+
+        <ImageButton
+            android:id="@+id/favorites"
+            android:layout_width="wrap_content"
+            android:layout_weight="1"
+            android:layout_height="wrap_content"
+            android:background="@drawable/nav_button"
+            android:src="@drawable/ic_favorite_white_36dp" />
+        <ImageButton
+            android:id="@+id/new_session"
+            android:layout_weight="1"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@drawable/nav_button"
+            android:src="@drawable/ic_note_add_white_36dp" />
+
+
+        <ImageButton
+            android:id="@+id/profile"
+            android:layout_weight="1"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@drawable/nav_button"
+            android:src="@drawable/ic_account_circle_white_36dp" />
+    </LinearLayout>
+</android.support.v7.widget.Toolbar>

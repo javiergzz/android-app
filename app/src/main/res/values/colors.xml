@@ -16,4 +16,10 @@
     <color name="light_grey">#EEE</color>
     <!-- Profile Fragment -->
     <color name="blakc_username">#333333</color>
+    <color name="mid_grey">#777</color>
+    <color name="twitter_blue">#4099FF</color>
+    <color name="registration_red">#CC1111</color>
+    <color name="action_bar_color">#E34D2E</color>
+    <color name="img_gray">#EAEAEA</color>
+    <color name="transparent_white">#F1F1F1</color>
 </resources>

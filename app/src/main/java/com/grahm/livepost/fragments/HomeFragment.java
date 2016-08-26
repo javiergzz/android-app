@@ -32,7 +32,12 @@ public class HomeFragment extends Fragment {
     private HomeListAdapter mHomeListAdapter;
 
     public HomeFragment() {}
-
+    public static HomeFragment newInstance(Bundle args) {
+        HomeFragment fragment = new HomeFragment();
+        //args.putInt(ARG_LIST_TYPE, listType);
+        fragment.setArguments(args);
+        return fragment;
+    }
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);

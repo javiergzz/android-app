@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.design.widget.TextInputLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/new_session_avatar_input"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:gravity="center">
+<LinearLayout
+    android:id="@+id/new_session_avatar_layout"
+    android:layout_width="120dp"
+    android:layout_height="120dp"
+    android:orientation="vertical"
+    android:background="@color/light_grey"
+    android:gravity="center">
+<ImageButton
+    android:id="@+id/new_session_avatar"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:scaleType="fitCenter"
+    android:src="@drawable/ic_add_a_photo_black_48dp"
+    android:layout_gravity="center" />
+</LinearLayout>
+    <ImageView
+        android:id="@+id/new_session_selected_img"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:maxHeight="200dp"/>
+
+</android.support.design.widget.TextInputLayout>
+
+
