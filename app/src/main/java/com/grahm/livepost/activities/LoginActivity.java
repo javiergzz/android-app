@@ -65,7 +65,6 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
     private UserLoginTask mAuthTask = null;
 
     // UI references.
-    @BindView(R.id.email)
     public AutoCompleteTextView mEmailView;
     @BindView(R.id.password)
     public EditText mPasswordView;
@@ -73,8 +72,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
     public View mProgressView;
     @BindView(R.id.login_form)
     public View mLoginFormView;
-    @BindView(R.id.login_background)
-    public View mLoginBackgroundView;
+
     @BindView(R.id.email_sign_in_button)
     public Button mEmailLoginButton;
 
@@ -85,12 +83,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         mFirebaseRef = new Firebase(getString(R.string.firebase_url));
         setContentView(R.layout.activity_login);
         ButterKnife.bind(this);
-        mLoginBackgroundView.setOnClickListener(new OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                onBackPressed();
-            }
-        });
+        mEmailView = ButterKnife.findById(this,R.id.email);
         populateAutoComplete();
     }
 
@@ -103,7 +96,10 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         startActivityForResult(new Intent(this, RegistrationActivity.class), 1);
     }
 
-
+    @OnClick(R.id.login_background_main)
+    public void backgroundClick(){
+        onBackPressed();
+    }
     /**
      * Attempts to sign in or register the account specified by the login form.
      * If there are form errors (invalid email, missing fields, etc.), the
@@ -249,9 +245,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
 
     private void addEmailsToAutoComplete(List<String> emailAddressCollection) {
         //Create adapter to tell the AutoCompleteTextView what to show in its dropdown list.
-        ArrayAdapter<String> adapter =
-                new ArrayAdapter<>(LoginActivity.this,
-                        android.R.layout.simple_dropdown_item_1line, emailAddressCollection);
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(LoginActivity.this, android.R.layout.simple_dropdown_item_1line, emailAddressCollection);
 
         mEmailView.setAdapter(adapter);
     }

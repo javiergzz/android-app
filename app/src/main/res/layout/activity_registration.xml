@@ -6,7 +6,7 @@
     android:background="@android:color/white"
     android:gravity="center_horizontal"
     android:orientation="vertical"
-    tools:context="com.livepost.javiergzzr.activities.RegistrationActivity">
+    tools:context="com.grahm.livepost.activities.RegistrationActivity">
 
     <LinearLayout
         android:layout_width="match_parent"

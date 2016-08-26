@@ -27,7 +27,7 @@ public class HomeFragment extends Fragment {
     private static final String TAG = "HomeFragment";
     private static final String ARG_SECTION_NUMBER = "section_number";
     private ValueEventListener mConnectedListener;
-    private Firebase ref;
+    private Firebase mFirebaseRef;
     private Context mContext;
     private HomeListAdapter mHomeListAdapter;
 
@@ -41,7 +41,7 @@ public class HomeFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        ref = new Firebase(getString(R.string.firebase_url)).child("users/javier@livepostnews/posts_created");
+        mFirebaseRef = new Firebase(getString(R.string.firebase_url)).child("posts");
     }
 
     @Override
@@ -62,7 +62,8 @@ public class HomeFragment extends Fragment {
     }
 
     private void setupAdapter(final RecyclerView recyclerView){
-        mHomeListAdapter = new HomeListAdapter(ref.orderByPriority(), (AppCompatActivity)getActivity(), R.layout.item_story, 1 ,false);
+        Log.d(TAG,mFirebaseRef.toString());
+        mHomeListAdapter = new HomeListAdapter(mFirebaseRef.orderByPriority(), (AppCompatActivity)getActivity(), R.layout.item_story, 1 ,false);
         recyclerView.setAdapter(mHomeListAdapter);
         mHomeListAdapter.registerAdapterDataObserver(new RecyclerView.AdapterDataObserver() {
             @Override
@@ -76,7 +77,7 @@ public class HomeFragment extends Fragment {
     @Override
     public void onStart() {
         super.onStart();
-        mConnectedListener = ref.getRoot().child(".info/connected").addValueEventListener(new ValueEventListener() {
+        mConnectedListener = mFirebaseRef.getRoot().child(".info/connected").addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 boolean connected = (Boolean) dataSnapshot.getValue();
@@ -99,6 +100,6 @@ public class HomeFragment extends Fragment {
     @Override
     public void onStop() {
         super.onStop();
-        ref.getRoot().child(".info/connected").removeEventListener(mConnectedListener);
+        mFirebaseRef.getRoot().child(".info/connected").removeEventListener(mConnectedListener);
     }
 }

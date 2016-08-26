@@ -4,6 +4,14 @@
 
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+    <uses-permission android:name="android.permission.VIBRATE" />
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
+    <uses-permission android:name="android.permission.GET_ACCOUNTS" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <uses-permission android:name="com.google.android.c2dm.permission.RECEIVE" />
+    <uses-permission android:name="android.permission.READ_PROFILE" />
+    <uses-permission android:name="android.permission.READ_CONTACTS" />
 
     <application
         android:name=".application.LoadData"
@@ -40,7 +48,33 @@
             android:windowSoftInputMode="stateHidden|adjustResize" />
         <activity
             android:name=".activities.SettingsActivity"
-            android:label="@string/title_activity_settings"></activity>
+            android:label="@string/title_activity_settings"
+            android:parentActivityName="com.grahm.livepost.activities.MainActivity"
+            />
+        <activity
+            android:name="com.grahm.livepost.activities.LoginActivity"
+            android:label="@string/title_activity_login"
+            android:theme="@style/Theme.Transparent"
+            android:parentActivityName="com.grahm.livepost.activities.MainActivity"/>
+        <activity
+            android:name="com.grahm.livepost.activities.RegistrationActivity"
+            android:label="@string/title_activity_login"
+            android:theme="@style/AppTheme.NoActionBar"
+            android:parentActivityName="com.grahm.livepost.activities.MainActivity">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.grahm.livepost.activities.MainActivity" />
+        </activity>
+        <activity
+            android:name="com.grahm.livepost.activities.LoginPrompt"
+            android:configChanges="orientation|keyboardHidden|screenSize"
+            android:label="@string/title_activity_login_prompt"
+            android:parentActivityName="com.grahm.livepost.activities.MainActivity"
+            android:theme="@style/FullscreenTheme">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.grahm.livepost.activities.MainActivity" />
+        </activity>
     </application>
 
 </manifest>
