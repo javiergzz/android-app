@@ -47,12 +47,11 @@ public class HomeFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        View rootView = inflater.inflate(R.layout.fragment_main, container, false);
-        Context context = rootView.getContext();
+        RecyclerView rootView = (RecyclerView)inflater.inflate(R.layout.fragment_main, container, false);
         mContext = rootView.getContext();
         if (rootView instanceof RecyclerView) {
             RecyclerView recyclerView = (RecyclerView) rootView;
-            LinearLayoutManager llm = new LinearLayoutManager(context);
+            LinearLayoutManager llm = new LinearLayoutManager(mContext);
             llm.setOrientation(LinearLayoutManager.VERTICAL);
             recyclerView.setLayoutManager(llm);
             setupAdapter(recyclerView);

@@ -42,11 +42,11 @@ public class Story implements Serializable {
     }
 
     public Timestamp getLast_time() {
-        return last_time;
+        return new Timestamp(last_time);
     }
 
     public void setLast_time(Timestamp last_time) {
-        this.last_time = last_time;
+        this.last_time = last_time.getTime();
     }
 
     public double getLat() {
@@ -90,11 +90,11 @@ public class Story implements Serializable {
     }
 
     public Timestamp getTimestamp() {
-        return timestamp;
+        return new Timestamp(timestamp);
     }
 
     public void setTimestamp(Timestamp timestamp) {
-        this.timestamp = timestamp;
+        this.timestamp = timestamp.getTime();
     }
 
     public String getTitle() {
@@ -105,33 +105,43 @@ public class Story implements Serializable {
         this.title = title;
     }
 
+    public boolean getIsLive() {
+        return Boolean.parseBoolean(isLive);
+    }
+
+    public void setIsLive(boolean live) {
+       this.isLive = String.valueOf(live);
+    }
+
     private String author;
     private String author_name;
     private String category;
     private String last_message;
-    private Timestamp last_time;
+    private long last_time;
     private double lat;
     private double lng;
     private String location;
     private String posts_picture;
     private String subcategory;
-    private Timestamp timestamp;
+    private long timestamp;
     private String title;
+    private String isLive;
 
     public Story (){}
 
-    public Story(String author, String author_name, String category, String last_message, Timestamp last_time, double lat, double lng, String location, String posts_picture, String subcategory, Timestamp timestamp, String title) {
+    public Story(String author, String author_name, String category, String last_message, Timestamp last_time, double lat, double lng, String location, String posts_picture, String subcategory, Timestamp timestamp, String title,boolean isLive) {
         this.author = author;
         this.author_name = author_name;
         this.category = category;
         this.last_message = last_message;
-        this.last_time = last_time;
+        this.last_time = last_time.getTime();
         this.lat = lat;
         this.lng = lng;
         this.location = location;
         this.posts_picture = posts_picture;
         this.subcategory = subcategory;
-        this.timestamp = timestamp;
+        this.timestamp = timestamp.getTime();
         this.title = title;
+        this.isLive = String.valueOf(isLive);
     }
 }
