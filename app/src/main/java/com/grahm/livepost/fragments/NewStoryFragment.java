@@ -71,6 +71,7 @@ public class NewStoryFragment extends Fragment implements OnPutImageListener {
     private Story mStory;
     private Uri mUri;
     private int mCurrentItem;
+    private User mUser;
     private NewSessionViewsManager mNewSessionViewsManager;
 
     // UI references.
@@ -114,6 +115,7 @@ public class NewStoryFragment extends Fragment implements OnPutImageListener {
             mCurrentItem = savedInstanceState.getInt(PAGE_KEY, 0);
             mUri = Uri.parse(savedInstanceState.getString(URI_KEY));
         }
+        mUser = Utilities.getUser(mFirebaseRef,getActivity(),savedInstanceState);
         mStory = mStory == null ? new Story() : mStory;
         mFirebaseRef = new Firebase(getString(R.string.firebase_url));
         mNewSessionViewsManager = new NewSessionViewsManager();
@@ -212,18 +214,14 @@ public class NewStoryFragment extends Fragment implements OnPutImageListener {
 
     public void attemptSessionCreation(){
         if (mStoryTask != null) return;
-        SharedPreferences sharedPreferences = getActivity().getSharedPreferences(getString(R.string.preference_file_key), Context.MODE_PRIVATE);
-        String s = sharedPreferences.getString("user", "");
 
-        if(s!="") {
-            User user =new Gson().fromJson(s, User.class);
-            mStory.setAuthor(user.getEmail());
-            mStory.setAuthor_name(user.getName());
-            mStory.setTimestamp(Utilities.getTimestamp());
-            mStory.setLast_time(Utilities.getTimestamp());
-            mStoryTask = new CreateStoryTask(mStory,mFirebaseRef.child("posts"),getActivity(),s3Client,this,true);
-            if(mUri!= null) mStoryTask.execute(mUri);
-        }
+        mStory.setAuthor(mUser.getEmail());
+        mStory.setAuthor_name(mUser.getName());
+        mStory.setTimestamp(Utilities.getTimestamp());
+        mStory.setLast_time(Utilities.getTimestamp());
+        mStoryTask = new CreateStoryTask(mStory,mFirebaseRef.child("posts"),getActivity(),s3Client,this,true);
+        if(mUri!= null) mStoryTask.execute(mUri);
+
     }
     /**
      * This interface must be implemented by activities that contain this
@@ -327,49 +325,49 @@ public class NewStoryFragment extends Fragment implements OnPutImageListener {
         }
         public class ImageField extends MultipartFormField {
 
-                public int getTitle() {
-                    return R.string.ns_image;
-                }
+            public int getTitle() {
+                return R.string.ns_image;
+            }
 
-                public int getLayout() {
-                    return R.layout.new_session_image;
-                }
+            public int getLayout() {
+                return R.layout.new_session_image;
+            }
 
-                public void onSetup(ViewGroup layout) {
-                    ImageButton imageButton = (ImageButton) layout.findViewById(R.id.new_session_avatar);
-                    if(mUri!=null){
-                        ButterKnife.findById(layout,R.id.new_session_avatar_layout).setVisibility(View.GONE);
-                        ImageView resultView = (ImageView)layout.findViewById(R.id.new_session_selected_img);
-                        resultView.setVisibility(View.VISIBLE);
-                        resultView.setImageResource(R.drawable.ic_add_a_photo_black_48dp);
-                        resultView.setImageURI(mUri);
-                        resultView.setOnClickListener(new View.OnClickListener() {
-                            @Override
-                            public void onClick(View v) {
-                                EasyImage.openChooserWithDocuments(NewStoryFragment.this, mStory.getTitle(), 1);
-                            }
-                        });
-                    }
-                    imageButton.setOnClickListener(new View.OnClickListener() {
+            public void onSetup(ViewGroup layout) {
+                ImageButton imageButton = (ImageButton) layout.findViewById(R.id.new_session_avatar);
+                if(mUri!=null){
+                    ButterKnife.findById(layout,R.id.new_session_avatar_layout).setVisibility(View.GONE);
+                    ImageView resultView = (ImageView)layout.findViewById(R.id.new_session_selected_img);
+                    resultView.setVisibility(View.VISIBLE);
+                    resultView.setImageResource(R.drawable.ic_add_a_photo_black_48dp);
+                    resultView.setImageURI(mUri);
+                    resultView.setOnClickListener(new View.OnClickListener() {
                         @Override
                         public void onClick(View v) {
                             EasyImage.openChooserWithDocuments(NewStoryFragment.this, mStory.getTitle(), 1);
                         }
                     });
-
-
                 }
-
-                public boolean onValidate() {
-                    if(mUri ==null){
-                        TextInputLayout t = ButterKnife.findById(mViewPager,R.id.new_session_avatar_input);
-                        if(t!=null)
-                            t.setError(mNewSessionErrors.ERROR_NO_IMG);
-                        return false;
+                imageButton.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        EasyImage.openChooserWithDocuments(NewStoryFragment.this, mStory.getTitle(), 1);
                     }
-                    return true;
-                }
+                });
+
+
             }
+
+            public boolean onValidate() {
+                if(mUri ==null){
+                    TextInputLayout t = ButterKnife.findById(mViewPager,R.id.new_session_avatar_input);
+                    if(t!=null)
+                        t.setError(mNewSessionErrors.ERROR_NO_IMG);
+                    return false;
+                }
+                return true;
+            }
+        }
 
 
     }

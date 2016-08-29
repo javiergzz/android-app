@@ -6,6 +6,7 @@ import android.content.SharedPreferences;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 
 import com.firebase.client.AuthData;
@@ -14,6 +15,10 @@ import com.firebase.client.Firebase;
 import com.firebase.client.FirebaseError;
 import com.firebase.client.ServerValue;
 import com.firebase.client.ValueEventListener;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.FirebaseDatabase;
 import com.google.gson.Gson;
 import com.grahm.livepost.R;
 import com.grahm.livepost.objects.User;
@@ -42,12 +47,18 @@ public class Utilities {
         return new Timestamp(rawtime);
     }
 
-    public static User getUser(Firebase mFirebaseRef,Activity activity,Bundle savedInstanceState){
+    public static User getUser(Firebase mFirebaseRef, Context ctx, Bundle savedInstanceState){
+        FirebaseUser mFirebaseUser = FirebaseAuth.getInstance().getCurrentUser();
+        if(mFirebaseUser==null){
+            return null;
+        }
         final Gson gson = new Gson();
-        final SharedPreferences SP = activity.getSharedPreferences(activity.getString(R.string.preference_file_key), Context.MODE_PRIVATE);
+        final SharedPreferences SP = ctx.getSharedPreferences(ctx.getString(R.string.preference_file_key), Context.MODE_PRIVATE);
         if(savedInstanceState==null){
-            mUser = new Gson().fromJson(activity.getSharedPreferences(activity.getString(R.string.preference_file_key), Context.MODE_PRIVATE).getString("user", null), User.class);
-            mFirebaseRef.getRoot().child("users/"+mFirebaseRef.getAuth().getAuth().get("email")).addValueEventListener(new ValueEventListener() {
+            mUser = new Gson().fromJson(ctx.getSharedPreferences(ctx.getString(R.string.preference_file_key), Context.MODE_PRIVATE).getString("user", null), User.class);
+            mFirebaseRef=mFirebaseRef==null?new Firebase(ctx.getString(R.string.firebase_url)):mFirebaseRef;
+
+            mFirebaseRef.getRoot().child("users/"+mFirebaseUser.getEmail().replace(".","")).addValueEventListener(new ValueEventListener() {
                 @Override
                 public void onDataChange(DataSnapshot dataSnapshot) {
                     mUser =dataSnapshot.getValue(User.class);
@@ -68,6 +79,39 @@ public class Utilities {
     }
     public static String getTimeMsg(Timestamp t){
         return new SimpleDateFormat("MM/dd/yyyy").format(t);
+    }
+
+    public static User readUser(Context ctx){
+        if(FirebaseAuth.getInstance().getCurrentUser()==null){
+            return null;
+        }
+        final SharedPreferences sharedPreferences = ctx.getSharedPreferences(ctx.getString(R.string.preference_file_key), Context.MODE_PRIVATE);
+        final Gson gson = new Gson();
+        String s = sharedPreferences.getString("user", "");
+        //User is authenticated but not in shared preferences
+        if(s=="") {
+            FirebaseDatabase.getInstance().getReference("users").addListenerForSingleValueEvent(new com.google.firebase.database.ValueEventListener() {
+                @Override
+                public void onDataChange(com.google.firebase.database.DataSnapshot dataSnapshot) {
+                    SharedPreferences.Editor editor = sharedPreferences.edit();
+                    User user = (User) dataSnapshot.getValue();
+                    if (user != null) {
+                        editor.putString("user", gson.toJson(user));
+                        editor.commit();
+                    }
+
+                }
+
+                @Override
+                public void onCancelled(DatabaseError databaseError) {
+                    Log.e("ReadUserError", databaseError.getMessage());
+                }
+            });
+            sharedPreferences.getString("user", "");
+            return gson.fromJson(s, User.class);
+        }else {
+            return s != "" ? gson.fromJson(s, User.class) : null;
+        }
     }
 
 }

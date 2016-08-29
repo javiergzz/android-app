@@ -5,6 +5,7 @@ import android.animation.AnimatorListenerAdapter;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.app.LoaderManager.LoaderCallbacks;
 
@@ -35,6 +36,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.auth.AuthResult;
+import com.google.firebase.auth.FirebaseAuth;
 import com.google.gson.Gson;
 import com.firebase.client.AuthData;
 import com.firebase.client.DataSnapshot;
@@ -42,12 +47,13 @@ import com.firebase.client.Firebase;
 import com.firebase.client.FirebaseError;
 import com.firebase.client.ValueEventListener;
 import com.grahm.livepost.R;
+import com.grahm.livepost.objects.FirebaseActivity;
 import com.grahm.livepost.objects.User;
+import com.grahm.livepost.util.Utilities;
 
 import butterknife.*;
 import butterknife.ButterKnife;
-import butterknife.OnClick;
-import butterknife.OnEditorAction;
+
 
 
 /**
@@ -63,6 +69,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
      * Keep track of the login task to ensure we can cancel it if requested.
      */
     private UserLoginTask mAuthTask = null;
+    private FirebaseAuth mAuth;
 
     // UI references.
     public AutoCompleteTextView mEmailView;
@@ -73,8 +80,6 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
     @BindView(R.id.login_form)
     public View mLoginFormView;
 
-    @BindView(R.id.email_sign_in_button)
-    public Button mEmailLoginButton;
 
 
     @Override
@@ -83,8 +88,10 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         mFirebaseRef = new Firebase(getString(R.string.firebase_url));
         setContentView(R.layout.activity_login);
         ButterKnife.bind(this);
+        mAuth = FirebaseAuth.getInstance();
         mEmailView = ButterKnife.findById(this,R.id.email);
         populateAutoComplete();
+
     }
 
     private void populateAutoComplete() {
@@ -105,8 +112,10 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
      * If there are form errors (invalid email, missing fields, etc.), the
      * errors are presented and no actual login attempt is made.
      */
+
     @OnClick(R.id.email_sign_in_button)
     public void attemptLogin() {
+        Log.e(TAG,"sign in action");
         if (mAuthTask != null) {
             return;
         }
@@ -266,8 +275,8 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
             mPassword = password;
         }
 
-        protected void loginAction(AuthData authData) {
-            mUid = authData.getUid();
+        protected void loginAction() {
+            mUid = mAuth.getCurrentUser().getUid();
             mFirebaseRef.child("users").child(mUid).addListenerForSingleValueEvent(new ValueEventListener() {
                 @Override
                 public void onDataChange(DataSnapshot dataSnapshot) {
@@ -281,7 +290,9 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
                     editor.putString("username", mEmail);
                     editor.commit();
                     Log.i(TAG, "Login successful!");
-                    finish();
+                    Intent mainIntent = new Intent(LoginActivity.this, MainActivity.class);
+                    LoginActivity.this.startActivity(mainIntent);
+                    LoginActivity.this.finish();
                 }
 
                 @Override
@@ -295,32 +306,17 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         @Override
         protected Boolean doInBackground(Void... params) {
             try {
-                mFirebaseRef.authWithPassword(mEmail, mPassword, new Firebase.AuthResultHandler() {
+                mAuth.signInWithEmailAndPassword(mEmail, mPassword).addOnCompleteListener(new OnCompleteListener<AuthResult>() {
                     @Override
-                    public void onAuthenticated(AuthData authData) {
-                        loginAction(authData);
-                    }
-
-                    @Override
-                    public void onAuthenticationError(FirebaseError firebaseError) {
-                        mFirebaseError = firebaseError;
-                        Log.i(TAG, "Login failed: " + mFirebaseError.getMessage());
-                        switch (firebaseError.getCode()) {
-                            case FirebaseError.USER_DOES_NOT_EXIST:
-                            case FirebaseError.INVALID_EMAIL:
-                                mEmailView.setError(firebaseError.getMessage());
-                            case FirebaseError.INVALID_PASSWORD:
-                            case FirebaseError.INVALID_CREDENTIALS:
-                            case FirebaseError.INVALID_AUTH_ARGUMENTS:
-                                mPasswordView.setError(firebaseError.getMessage());
-                            default:
-                                mPasswordView.setError(firebaseError.getMessage());
-                                break;
-
+                    public void onComplete(@NonNull Task<AuthResult> task) {
+                        if(!task.isSuccessful()){
+                            Log.e(TAG,task.getException().getMessage());
+                            mPasswordView.setText(task.getException().getLocalizedMessage());
+                            return;
                         }
+                        loginAction();
                     }
                 });
-                Thread.sleep(2000);
             } catch (Exception e) {
                 return false;
             }

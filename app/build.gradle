@@ -1,11 +1,12 @@
 apply plugin: 'com.android.application'
 apply plugin: 'com.google.gms.google-services'
+apply plugin: 'android-apt'
 android {
     compileSdkVersion 23
     buildToolsVersion "23.0.3"
     defaultConfig {
         applicationId "com.grahm.livepost"
-        minSdkVersion 15
+        minSdkVersion 16
         targetSdkVersion 23
         versionCode 1
         versionName "1.0"
@@ -27,11 +28,8 @@ repositories {
     maven { url "https://jitpack.io" }
 }
 dependencies {
-    compile fileTree(dir: 'libs', include: ['*.jar'])
-
+    compile fileTree(include: ['*.jar'], dir: 'libs')
     //compile 'com.android.support.constraint:constraint-layout:1.0.0-alpha3'
-    
-
     compile 'com.amazonaws:aws-android-sdk-core:2.2.+'
     compile 'com.amazonaws:aws-android-sdk-s3:2.2.+'
     compile 'com.amazonaws:aws-android-sdk-ddb:2.2.+'
@@ -50,4 +48,13 @@ dependencies {
     compile 'com.soundcloud.android:android-crop:1.0.1@aar'
     compile 'com.github.jkwiecien:EasyImage:1.2.3'
     compile 'com.github.siyamed:android-shape-imageview:0.9.+@aar'
+    apt 'com.jakewharton:butterknife-compiler:8.4.0'
+    // Single target that includes all FirebaseUI libraries
+    compile 'com.firebaseui:firebase-ui:0.5.1'
+
+    // FirebaseUI Database only
+    compile 'com.firebaseui:firebase-ui-database:0.5.1'
+
+    // FirebaseUI Auth only
+    compile 'com.firebaseui:firebase-ui-auth:0.5.1'
 }

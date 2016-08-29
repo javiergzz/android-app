@@ -37,12 +37,15 @@ import com.firebase.client.DataSnapshot;
 import com.firebase.client.Firebase;
 import com.firebase.client.FirebaseError;
 import com.firebase.client.ValueEventListener;
+import com.google.firebase.auth.FirebaseAuth;
 import com.grahm.livepost.asynctask.RegisterUserTask;
 import com.grahm.livepost.interfaces.OnPutImageListener;
 import com.grahm.livepost.R;
+import com.grahm.livepost.objects.FirebaseActivity;
 import com.grahm.livepost.objects.MultipartFormField;
 import com.grahm.livepost.objects.User;
 import com.grahm.livepost.util.GV;
+import com.grahm.livepost.util.Utilities;
 import com.soundcloud.android.crop.Crop;
 
 import java.io.File;
@@ -127,8 +130,9 @@ public class RegistrationActivity extends AppCompatActivity implements LoaderCal
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        mUser = mUser==null?new User():mUser;
         mFirebaseRef = new Firebase(getString(R.string.firebase_url));
+        mUser = Utilities.getUser(mFirebaseRef,this,savedInstanceState);
+        mUser = mUser==null?new User():mUser;
         mRegistrationViewsManager = new RegistrationViewsManager();
         setContentView(R.layout.activity_registration);
         ButterKnife.bind(this);
@@ -150,6 +154,7 @@ public class RegistrationActivity extends AppCompatActivity implements LoaderCal
         MultipartFormField r = mRegistrationViewsManager.list.get(current);
         if (r.onValidate()) {
             if (current + 1 == vCount) {//Send Registration Form
+                Log.d(TAG,"Attempting registration");
                 attemptRegistration(mUri);
             }
             mViewPager.setCurrentItem(current + 1, true);
@@ -173,7 +178,7 @@ public class RegistrationActivity extends AppCompatActivity implements LoaderCal
             return;
         }
         AmazonS3Client amazonS3Client = new AmazonS3Client(new BasicAWSCredentials(GV.ACCESS_KEY_ID, GV.SECRET_KEY));
-        mAuthTask = new RegisterUserTask(mUser, mPassword,mFirebaseRef,this,amazonS3Client,this,true);
+        mAuthTask = new RegisterUserTask(mUser, mPassword,mFirebaseRef, FirebaseAuth.getInstance(),this,amazonS3Client,this,true);
         mAuthTask.execute(pictureUri);
 
     }
@@ -254,7 +259,9 @@ public class RegistrationActivity extends AppCompatActivity implements LoaderCal
 
     @Override
     public void onSuccess(String url) {
-        NavUtils.navigateUpFromSameTask(this);
+        Intent mainIntent = new Intent(RegistrationActivity.this, MainActivity.class);
+        RegistrationActivity.this.startActivity(mainIntent);
+        RegistrationActivity.this.finish();
     }
 
     private interface ProfileQuery {
@@ -383,19 +390,8 @@ public class RegistrationActivity extends AppCompatActivity implements LoaderCal
                     return false;
                 } else {//Check if username exists in DB
                     mUser.setEmail(email);
-                    checkUser(email, new CheckUserAsyncTask(emailView, mRegistrationErrors, email));
-                    //We return false because CheckUserAsyncTask will switch views directly if the username is available.
-                    //Or display the corresponding error otherwise.
-                    return false;
-
+                    return true;
                 }
-            }
-        }
-        protected synchronized void checkUser(String email,CheckUserAsyncTask checkUserAsyncTask){
-            try{
-                checkUserAsyncTask.execute(email).get();
-            }catch (Exception e){
-                e.printStackTrace();
             }
         }
 
@@ -500,59 +496,6 @@ public class RegistrationActivity extends AppCompatActivity implements LoaderCal
         @Override
         public int getCount() {
             return mRegistrationViewsManager.list.size();
-        }
-    }
-    class CheckUserAsyncTask extends AsyncTask<String,Void,Void>{
-        TextView mEmailView;
-        RegistrationViewsManager.RegistrationErrors mErrors;
-        String mEmail;
-        CheckUserAsyncTask(TextView emailView, RegistrationViewsManager.RegistrationErrors r, String email){
-            mErrors = r;
-            mEmailView=emailView;
-            mEmail = email;
-        }
-        @Override
-        protected void onPreExecute() {
-            showProgress(true);
-            super.onPreExecute();
-        }
-        @Override
-        protected Void doInBackground(String... params) {
-            setFBQuery(params[0]);
-            return null;
-        }
-
-        protected synchronized void setFBQuery(String email){
-            mFirebaseRef.child("users").orderByChild("email").equalTo(email).addListenerForSingleValueEvent(new ValueEventListener() {
-                @Override
-                public void onDataChange(DataSnapshot dataSnapshot) {
-                    if (dataSnapshot.exists()) {
-                        Log.d(TAG, "User already exists");
-                        mEmailView.setError(mErrors.ERROR_TAKEN_EMAIL);
-                    } else {
-                        Log.i(TAG, "Email is available!");
-                        mViewPager.setCurrentItem(mViewPager.getCurrentItem()+1);
-                    }
-                }
-
-                @Override
-                public void onCancelled(FirebaseError firebaseError) {
-                    Log.e(TAG, "Cancelled");
-                }
-            });
-        }
-
-
-        @Override
-        protected void onPostExecute(Void aBoolean) {
-            showProgress(false);
-            super.onPostExecute(aBoolean);
-        }
-
-        @Override
-        protected void onCancelled() {
-            showProgress(false);
-            super.onCancelled();
         }
     }
 }

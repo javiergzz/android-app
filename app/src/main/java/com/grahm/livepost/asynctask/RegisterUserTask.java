@@ -9,11 +9,17 @@ import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.SystemClock;
+import android.support.annotation.NonNull;
 import android.text.TextUtils;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.util.TypedValue;
+import android.widget.Toast;
 
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.auth.AuthResult;
+import com.google.firebase.auth.FirebaseAuth;
 import com.google.gson.Gson;
 import com.amazonaws.services.s3.AmazonS3Client;
 import com.amazonaws.services.s3.model.CannedAccessControlList;
@@ -52,9 +58,10 @@ public class RegisterUserTask extends AsyncTask<Uri, String, String> {
     private String mPassword;
     Firebase mFirebaseRef;
     FirebaseError mFirebaseError;
+    FirebaseAuth mFirebaseAuth;
     SharedPreferences mSharedPref;
 
-    public RegisterUserTask(User user,String password, Firebase ref,Context context, AmazonS3Client client, OnPutImageListener listener, Boolean showDialog){
+    public RegisterUserTask(User user,String password, Firebase ref,FirebaseAuth auth, Context context, AmazonS3Client client, OnPutImageListener listener, Boolean showDialog){
         mUid = null;
         mContext = context;
         mS3Client = client;
@@ -64,14 +71,16 @@ public class RegisterUserTask extends AsyncTask<Uri, String, String> {
         mUser=user;
         mPassword = password;
         mFirebaseRef = ref;
+        mFirebaseAuth = auth;
         mSharedPref = context.getSharedPreferences(context.getString(R.string.preference_file_key), Context.MODE_PRIVATE);
+        dialog = new ProgressDialog(mContext);
 
     }
     protected void onPreExecute() {
-        dialog = new ProgressDialog(mContext);
+
         dialog.setMessage(mContext.getString(R.string.reg_creating_text));
         dialog.setCancelable(false);
-        if(mShowDialog){
+        if(mShowDialog && !dialog.isShowing() && !dialog.isIndeterminate()){
             dialog.show();
         }
     }
@@ -85,21 +94,18 @@ public class RegisterUserTask extends AsyncTask<Uri, String, String> {
         Uri selectedImage = uris[0];
         if(selectedImage!= null)
             mUser.setProfile_picture(uploadImages(selectedImage));
+        Log.d(TAG,"Adding Entry");
         addFirebaseEntry();
         return url;
     }
     protected void onPostExecute(String result) {
-        if(mShowDialog){
-            dialog.dismiss();
-        }
+        if(!mShowDialog && dialog.isShowing())dialog.dismiss();
     }
 
     @Override
     protected void onCancelled() {
         super.onCancelled();
-        if(mShowDialog){
-            dialog.dismiss();
-        }
+        if(mShowDialog && dialog.isShowing())dialog.dismiss();
     }
     protected String uploadImages(Uri srcUri){
         String url = "";
@@ -129,12 +135,20 @@ public class RegisterUserTask extends AsyncTask<Uri, String, String> {
 
     private synchronized void addFirebaseEntry(){
         try {
-            mFirebaseRef.createUser(mUser.getEmail(), mPassword, new Firebase.ValueResultHandler<Map<String, Object>>() {
+            mFirebaseAuth.createUserWithEmailAndPassword(mUser.getEmail(), mPassword).addOnCompleteListener(new OnCompleteListener<AuthResult>() {
                 @Override
-                public void onSuccess(Map<String, Object> stringObjectMap) {
+                public void onComplete(@NonNull Task<AuthResult> task) {
+                    // If sign in fails, display a message to the user. If sign in succeeds
+                    // the auth state listener will be notified and logic to handle the
+                    // signed in user can be handled in the listener.
+                    if (!task.isSuccessful()) {
+                        Log.e(TAG,"User creation failed");
+                        dialog.setMessage("User creation failed");
+                        return;
+                    }
                     //If user creation was successful, store extra data object
-                    mUid = stringObjectMap.get("uid").toString();
-                    mFirebaseRef.child("users").child(mUid).setValue(mUser);
+                    // mUid = mFirebaseAuth.getCurrentUser().getUid();
+                    mFirebaseRef.child("users").child(mUser.getEmail().replace(".","")).setValue(mUser);
                     SharedPreferences.Editor editor = mSharedPref.edit();
                     //Write user data to shared preferences
                     Gson gson = new Gson();
@@ -156,29 +170,13 @@ public class RegisterUserTask extends AsyncTask<Uri, String, String> {
                             Log.i(TAG, "Login failed: " + mFirebaseError.getMessage());
                         }
                     });
+                    if(mShowDialog && dialog.isShowing())dialog.dismiss();
                     if(mListener != null){
                         mListener.onSuccess(mPictureName);
                     }
                 }
-
-                @Override
-                public void onError(FirebaseError firebaseError) {
-                    mFirebaseError = firebaseError;
-                    switch (firebaseError.getCode()) {
-
-                        case FirebaseError.EMAIL_TAKEN:
-                            dialog.setMessage(mContext.getString(R.string.error_taken_email));
-                            break;
-                        case FirebaseError.INVALID_EMAIL:
-                            dialog.setMessage(mContext.getString(R.string.error_invalid_email));
-                            break;
-                        default:
-                            dialog.setMessage(mFirebaseError.getMessage());
-                            break;
-                    }
-                    Log.e(TAG, "Error registering User " + mUser.getEmail() + " " + firebaseError.getMessage());
-                }
-            });
+            }
+            );
         } catch (Exception e) {
             e.printStackTrace();
         }

@@ -17,17 +17,19 @@ import android.view.MenuItem;
 
 
 import com.firebase.client.Firebase;
+import com.google.firebase.auth.FirebaseAuth;
 import com.grahm.livepost.R;
 import com.grahm.livepost.adapters.HomeFragmentAdapter;
 import com.grahm.livepost.fragments.HomeFragment;
 import com.grahm.livepost.fragments.ProfileFragment;
 import com.grahm.livepost.interfaces.OnFragmentInteractionListener;
+import com.grahm.livepost.objects.FirebaseActivity;
 
 import java.io.Serializable;
 
 import butterknife.OnClick;
 
-public class MainActivity extends AppCompatActivity implements OnFragmentInteractionListener, TabLayout.OnTabSelectedListener {
+public class MainActivity extends FirebaseActivity implements OnFragmentInteractionListener, TabLayout.OnTabSelectedListener {
 
     /**
      * The {@link android.support.v4.view.PagerAdapter} that will provide
@@ -58,18 +60,15 @@ public class MainActivity extends AppCompatActivity implements OnFragmentInterac
 
     private FragmentsEnum mCurrentPage;
     private SectionsFragmentManager mSectionsFragmentManager;
-    private HomeFragmentAdapter mSectionsPagerAdapter;
-    private ViewPager mViewPager;
     private Intent starterIntent;
     protected Menu mMenu;
-    protected Firebase mFirebaseRef;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        mFirebaseRef = new Firebase(getString(R.string.firebase_url));
         setSupportActionBar(toolbar);
         setupNavigation(savedInstanceState);
 
@@ -100,7 +99,7 @@ public class MainActivity extends AppCompatActivity implements OnFragmentInterac
     void updateMenu() {
         MenuItem loginActionView = mMenu.findItem(R.id.action_login);
         MenuItem logoutActionView = mMenu.findItem(R.id.action_logout);
-        if (mFirebaseRef.getAuth() == null) {
+        if (mAuth.getCurrentUser() != null) {
             loginActionView.setVisible(true);
             logoutActionView.setVisible(false);
         } else {
@@ -120,7 +119,7 @@ public class MainActivity extends AppCompatActivity implements OnFragmentInterac
                 updateMenu();
                 return true;
             case R.id.action_logout:
-                mFirebaseRef.unauth();
+                FirebaseAuth.getInstance().signOut();
                 SharedPreferences.Editor e = getSharedPreferences(getString(R.string.preference_file_key), MODE_PRIVATE).edit();
                 e.remove("username");
                 e.remove("user");
@@ -133,11 +132,7 @@ public class MainActivity extends AppCompatActivity implements OnFragmentInterac
         return super.onOptionsItemSelected(item);
     }
 
-    @Override
-    protected void onResume() {
-        super.onResume();
-        Firebase.setAndroidContext(this);
-    }
+
 
 
     @Override
@@ -265,7 +260,7 @@ public class MainActivity extends AppCompatActivity implements OnFragmentInterac
 
     @Override
     public void onTabReselected(TabLayout.Tab tab) {
-
+        onTabSelected(tab);
     }
 
     @Override
