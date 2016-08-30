@@ -112,7 +112,7 @@ public class StoryListAdapter extends FirebaseListAdapter<Story> {
             iholder.mItem = s;
             final String lastMessage = s.getLast_message();
             if(lastMessage!=null && lastMessage!="") {
-                if (lastMessage.contains(".png")||lastMessage.contains(".jpg")) {
+                if (lastMessage.contains("https://")||lastMessage.contains("http://")) {
                     iholder.mLastMsgView.setVisibility(View.GONE);
                 } else {
                     iholder.mLastMsgView.setText(lastMessage);

@@ -3,6 +3,7 @@ package com.grahm.livepost.activities;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.support.design.widget.TabItem;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -14,6 +15,7 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 
 
 import com.firebase.client.Firebase;
@@ -21,12 +23,14 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.grahm.livepost.R;
 import com.grahm.livepost.adapters.HomeFragmentAdapter;
 import com.grahm.livepost.fragments.HomeFragment;
+import com.grahm.livepost.fragments.NewStoryFragment;
 import com.grahm.livepost.fragments.ProfileFragment;
 import com.grahm.livepost.interfaces.OnFragmentInteractionListener;
 import com.grahm.livepost.objects.FirebaseActivity;
 
 import java.io.Serializable;
 
+import butterknife.ButterKnife;
 import butterknife.OnClick;
 
 public class MainActivity extends FirebaseActivity implements OnFragmentInteractionListener, TabLayout.OnTabSelectedListener {
@@ -41,9 +45,9 @@ public class MainActivity extends FirebaseActivity implements OnFragmentInteract
      */
     public static final String TAG = "MainActivity";
     public static final int HOME_IDX = 0;
-    public static final int FAVORITES_IDX=1;
-    public static final int NEW_STORY_IDX=2;
-    public static final int PROFILE_IDX = 3;
+    public static final int FAVORITES_IDX=3;
+    public static final int NEW_STORY_IDX=1;
+    public static final int PROFILE_IDX = 2;
     public static final int CHAT_IDX = 4;
     public static final String REBOOT_REQ = "reboot_req";
 
@@ -71,11 +75,15 @@ public class MainActivity extends FirebaseActivity implements OnFragmentInteract
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         setupNavigation(savedInstanceState);
-
+        setupTabs();
     }
+    private void setupTabs(){
+        TabLayout tabLayout= (TabLayout)findViewById(R.id.tabs);
+        tabLayout.setOnTabSelectedListener(this);
+    }
+
     private void setupNavigation(Bundle savedInstanceState) {
         mCurrentPage = savedInstanceState != null && savedInstanceState.containsKey(PAGE_KEY) ? (FragmentsEnum) savedInstanceState.getSerializable(PAGE_KEY) : FragmentsEnum.HOME;
-        TabLayout tabLayout = (TabLayout) findViewById(R.id.tabs);
         // Create the adapter that will return a fragment for each of the three
         // primary sections of the activity.
         mSectionsFragmentManager = new SectionsFragmentManager(this.getBaseContext(),getSupportFragmentManager(), R.id.container);
@@ -97,8 +105,10 @@ public class MainActivity extends FirebaseActivity implements OnFragmentInteract
     }
 
     void updateMenu() {
+        if(mMenu==null)return;
         MenuItem loginActionView = mMenu.findItem(R.id.action_login);
         MenuItem logoutActionView = mMenu.findItem(R.id.action_logout);
+        mAuth = FirebaseAuth.getInstance();
         if (mAuth.getCurrentUser() != null) {
             loginActionView.setVisible(true);
             logoutActionView.setVisible(false);
@@ -156,6 +166,30 @@ public class MainActivity extends FirebaseActivity implements OnFragmentInteract
         }
     }
 
+    @Override
+    public void onTabSelected(TabLayout.Tab tab) {
+        switch (tab.getPosition()){
+            case 0: mCurrentPage = FragmentsEnum.HOME;
+                break;
+            case 1: mCurrentPage = FragmentsEnum.NEW_STORY;
+                break;
+            case 2: mCurrentPage = FragmentsEnum.PROFILE;
+                break;
+        }
+
+        mSectionsFragmentManager.setPage(mCurrentPage,null);
+    }
+
+    @Override
+    public void onTabUnselected(TabLayout.Tab tab) {
+
+    }
+
+    @Override
+    public void onTabReselected(TabLayout.Tab tab) {
+
+    }
+
     public enum FragmentsEnum implements Serializable {
 
         HOME(HOME_TAG, R.string.home_str) {
@@ -174,7 +208,7 @@ public class MainActivity extends FirebaseActivity implements OnFragmentInteract
         NEW_STORY(NEW_STORY_TAG, R.string.new_session_str) {
             @Override
             public Fragment getInstance(Bundle args) {
-                return HomeFragment.newInstance(args);
+                return NewStoryFragment.newInstance(args);
             }
         },
         PROFILE(PROFILE_TAG, R.string.profile_str) {
@@ -252,24 +286,9 @@ public class MainActivity extends FirebaseActivity implements OnFragmentInteract
         }
     }
 
-
-    @OnClick(R.id.login_button)
     protected void launchLogin() {
         startActivityForResult(new Intent(this, LoginActivity.class), 1);
     }
 
-    @Override
-    public void onTabReselected(TabLayout.Tab tab) {
-        onTabSelected(tab);
-    }
 
-    @Override
-    public void onTabSelected(TabLayout.Tab tab) {
-        mSectionsFragmentManager.setPage(FragmentsEnum.valueOf(tab.getTag().toString()),getIntent().getExtras());
-    }
-
-    @Override
-    public void onTabUnselected(TabLayout.Tab tab) {
-
-    }
 }

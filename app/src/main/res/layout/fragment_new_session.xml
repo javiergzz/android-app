@@ -7,7 +7,7 @@
     android:background="@android:color/white"
     android:gravity="center_horizontal"
     android:orientation="vertical"
-    tools:context="com.livepost.javiergzzr.fragments.NewSessionFragment">
+    tools:context="com.grahm.livepost.fragments.NewStoryFragment">
 
 <LinearLayout
     android:layout_width="match_parent"
@@ -21,7 +21,7 @@
             android:id="@+id/new_session_toolbar"
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
-            android:background="?attr/colorAccent"
+            android:background="?attr/colorPrimary"
             app:layout_scrollFlags="scroll|enterAlways"
             app:popupTheme="@style/AppTheme.PopupOverlay">
 
@@ -40,7 +40,7 @@
             android:paddingRight="@dimen/activity_horizontal_margin"
             android:paddingTop="@dimen/activity_vertical_margin">
 
-            <com.livepost.javiergzzr.specialViews.NonSwipeableViewPager
+            <com.grahm.livepost.specialViews.NonSwipeableViewPager
                 android:id="@+id/new_session_pager"
                 android:layout_width="match_parent"
                 android:layout_height="320dp" />

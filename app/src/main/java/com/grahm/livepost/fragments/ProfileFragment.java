@@ -72,7 +72,7 @@ public class ProfileFragment extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         mFirebaseRef = new Firebase(getString(R.string.firebase_url));
-        Utilities.getUser(mFirebaseRef,getActivity(),savedInstanceState);
+        mUser = Utilities.getUser(mFirebaseRef,getActivity(),savedInstanceState);
     }
 
     @Override
@@ -82,7 +82,8 @@ public class ProfileFragment extends Fragment {
         ButterKnife.bind(this, view);
 
         ImageLoader imageLoader = ImageLoader.getInstance();
-        imageLoader.displayImage(mUser.getProfile_picture(), mImageView);
+        String[] parts = mUser.getProfile_picture().split("\\?");
+        imageLoader.displayImage(parts[0], mImageView);
 
         mTitleView.setText(mUser.getName());
         setupNavigation(view,inflater);
@@ -188,7 +189,7 @@ public class ProfileFragment extends Fragment {
 
             public void onSetup(ViewGroup layout) {
                 mUser.getEmail();
-                Query q = mFirebaseRef.child("posts").orderByChild("author").equalTo(mUser.getEmail());
+                Query q = mFirebaseRef.child("posts").orderByChild("author").equalTo(mUser.getEmail().replace(".",""));
                     RecyclerView recyclerView = ButterKnife.findById(layout, R.id.profile_list);
                     recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
                     recyclerView.setAdapter(new StoryListAdapter(q, (AppCompatActivity) getActivity(), 0, 1, false));

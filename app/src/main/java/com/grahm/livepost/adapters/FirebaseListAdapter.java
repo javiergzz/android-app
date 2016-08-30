@@ -117,7 +117,8 @@ public abstract class FirebaseListAdapter<T> extends  RecyclerView.Adapter<Recyc
                 }
 
                 int index = mModels.indexOf(oldModel);
-
+                //Return if model is no longer found
+                if(index == -1) return;
                 mModels.set(index, newModel);
                 mModelKeys.put(modelName, newModel);
                 mKeys.set(index, modelName);
@@ -156,6 +157,9 @@ public abstract class FirebaseListAdapter<T> extends  RecyclerView.Adapter<Recyc
                     newModel = dataSnapshot.getValue(FirebaseListAdapter.this.mModelClass);
                 }
                 int index = mModels.indexOf(oldModel);
+                //Return if old model is no longer found
+                if(index==-1)return;
+
                 mModels.remove(index);
                 mKeys.remove(index);
                 if (previousChildName == null) {

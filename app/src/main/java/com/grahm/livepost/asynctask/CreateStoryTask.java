@@ -13,6 +13,8 @@ import android.util.DisplayMetrics;
 import android.util.Log;
 import android.util.TypedValue;
 
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.ServerValue;
 import com.google.gson.Gson;
 import com.amazonaws.services.s3.AmazonS3Client;
 import com.amazonaws.services.s3.model.CannedAccessControlList;
@@ -37,6 +39,7 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.net.URL;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Map;
 
 public class CreateStoryTask extends AsyncTask<Uri, String, String> {
@@ -102,6 +105,9 @@ public class CreateStoryTask extends AsyncTask<Uri, String, String> {
         if (mShowDialog) {
             dialog.dismiss();
         }
+        if (mListener != null) {
+            mListener.onSuccess(null);
+        }
     }
 
     @Override
@@ -127,7 +133,7 @@ public class CreateStoryTask extends AsyncTask<Uri, String, String> {
 
         int maxLargeWidth = Math.round(TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, r.getDimension(R.dimen.max_large_width), d));
         int maxLargeHeight = Math.round(TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, r.getDimension(R.dimen.max_large_height), d));
-        mPictureName = mUser.getName()+"_"+mStory.getTitle()+"_"+mStory.getTimestamp();
+        mPictureName = mUser.getName()+"_"+mStory.getTitle()+"_"+System.currentTimeMillis()/1000L;
         uploadImage(mPictureName + "_thumb.jpg", srcUri, thumbSize, thumbSize);
         uploadImage(mPictureName + "_l_thumb.jpg", srcUri, largeThumbWidth, largeThumbMaxHeight);
         uploadImage(mPictureName + "_md.jpg", srcUri, maxMediumWidth, maxMediumHeight);
@@ -153,16 +159,25 @@ public class CreateStoryTask extends AsyncTask<Uri, String, String> {
 
     private synchronized void addFirebaseEntry() {
         try {
+            mStory.setIsLive(true);
             Firebase ref = mFirebaseRef.push();
             ref.setValue(mStory);
             String key = ref.getKey();
+            //Set Timestamps
+            ref.child("timestamp").setValue(ServerValue.TIMESTAMP);
+            //Set Timestamps
+            ref.child("last_time").setValue(ServerValue.TIMESTAMP);
             //(int count_likes, Map<String, Integer> likes, String message, String profile_picture, String sender, String sender_key, long timestamp)
             mFirebaseRef.getRoot().child("updates/"+key).push()
                     .setValue(new Update(0,null,mStory.getPosts_picture(),mUser.getProfile_picture(),mStory.getAuthor_name(),mStory.getAuthor(),mStory.getTimestamp()));
 
-            if (mListener != null) {
-                mListener.onSuccess(null);
-            }
+
+
+            //Add post to "posts created"
+            Map<String, Object> posts = new HashMap<String, Object>();
+            posts.put(key, mStory);
+            mFirebaseRef.getRoot().child("users/"+FirebaseAuth.getInstance().getCurrentUser().getEmail().replace(".","")).child("/posts_created").updateChildren(posts);
+
         } catch (Exception e) {
             e.printStackTrace();
         }

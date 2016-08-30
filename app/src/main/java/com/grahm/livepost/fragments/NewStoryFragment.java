@@ -64,7 +64,6 @@ public class NewStoryFragment extends Fragment implements OnPutImageListener {
     public static final String PAGE_KEY = "page";
     public static final String URI_KEY = "uri";
     private Firebase mFirebaseRef;
-    protected FirebaseError mFirebaseError;
     private static final String TAG = "NewStoryFragment";
     private AmazonS3Client s3Client = new AmazonS3Client(new BasicAWSCredentials(GV.ACCESS_KEY_ID, GV.SECRET_KEY));
     private CreateStoryTask mStoryTask = null;
@@ -113,7 +112,8 @@ public class NewStoryFragment extends Fragment implements OnPutImageListener {
         if (savedInstanceState != null) {
             mStory = (Story)savedInstanceState.getSerializable(SESSION_KEY);
             mCurrentItem = savedInstanceState.getInt(PAGE_KEY, 0);
-            mUri = Uri.parse(savedInstanceState.getString(URI_KEY));
+            String uriString = savedInstanceState.getString(URI_KEY);
+            mUri = uriString==null?null:Uri.parse(uriString);
         }
         mUser = Utilities.getUser(mFirebaseRef,getActivity(),savedInstanceState);
         mStory = mStory == null ? new Story() : mStory;
@@ -215,10 +215,8 @@ public class NewStoryFragment extends Fragment implements OnPutImageListener {
     public void attemptSessionCreation(){
         if (mStoryTask != null) return;
 
-        mStory.setAuthor(mUser.getEmail());
+        mStory.setAuthor(mUser.getEmail().replace(".",""));
         mStory.setAuthor_name(mUser.getName());
-        mStory.setTimestamp(Utilities.getTimestamp());
-        mStory.setLast_time(Utilities.getTimestamp());
         mStoryTask = new CreateStoryTask(mStory,mFirebaseRef.child("posts"),getActivity(),s3Client,this,true);
         if(mUri!= null) mStoryTask.execute(mUri);
 
@@ -409,7 +407,7 @@ public class NewStoryFragment extends Fragment implements OnPutImageListener {
     }
     @Override
     public void onSuccess(String url) {
-        mListener.onFragmentInteraction(MainActivity.NEW_STORY_IDX,null);
+        mListener.onFragmentInteraction(MainActivity.HOME_IDX,null);
     }
     private class NewSessionPagerAdapter extends PagerAdapter {
         LayoutInflater mInflater;

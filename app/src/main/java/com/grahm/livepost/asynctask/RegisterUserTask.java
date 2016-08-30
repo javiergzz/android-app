@@ -20,6 +20,7 @@ import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.ServerValue;
 import com.google.gson.Gson;
 import com.amazonaws.services.s3.AmazonS3Client;
 import com.amazonaws.services.s3.model.CannedAccessControlList;
@@ -148,7 +149,9 @@ public class RegisterUserTask extends AsyncTask<Uri, String, String> {
                     }
                     //If user creation was successful, store extra data object
                     // mUid = mFirebaseAuth.getCurrentUser().getUid();
-                    mFirebaseRef.child("users").child(mUser.getEmail().replace(".","")).setValue(mUser);
+                    mUser.setUid(mFirebaseAuth.getCurrentUser().getUid());
+                    mFirebaseRef.child("users/"+mUser.getEmail().replace(".","")).setValue(mUser);
+                    mFirebaseRef.child("users/"+mUser.getEmail().replace(".","")+"/timestamp").setValue(ServerValue.TIMESTAMP);
                     SharedPreferences.Editor editor = mSharedPref.edit();
                     //Write user data to shared preferences
                     Gson gson = new Gson();

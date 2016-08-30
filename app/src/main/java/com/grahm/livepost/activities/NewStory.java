@@ -162,8 +162,8 @@ public class NewStory extends ActionBarActivity implements OnPutImageListener{
         Firebase ref = new Firebase(getString(R.string.firebase_url)).child("posts");
         mUser = Utilities.getUser(ref,this,getIntent().getExtras());
         Story story = new Story(
-                mUsername, mUser.getName(),txtCategory.getText().toString(),null,Utilities.getTimestamp(),
-                0,0,null,getString(R.string.amazon_image_path) + url,"",Utilities.getTimestamp(),txtDescription.getText().toString(),true);
+                mUsername, mUser.getName(),txtCategory.getText().toString(),null,
+                0,0,null,getString(R.string.amazon_image_path) + url,"",txtDescription.getText().toString(),true);
         ref.push().setValue(story);
         NewStory.this.finish();
     }

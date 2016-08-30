@@ -13,10 +13,11 @@ import com.firebase.client.AuthData;
 import com.firebase.client.DataSnapshot;
 import com.firebase.client.Firebase;
 import com.firebase.client.FirebaseError;
-import com.firebase.client.ServerValue;
+import com.google.firebase.database.ServerValue;
 import com.firebase.client.ValueEventListener;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.gson.Gson;
@@ -40,11 +41,6 @@ public class Utilities {
 
     public static boolean isNullOrEmpty(String str) {
         return (str == null || str.trim().length() == 0);
-    }
-    public static Timestamp getTimestamp(){
-        long rawtime = Long.valueOf(ServerValue.TIMESTAMP.get(".sv"));
-        Log.d("Utilities","timestamp:"+rawtime);
-        return new Timestamp(rawtime);
     }
 
     public static User getUser(Firebase mFirebaseRef, Context ctx, Bundle savedInstanceState){

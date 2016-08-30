@@ -129,18 +129,16 @@ public class Story implements Serializable {
 
     public Story (){}
 
-    public Story(String author, String author_name, String category, String last_message, Timestamp last_time, double lat, double lng, String location, String posts_picture, String subcategory, Timestamp timestamp, String title,boolean isLive) {
+    public Story(String author, String author_name, String category, String last_message, double lat, double lng, String location, String posts_picture, String subcategory, String title,boolean isLive) {
         this.author = author;
         this.author_name = author_name;
         this.category = category;
         this.last_message = last_message;
-        this.last_time = last_time.getTime();
         this.lat = lat;
         this.lng = lng;
         this.location = location;
         this.posts_picture = posts_picture;
         this.subcategory = subcategory;
-        this.timestamp = timestamp.getTime();
         this.title = title;
         this.isLive = String.valueOf(isLive);
     }
