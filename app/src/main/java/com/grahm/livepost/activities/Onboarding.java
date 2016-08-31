@@ -26,9 +26,9 @@ import android.widget.TextView;
 
 import com.grahm.livepost.R;
 import com.grahm.livepost.asynctask.DownloadImageTask;
-import com.grahm.livepost.interfaces.CallbackImage;
+import com.grahm.livepost.interfaces.OnCallbackImageListener;
 
-public class Onboarding extends AppCompatActivity implements CallbackImage {
+public class Onboarding extends AppCompatActivity implements OnCallbackImageListener {
     private static final int PROGRESS = 3000;
     private String[] imgCategories = {"", "breaking_news.png", "business.png", "crime.png", "crisis.png", "entertainment.png", "events.png", "fashion.png", "food.png", "funny.png", "miscellaneous.png", "music.png", "news.png", "politics.png", "religion.png", "sports.png", "technology.png", "travel.png"};
     private View bodyMessages;
@@ -43,7 +43,7 @@ public class Onboarding extends AppCompatActivity implements CallbackImage {
     private String[] nameMessages;
     private String storyTitle = "";
     private String storyCategory = "";
-    private CallbackImage imageCallback;
+    private OnCallbackImageListener imageCallback;
     private Spinner.OnItemSelectedListener selectCategory = new Spinner.OnItemSelectedListener() {
         @Override
         public void onItemSelected(AdapterView<?> parentView, View selectedItemView, int position, long id) {

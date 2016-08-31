@@ -1,0 +1,98 @@
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="com.grahm.livepost.fragments.LoginFragment">
+
+    <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:tools="http://schemas.android.com/tools"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="#ffffff"
+        tools:context="com.grahm.livepost.activities.Login">
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Create your profile"
+            android:textColor="#364457"
+            android:layout_marginTop="29dp"
+            android:layout_centerHorizontal="true"
+            android:textSize="18dp"/>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:orientation="vertical">
+
+            <Button
+                android:id="@+id/btn_login_livepost"
+                android:layout_width="match_parent"
+                android:layout_height="50dp"
+                android:drawableLeft="@drawable/ic_livepost"
+                android:text="@string/btn_login_livepost"
+                android:textColor="#FFFFFF"
+                android:textSize="18dp"
+                android:background="@color/first_dark"
+                android:layout_marginTop="100dp"
+                android:layout_marginLeft="30dp"
+                android:layout_marginRight="30dp"
+                android:textAllCaps="false"
+                android:padding="10dp"
+                android:onClick="doSwipe"/>
+
+            <com.twitter.sdk.android.core.identity.TwitterLoginButton
+                android:id="@+id/btn_login_twitter"
+                android:layout_width="match_parent"
+                android:layout_height="50dp"
+                android:layout_marginTop="10dp"
+                android:layout_marginLeft="30dp"
+                android:layout_marginRight="30dp"/>
+
+
+            <!--<Button-->
+                <!--android:id="@+id/btn_login_twitter"-->
+                <!--android:layout_width="match_parent"-->
+                <!--android:layout_height="50dp"-->
+                <!--android:drawableLeft="@drawable/ic_twitter"-->
+                <!--android:text="@string/btn_login_twitter"-->
+                <!--android:textColor="#FFFFFF"-->
+                <!--android:textSize="18dp"-->
+                <!--android:background="#4099FF"-->
+                <!--android:layout_marginTop="10dp"-->
+                <!--android:layout_marginLeft="30dp"-->
+                <!--android:layout_marginRight="30dp"-->
+                <!--android:textAllCaps="false"-->
+                <!--android:padding="10dp" />-->
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_centerHorizontal="true"
+            android:layout_alignParentBottom="true"
+            android:layout_marginBottom="20dp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Have an account?"
+                android:textColor="#95989A"/>
+            <Button
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:minWidth="0dp"
+                android:layout_marginLeft="5dp"
+                android:text="Log in"
+                android:textColor="#364457"
+                android:background="#FFFFFF"
+                android:textAllCaps="false"/>
+        </LinearLayout>
+
+    </RelativeLayout>
+
+
+
+</FrameLayout>

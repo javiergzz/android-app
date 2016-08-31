@@ -1,8 +1,8 @@
 package com.grahm.livepost.interfaces;
 
-/**
- * Created by javiergonzalez on 8/29/16.
- */
+import org.json.JSONObject;
 
-public class OnHttpListener {
+public interface OnHttpListener {
+    JSONObject doInBackground();
+    void onPostExecute(JSONObject response);
 }

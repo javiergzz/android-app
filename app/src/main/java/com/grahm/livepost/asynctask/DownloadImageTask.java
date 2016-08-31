@@ -6,7 +6,7 @@ import android.os.AsyncTask;
 import android.util.Log;
 import android.widget.ImageView;
 
-import com.grahm.livepost.interfaces.CallbackImage;
+import com.grahm.livepost.interfaces.OnCallbackImageListener;
 
 import java.io.InputStream;
 
@@ -16,8 +16,8 @@ import java.io.InputStream;
 
 public class DownloadImageTask extends AsyncTask<String, Void, Bitmap> {
     private ImageView bmImage;
-    private CallbackImage image;
-    public DownloadImageTask(ImageView bmImage, CallbackImage callback) {
+    private OnCallbackImageListener image;
+    public DownloadImageTask(ImageView bmImage, OnCallbackImageListener callback) {
         this.bmImage = bmImage;
         this.image = callback;
     }

@@ -2,6 +2,6 @@ package com.grahm.livepost.interfaces;
 
 import android.graphics.Bitmap;
 
-public interface CallbackImage {
+public interface OnCallbackImageListener {
     public void callback(Bitmap result);
 }

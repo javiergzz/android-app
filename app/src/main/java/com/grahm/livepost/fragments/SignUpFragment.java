@@ -15,19 +15,24 @@ import android.widget.EditText;
 
 import com.grahm.livepost.R;
 import com.grahm.livepost.interfaces.OnFragmentInteractionListener;
+import com.grahm.livepost.objects.User;
 
 
 public class SignUpFragment extends Fragment {
 
+    private static final int PASS_MIN_LENGTH = 6;
     private OnFragmentInteractionListener mListener;
-    private EditText txtName;
-    private OnClickListener continueListener = new OnClickListener() {
+    private EditText txtEmail;
+    private EditText txtPassword;
+    private User mUser = new User();
+    private static final boolean signup = true;
+    private OnClickListener doneListener = new OnClickListener() {
         @Override
         public void onClick(View v) {
-            if(TextUtils.isEmpty(txtName.getText().toString())){
-                showAlertContinue();
-            }else{
-                mListener.onFragmentInteraction();
+            if(!attemptLogin()){
+                mUser.setEmail(txtEmail.getText().toString());
+                mUser.setPassword((txtPassword.getText().toString()));
+                mListener.onFragmentInteraction(mUser, signup);
             }
         }
     };
@@ -51,10 +56,11 @@ public class SignUpFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.fragment_name, container, false);
-        Button btnContinue = (Button) view.findViewById(R.id.btn_continue);
-        txtName = (EditText) view.findViewById(R.id.name);
-        btnContinue.setOnClickListener(continueListener);
+        View view = inflater.inflate(R.layout.fragment_sign_up, container, false);
+        Button btnDone = (Button) view.findViewById(R.id.btn_done);
+        txtEmail = (EditText) view.findViewById(R.id.txt_email);
+        txtPassword = (EditText) view.findViewById(R.id.txt_password);
+        btnDone.setOnClickListener(doneListener);
         return view;
     }
 
@@ -68,16 +74,46 @@ public class SignUpFragment extends Fragment {
         super.onDetach();
     }
 
-    private void showAlertContinue(){
-        new AlertDialog.Builder(getActivity())
-                .setTitle("Alert")
-                .setMessage("Please write your name \uD83D\uDE4F")
-                .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int which) {
-                        dialog.cancel();
-                    }
-                })
-                .show();
+    private boolean attemptLogin(){
+        txtEmail.setError(null);
+        txtPassword.setError(null);
+
+        String email = txtEmail.getText().toString();
+        String password = txtPassword.getText().toString();
+        boolean cancel = false;
+        View focusView = null;
+
+        // Check for a valid email address.
+        if (TextUtils.isEmpty(email)) {
+            txtEmail.setError("This field is required");
+        } else if (!isEmailValid(email)) {
+            txtEmail.setError("This email address is invalid");
+            focusView = txtEmail;
+            cancel = true;
+        }
+
+        // Check for a valid password, if the user entered one.
+        if (!TextUtils.isEmpty(password) && !isPasswordValid(password)) {
+            txtPassword.setError("This password is too short");
+            focusView = txtPassword;
+            cancel = true;
+        }
+
+        if (cancel) {
+            focusView.requestFocus();
+        }
+        return cancel;
     }
 
+    private boolean isEmailValid(String email) {
+        if (email == null) {
+            return false;
+        } else {
+            return android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches();
+        }
+    }
+
+    private boolean isPasswordValid(String password) {
+        return password.length() > PASS_MIN_LENGTH;
+    }
 }

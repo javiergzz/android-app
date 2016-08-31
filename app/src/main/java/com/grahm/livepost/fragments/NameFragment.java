@@ -3,52 +3,37 @@ package com.grahm.livepost.fragments;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
-import android.content.Intent;
-import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.Button;
-import android.widget.ImageView;
+import android.widget.EditText;
 
 import com.grahm.livepost.R;
 import com.grahm.livepost.interfaces.OnFragmentInteractionListener;
+import com.grahm.livepost.objects.User;
 
 
 public class NameFragment extends Fragment {
 
-    private static final int PHOTO_SELECTED = 1;
-    private static boolean mContinue = false;
     private OnFragmentInteractionListener mListener;
-    private static ImageView imgProfile;
-    private OnClickListener mContinueListener = new OnClickListener() {
+    private EditText txtName;
+    private User mUser = new User();
+    private static final boolean signup = false;
+    private OnClickListener continueListener = new OnClickListener() {
         @Override
         public void onClick(View v) {
-            if(mContinue){
-                mListener.onFragmentInteraction();
+            String name = txtName.getText().toString();
+            if(TextUtils.isEmpty(name)){
+                showAlertContinue();
             }else{
-                new AlertDialog.Builder(getActivity())
-                        .setTitle("Alert")
-                        .setMessage("Where's your profile picture? \uD83D\uDE31")
-                        .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
-                            public void onClick(DialogInterface dialog, int which) {
-                                dialog.cancel();
-                            }
-                        })
-                        .show();
+                mUser.setName(name);
+                mListener.onFragmentInteraction(mUser, signup);
             }
-        }
-    };
-
-    private OnClickListener mImageListener = new OnClickListener() {
-        @Override
-        public void onClick(View v) {
-            Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
-            intent.setType("image/*");
-            getActivity().startActivityForResult(intent, PHOTO_SELECTED);
         }
     };
 
@@ -71,11 +56,10 @@ public class NameFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.fragment_profile_picture, container, false);
+        View view = inflater.inflate(R.layout.fragment_name, container, false);
         Button btnContinue = (Button) view.findViewById(R.id.btn_continue);
-        imgProfile = (ImageView) view.findViewById(R.id.img_profile);
-        btnContinue.setOnClickListener(mContinueListener);
-        imgProfile.setOnClickListener(mImageListener);
+        txtName = (EditText) view.findViewById(R.id.name);
+        btnContinue.setOnClickListener(continueListener);
         return view;
     }
 
@@ -89,9 +73,16 @@ public class NameFragment extends Fragment {
         super.onDetach();
     }
 
-    public static void setImage(Bitmap image){
-        imgProfile.setImageBitmap(image);
-        mContinue = true;
+    private void showAlertContinue(){
+        new AlertDialog.Builder(getActivity())
+                .setTitle("Alert")
+                .setMessage("Please write your name \uD83D\uDE4F")
+                .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.cancel();
+                    }
+                })
+                .show();
     }
 
 }
