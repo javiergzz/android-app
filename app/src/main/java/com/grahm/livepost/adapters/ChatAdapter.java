@@ -154,13 +154,13 @@ public class ChatAdapter extends FirebaseListAdapter<Update> {
         h.mTxtLikeView.setText(String.valueOf(m.getCount_likes()));
         h.mAuthorView.setText(m.getSender() + " :");
         if(m.getProfile_picture() != null){
-            loadBitmap(m.getProfile_picture(), h.mImgProfileView);
+            loadBitmap(Utilities.cleanUrl(m.getProfile_picture()), h.mImgProfileView);
         }
         final String msg = m.getMessage();
         if(msg.contains(".png")||msg.contains(".jpg")){
             h.mMessageView.setVisibility(View.GONE);
             h.mImgChatView.setVisibility(View.VISIBLE);
-            loadBitmap(msg, h.mImgChatView);
+            loadBitmap(Utilities.cleanUrl(msg), h.mImgChatView);
         }else{
             h.mMessageView.setVisibility(View.VISIBLE);
             h.mImgChatView.setVisibility(View.GONE);

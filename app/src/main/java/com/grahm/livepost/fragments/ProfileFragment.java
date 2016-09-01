@@ -48,10 +48,9 @@ import butterknife.OnClick;
  */
 public class ProfileFragment extends Fragment {
     @BindView(R.id.profile_pic) public ImageView mImageView;
-    @BindView(R.id.profile_desc) public TextView mDescView;
     @BindView(R.id.pager) public ViewPager mViewPager;
-    @BindView(R.id.profile_name)
-    TextView mTitleView;
+    @BindView(R.id.profile_name) TextView mTitleView;
+    @BindView(R.id.profile_email) TextView mEmailView;
     private User mUser;
     private ProfileViewsManager mProfileViewsManager;
     private Firebase mFirebaseRef;
@@ -86,6 +85,7 @@ public class ProfileFragment extends Fragment {
         imageLoader.displayImage(parts[0], mImageView);
 
         mTitleView.setText(mUser.getName());
+        mEmailView.setText(mUser.getEmail());
         setupNavigation(view,inflater);
         return view;
 

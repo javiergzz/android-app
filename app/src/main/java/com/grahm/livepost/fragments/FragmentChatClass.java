@@ -28,6 +28,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.amazonaws.auth.BasicAWSCredentials;
+import com.google.firebase.auth.FirebaseAuth;
 import com.google.gson.Gson;
 import com.amazonaws.services.s3.AmazonS3Client;
 import com.firebase.client.DataSnapshot;
@@ -69,7 +70,7 @@ public class FragmentChatClass extends Fragment implements AbsListView.OnItemCli
 
     private static final String TAG_CLASS = "FragmentChatClass";
     public static final String TAG_AUTHOR = "author";
-    public static final String TAG_ID = "id";
+    public static final String TAG_ID = "key";
     public static final String TAG_USER = "user";
     private static final int TAKE_PICTURE = 0;
     private static final int PHOTO_SELECTED = 1;
@@ -128,7 +129,7 @@ public class FragmentChatClass extends Fragment implements AbsListView.OnItemCli
                 .setImagesFolderName("images")
                 .saveInAppExternalFilesDir()
                 .setCopyExistingPicturesToPublicLocation(true);
-        mFirebaseRef = new Firebase(getResources().getString(R.string.firebase_url)).child("messages").child(mId);
+        mFirebaseRef = new Firebase(getResources().getString(R.string.firebase_url)).child("updates").child(mId);
     }
 
     @Override
@@ -141,7 +142,7 @@ public class FragmentChatClass extends Fragment implements AbsListView.OnItemCli
             @Override
             public void onSuccess(String url) {
                 mUser = Utilities.getUser(mFirebaseRef,getActivity(),savedInstanceState);
-                mFirebaseRef.getRoot().child("posts/" + mId + "/lastMessage").setValue(url);
+                mFirebaseRef.getRoot().child("posts/" + mId + "/last_message").setValue(url);
                 Update m = new Update(0,null,url,mUser.getProfile_picture(), mUser.getName(), mUser.getEmail(),new Timestamp(System.currentTimeMillis()/1000L));
                 // Create a new, auto-generated child of that chat location, and save our chat data there
                 mFirebaseRef.push().setValue(m);
@@ -160,10 +161,6 @@ public class FragmentChatClass extends Fragment implements AbsListView.OnItemCli
 
     @OnClick(R.id.btnAddPicture)
     public void addPictureCallback() {
-        if(mFirebaseRef.getAuth()==null){
-            startActivityForResult(new Intent(getActivity(), LoginActivity.class), 1);
-            return;
-        }
         Long l = System.currentTimeMillis()/1000L;
         EasyImage.openChooserWithDocuments(this, mId+"_"+l, 1);
     }
@@ -272,29 +269,21 @@ public class FragmentChatClass extends Fragment implements AbsListView.OnItemCli
 
     @OnClick(R.id.btnSend)
     public void sendMessage() {
-        if(mFirebaseRef.getAuth()==null){
-            startActivityForResult(new Intent(getActivity(), LoginActivity.class), 1);
-            return;
-        }
         final EditText inputText = (EditText) getView().findViewById(R.id.messageInput);
         SharedPreferences sharedPref = getActivity().getSharedPreferences(getString(R.string.preference_file_key), Context.MODE_PRIVATE);
         String input = inputText.getText().toString();
         Gson gson = new Gson();
         String storedUsrJson = sharedPref.getString("user", null);
         SharedPreferences.Editor SPEdit = sharedPref.edit();
-        String uid = mFirebaseRef.getAuth().getUid();
-        if (TextUtils.isEmpty(storedUsrJson))
-            mUser = null;
-        else
-            mUser = gson.fromJson(storedUsrJson, User.class);
-        if (mUser==null){
-            startActivityForResult(new Intent(getActivity(), LoginActivity.class), 1);
-        }else {
+        String uid = FirebaseAuth.getInstance().getCurrentUser().getUid();
+        mUser = Utilities.getUser(mFirebaseRef,getContext(),null);
             if (!TextUtils.isEmpty(input)) {
                 //TODO
-                mFirebaseRef.getRoot().child("posts/" + mId + "/lastMessage").setValue(input);
+                mFirebaseRef.getRoot().child("posts/" + mId + "/last_message").setValue(input);
                 final String currentDateTimeString = DateFormat.getDateTimeInstance().format(new Date());
-                Update m = new Update(0,null,input,mUser.getProfile_picture(), mUser.getName(), mUser.getEmail(),new Timestamp(System.currentTimeMillis()/1000L));
+                String[] parts = mUser.getProfile_picture().split("\\?");
+
+                Update m = new Update(0,null,input,parts[0], mUser.getName(), mUser.getEmail(),new Timestamp(System.currentTimeMillis()/1000L));
                 // Create a new, auto-generated child of that chat location, and save our chat data there
                 mFirebaseRef.push().setValue(m);
                 //Update Shared Preferences
@@ -304,10 +293,10 @@ public class FragmentChatClass extends Fragment implements AbsListView.OnItemCli
                 SPEdit.putString(new Gson().toJson(mUser), "user");
                 SPEdit.commit();
 
-                mFirebaseRef.getRoot().child("users/"+uid+"/postsContributed").updateChildren(mUser.getPosts_contributed());
+                mFirebaseRef.getRoot().child("users/"+uid+"/posts_contributed").updateChildren(mUser.getPosts_contributed());
                 inputText.setText("");
             }
-        }
+
     }
 
     public void loadImage(Context ctx, Intent data) {

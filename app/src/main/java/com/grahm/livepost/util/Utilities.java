@@ -109,5 +109,9 @@ public class Utilities {
             return s != "" ? gson.fromJson(s, User.class) : null;
         }
     }
+    public static String cleanUrl(String url){
+        String [] parts = url.split("\\?");
+        return parts[0];
+    }
 
 }

@@ -94,10 +94,7 @@ public class StoryListAdapter extends FirebaseListAdapter<Story> {
 
     @Override
     public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        //if(viewType == TYPE_ITEM)
             return new ViewHolderI(LayoutInflater.from(parent.getContext()).inflate(mVItemLayout, parent, false));
-        //else
-        //    return new ViewHolderH(LayoutInflater.from(parent.getContext()).inflate(R.layout.fragment_item_header, parent, false));
     }
 
     @Override

@@ -22,6 +22,7 @@ import com.firebase.client.Firebase;
 import com.google.firebase.auth.FirebaseAuth;
 import com.grahm.livepost.R;
 import com.grahm.livepost.adapters.HomeFragmentAdapter;
+import com.grahm.livepost.fragments.FragmentChatClass;
 import com.grahm.livepost.fragments.HomeFragment;
 import com.grahm.livepost.fragments.NewStoryFragment;
 import com.grahm.livepost.fragments.ProfileFragment;
@@ -187,7 +188,7 @@ public class MainActivity extends FirebaseActivity implements OnFragmentInteract
 
     @Override
     public void onTabReselected(TabLayout.Tab tab) {
-
+        onTabSelected(tab);
     }
 
     public enum FragmentsEnum implements Serializable {
@@ -220,7 +221,7 @@ public class MainActivity extends FirebaseActivity implements OnFragmentInteract
         CHAT(CHAT_TAG, R.string.chat_str) {
             @Override
             public Fragment getInstance(Bundle args) {
-                return HomeFragment.newInstance(args);
+                return FragmentChatClass.newInstance(args);
             }
         };
         private final String tag;
