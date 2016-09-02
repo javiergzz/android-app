@@ -20,8 +20,8 @@ import android.widget.TextView;
 
 import com.amazonaws.auth.BasicAWSCredentials;
 import com.amazonaws.services.s3.AmazonS3Client;
-import com.firebase.client.Firebase;
-import com.firebase.client.Query;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 import com.grahm.livepost.activities.MainActivity;
 import com.grahm.livepost.asynctask.S3PutObjectTask;
 import com.grahm.livepost.fragments.FragmentChatClass;
@@ -61,7 +61,7 @@ public class StoryLinearListAdapter extends FirebaseListFilteredAdapter<Story> {
     private OnFragmentInteractionListener mOnFragmentInteractionListener;
 
 
-    public StoryLinearListAdapter(Firebase ref, AppCompatActivity activity, int listType, Map<String,Object> filter) {
+    public StoryLinearListAdapter(DatabaseReference ref, AppCompatActivity activity, int listType, Map<String,Object> filter) {
         super(ref, Story.class, activity, filter);
         mListType = listType;
         mVItemLayout = listType == STAGGERED?R.layout.item_session_staggered:R.layout.item_session;
@@ -160,9 +160,9 @@ public class StoryLinearListAdapter extends FirebaseListFilteredAdapter<Story> {
         builder.setPositiveButton(R.string.delete_confirm, new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int id) {
                 //TODO Security
-                Firebase ref = new Firebase(mCtx.getString(R.string.firebase_url) + "sessions/").child(key);
+                DatabaseReference ref = FirebaseDatabase.getInstance().getReference("posts/").child(key);
                 ref.removeValue();
-                ref = new Firebase(mCtx.getString(R.string.firebase_url) + "messages/").child(key);
+                ref =  FirebaseDatabase.getInstance().getReference("updates/").child(key);
                 ref.removeValue();
                 Log.d(TAG, "Deleted Session " + key);
             }

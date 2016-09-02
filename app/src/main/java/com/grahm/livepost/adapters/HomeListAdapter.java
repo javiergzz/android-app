@@ -13,7 +13,7 @@ import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
-import com.firebase.client.Query;
+import com.google.firebase.database.Query;
 import com.grahm.livepost.R;
 import com.grahm.livepost.activities.MainActivity;
 import com.grahm.livepost.interfaces.OnFragmentInteractionListener;

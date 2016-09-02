@@ -9,17 +9,15 @@ import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 
-import com.firebase.client.AuthData;
-import com.firebase.client.DataSnapshot;
-import com.firebase.client.Firebase;
-import com.firebase.client.FirebaseError;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.ServerValue;
-import com.firebase.client.ValueEventListener;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 import com.google.gson.Gson;
 import com.grahm.livepost.R;
 import com.grahm.livepost.objects.User;
@@ -43,7 +41,7 @@ public class Utilities {
         return (str == null || str.trim().length() == 0);
     }
 
-    public static User getUser(Firebase mFirebaseRef, Context ctx, Bundle savedInstanceState){
+    public static User getUser(DatabaseReference mFirebaseRef, Context ctx, Bundle savedInstanceState){
         FirebaseUser mFirebaseUser = FirebaseAuth.getInstance().getCurrentUser();
         if(mFirebaseUser==null){
             return null;
@@ -52,7 +50,7 @@ public class Utilities {
         final SharedPreferences SP = ctx.getSharedPreferences(ctx.getString(R.string.preference_file_key), Context.MODE_PRIVATE);
         if(savedInstanceState==null){
             mUser = new Gson().fromJson(ctx.getSharedPreferences(ctx.getString(R.string.preference_file_key), Context.MODE_PRIVATE).getString("user", null), User.class);
-            mFirebaseRef=mFirebaseRef==null?new Firebase(ctx.getString(R.string.firebase_url)):mFirebaseRef;
+            mFirebaseRef=mFirebaseRef==null? FirebaseDatabase.getInstance().getReference():mFirebaseRef;
 
             mFirebaseRef.getRoot().child("users/"+mFirebaseUser.getEmail().replace(".","")).addValueEventListener(new ValueEventListener() {
                 @Override
@@ -62,7 +60,7 @@ public class Utilities {
                 }
 
                 @Override
-                public void onCancelled(FirebaseError firebaseError) {
+                public void onCancelled(DatabaseError databaseError) {
                     mUser = gson.fromJson(SP.getString("user", null), User.class);
                 }
             });

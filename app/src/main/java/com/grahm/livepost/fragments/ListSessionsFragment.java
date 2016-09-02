@@ -1,4 +1,4 @@
-package com.livepost.javiergzzr.fragments;
+package com.grahm.livepost.fragments;
 
 import android.app.Activity;
 import android.content.Context;
@@ -21,14 +21,12 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.ListView;
-import android.app.SearchManager;
 
-import com.firebase.client.ChildEventListener;
-import com.firebase.client.DataSnapshot;
-import com.firebase.client.Firebase;
-import com.firebase.client.FirebaseError;
-import com.firebase.client.Query;
-import com.firebase.client.ValueEventListener;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 import com.grahm.livepost.activities.MainActivity;
 import com.grahm.livepost.activities.NewStory;
 import com.grahm.livepost.activities.LoginActivity;
@@ -45,7 +43,7 @@ public class ListSessionsFragment extends Fragment {
 
 
     private int mPresentationType;
-    private Firebase mFirebaseRef;
+    private DatabaseReference mFirebaseRef;
     private ValueEventListener mConnectedListener;
     private StoryListAdapter mStoryListAdapter;
     private OnFragmentInteractionListener mOnFragmentInteractionListener;
@@ -64,7 +62,7 @@ public class ListSessionsFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        mFirebaseRef = new Firebase(getString(R.string.firebase_url)).child("posts");
+        mFirebaseRef = FirebaseDatabase.getInstance().getReference("posts");
 
     }
 
@@ -112,7 +110,7 @@ public class ListSessionsFragment extends Fragment {
             }
 
             @Override
-            public void onCancelled(FirebaseError firebaseError) {
+            public void onCancelled(DatabaseError firebaseError) {
                 // No-op
             }
         });

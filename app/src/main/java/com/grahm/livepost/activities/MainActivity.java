@@ -18,7 +18,6 @@ import android.view.MenuItem;
 import android.view.View;
 
 
-import com.firebase.client.Firebase;
 import com.google.firebase.auth.FirebaseAuth;
 import com.grahm.livepost.R;
 import com.grahm.livepost.adapters.HomeFragmentAdapter;

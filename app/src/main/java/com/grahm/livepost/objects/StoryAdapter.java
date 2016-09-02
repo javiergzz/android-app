@@ -9,8 +9,7 @@ import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.firebase.client.Firebase;
-import com.firebase.client.Query;
+
 import com.grahm.livepost.R;
 import com.nostra13.universalimageloader.core.DisplayImageOptions;
 import com.nostra13.universalimageloader.core.ImageLoader;

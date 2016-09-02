@@ -33,11 +33,10 @@ import android.widget.TextView;
 
 import com.amazonaws.auth.BasicAWSCredentials;
 import com.amazonaws.services.s3.AmazonS3Client;
-import com.firebase.client.DataSnapshot;
-import com.firebase.client.Firebase;
-import com.firebase.client.FirebaseError;
-import com.firebase.client.ValueEventListener;
+import com.google.firebase.FirebaseException;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 import com.grahm.livepost.asynctask.RegisterUserTask;
 import com.grahm.livepost.interfaces.OnPutImageListener;
 import com.grahm.livepost.R;
@@ -64,8 +63,9 @@ import pl.aprilapps.easyphotopicker.EasyImage;
 public class RegistrationActivity extends AppCompatActivity implements LoaderCallbacks<Cursor>, OnPutImageListener{
     public static final String USER_KEY = "user";
     public static final String PWD_KEY = "pwd";
-    private Firebase mFirebaseRef;
-    protected FirebaseError mFirebaseError;
+    private FirebaseDatabase mFirebaseDB;
+    private DatabaseReference mFirebaseRef;
+    protected FirebaseException mFirebaseError;
     private static final String TAG = "LoginActivity";
     /**
      * Keep track of the login task to ensure we can cancel it if requested.
@@ -130,7 +130,7 @@ public class RegistrationActivity extends AppCompatActivity implements LoaderCal
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        mFirebaseRef = new Firebase(getString(R.string.firebase_url));
+        mFirebaseRef = FirebaseDatabase.getInstance().getReference();
         mUser = Utilities.getUser(mFirebaseRef,this,savedInstanceState);
         mUser = mUser==null?new User():mUser;
         mRegistrationViewsManager = new RegistrationViewsManager();

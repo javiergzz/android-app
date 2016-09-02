@@ -14,7 +14,7 @@ public class User implements Serializable {
     private  Map<String, Object> posts_contributed;
     private  Map<String, Object> posts_created;
     private String profile_picture;
-    private Timestamp timestamp;
+    private long timestamp;
     private String uid;
 
     public String getEmail() {
@@ -57,14 +57,6 @@ public class User implements Serializable {
         this.profile_picture = profile_picture;
     }
 
-    public Timestamp getTimestamp() {
-        return timestamp;
-    }
-
-    public void setTimestamp(Timestamp timestamp) {
-        this.timestamp = timestamp;
-    }
-
     public String getUid() {
         return uid;
     }
@@ -76,7 +68,7 @@ public class User implements Serializable {
     public User() {
     }
 
-    public User(String email, String name, Map<String, Object> posts_contributed, Map<String, Object> posts_created, String profile_picture, Timestamp timestamp, String uid) {
+    public User(String email, String name, Map<String, Object> posts_contributed, Map<String, Object> posts_created, String profile_picture, long timestamp, String uid) {
         this.email = email;
         this.name = name;
         this.posts_contributed = posts_contributed;

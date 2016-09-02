@@ -5,12 +5,14 @@ import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
 
-import com.firebase.client.ChildEventListener;
-import com.firebase.client.DataSnapshot;
-import com.firebase.client.Firebase;
-import com.firebase.client.FirebaseError;
-import com.firebase.client.Query;
-import com.firebase.client.ValueEventListener;
+
+import com.google.firebase.FirebaseException;
+import com.google.firebase.database.ChildEventListener;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.Query;
+import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -47,7 +49,7 @@ public abstract class FirebaseListFilteredAdapter<T> extends  RecyclerView.Adapt
      * @param mModelClass Firebase will marshall the data at a location into an instance of a class that you provide
      * @param activity    The activity containing the ListView
      */
-    public FirebaseListFilteredAdapter(Firebase mRef, Class<T> mModelClass, Activity activity, final Map<String,Object> filter) {
+    public FirebaseListFilteredAdapter(DatabaseReference mRef, Class<T> mModelClass, Activity activity, final Map<String,Object> filter) {
         this.mFilter=filter;
         this.mRef = mRef;
         this.mModelClass = mModelClass;
@@ -70,7 +72,7 @@ public abstract class FirebaseListFilteredAdapter<T> extends  RecyclerView.Adapt
                 }
 
                 @Override
-                public void onCancelled(FirebaseError firebaseError) {
+                public void onCancelled(DatabaseError firebaseError) {
                     Log.e("Firebase Error", firebaseError.getMessage());
                 }
             });

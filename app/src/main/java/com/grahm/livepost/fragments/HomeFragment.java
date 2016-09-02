@@ -11,10 +11,11 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
-import com.firebase.client.DataSnapshot;
-import com.firebase.client.Firebase;
-import com.firebase.client.FirebaseError;
-import com.firebase.client.ValueEventListener;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 import com.grahm.livepost.R;
 import com.grahm.livepost.adapters.HomeListAdapter;
 
@@ -27,7 +28,7 @@ public class HomeFragment extends Fragment {
     private static final String TAG = "HomeFragment";
     private static final String ARG_SECTION_NUMBER = "section_number";
     private ValueEventListener mConnectedListener;
-    private Firebase mFirebaseRef;
+    private DatabaseReference mFirebaseRef;
     private Context mContext;
     private HomeListAdapter mHomeListAdapter;
 
@@ -41,7 +42,7 @@ public class HomeFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        mFirebaseRef = new Firebase(getString(R.string.firebase_url)).child("posts");
+        mFirebaseRef = FirebaseDatabase.getInstance().getReference("posts");
     }
 
     @Override
@@ -89,7 +90,7 @@ public class HomeFragment extends Fragment {
             }
 
             @Override
-            public void onCancelled(FirebaseError firebaseError) {
+            public void onCancelled(DatabaseError firebaseError) {
                 // No-op
             }
         });

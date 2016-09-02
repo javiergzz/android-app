@@ -38,14 +38,15 @@ import java.util.Map;
 
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
+import com.google.firebase.FirebaseException;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 import com.google.gson.Gson;
-import com.firebase.client.AuthData;
-import com.firebase.client.DataSnapshot;
-import com.firebase.client.Firebase;
-import com.firebase.client.FirebaseError;
-import com.firebase.client.ValueEventListener;
 import com.grahm.livepost.R;
 import com.grahm.livepost.objects.FirebaseActivity;
 import com.grahm.livepost.objects.User;
@@ -60,8 +61,9 @@ import butterknife.ButterKnife;
  * A login screen that offers login via email/password.
  */
 public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<Cursor> {
-    private Firebase mFirebaseRef;
-    protected FirebaseError mFirebaseError;
+    private FirebaseDatabase mFirebaseDB;
+    private DatabaseReference mFirebaseRef;
+    protected FirebaseException mFirebaseError;
     private static final String TAG = "LoginActivity";
     protected static boolean registrationCheck = false;
     protected static boolean authSuccessful = false;
@@ -85,7 +87,8 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        mFirebaseRef = new Firebase(getString(R.string.firebase_url));
+        mFirebaseDB = FirebaseDatabase.getInstance();
+        mFirebaseRef = mFirebaseDB.getReference();
         setContentView(R.layout.activity_login);
         ButterKnife.bind(this);
         mAuth = FirebaseAuth.getInstance();
@@ -296,8 +299,8 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
                 }
 
                 @Override
-                public void onCancelled(FirebaseError firebaseError) {
-                    Log.e(TAG, firebaseError.getMessage());
+                public void onCancelled(DatabaseError databaseError) {
+                    Log.e(TAG,databaseError.getMessage());
                 }
             });
 

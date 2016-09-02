@@ -5,10 +5,9 @@ import android.content.SharedPreferences;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.os.Handler;
-
-import com.firebase.client.Firebase;
-import com.firebase.ui.auth.AuthUI;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 import com.grahm.livepost.R;
 import com.grahm.livepost.objects.FirebaseActivity;
 import com.grahm.livepost.util.Utilities;
@@ -34,7 +33,7 @@ public class SplashScreen extends FirebaseActivity {
         ImageLoaderConfiguration config = new ImageLoaderConfiguration.Builder(this).build();
         ImageLoader.getInstance().init(config);
         FirebaseAuth auth = FirebaseAuth.getInstance();
-        Firebase ref = new Firebase(getString(R.string.firebase_url));
+        DatabaseReference ref = FirebaseDatabase.getInstance().getReference();
 
         if (auth.getCurrentUser() != null) {
             //Signed in

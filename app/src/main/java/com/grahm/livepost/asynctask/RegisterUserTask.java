@@ -18,8 +18,10 @@ import android.widget.Toast;
 
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
+import com.google.firebase.FirebaseException;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.ServerValue;
 import com.google.gson.Gson;
 import com.amazonaws.services.s3.AmazonS3Client;
@@ -28,9 +30,6 @@ import com.amazonaws.services.s3.model.GeneratePresignedUrlRequest;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.PutObjectRequest;
 import com.amazonaws.services.s3.model.ResponseHeaderOverrides;
-import com.firebase.client.AuthData;
-import com.firebase.client.Firebase;
-import com.firebase.client.FirebaseError;
 import com.grahm.livepost.interfaces.OnPutImageListener;
 import com.grahm.livepost.R;
 import com.grahm.livepost.objects.User;
@@ -57,12 +56,12 @@ public class RegisterUserTask extends AsyncTask<Uri, String, String> {
     private User mUser;
     private String mUid;
     private String mPassword;
-    Firebase mFirebaseRef;
-    FirebaseError mFirebaseError;
+    DatabaseReference mFirebaseRef;
+    FirebaseException mFirebaseError;
     FirebaseAuth mFirebaseAuth;
     SharedPreferences mSharedPref;
 
-    public RegisterUserTask(User user,String password, Firebase ref,FirebaseAuth auth, Context context, AmazonS3Client client, OnPutImageListener listener, Boolean showDialog){
+    public RegisterUserTask(User user, String password, DatabaseReference ref, FirebaseAuth auth, Context context, AmazonS3Client client, OnPutImageListener listener, Boolean showDialog){
         mUid = null;
         mContext = context;
         mS3Client = client;
@@ -161,18 +160,6 @@ public class RegisterUserTask extends AsyncTask<Uri, String, String> {
                     editor.putString("username", mUser.getEmail());
                     editor.commit();
                     Log.i(TAG, "User " + mUser.getEmail() + " was registerd successfully!");
-                    mFirebaseRef.authWithPassword(mUser.getEmail(), mPassword, new Firebase.AuthResultHandler() {
-                        @Override
-                        public void onAuthenticated(AuthData authData) {
-                            Log.i(TAG, "Login successful: " + mUser.getEmail());
-                        }
-
-                        @Override
-                        public void onAuthenticationError(FirebaseError firebaseError) {
-                            mFirebaseError = firebaseError;
-                            Log.i(TAG, "Login failed: " + mFirebaseError.getMessage());
-                        }
-                    });
                     if(mShowDialog && dialog.isShowing())dialog.dismiss();
                     if(mListener != null){
                         mListener.onSuccess(mPictureName);

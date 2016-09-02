@@ -24,8 +24,8 @@ import android.widget.TextView;
 
 import com.amazonaws.auth.BasicAWSCredentials;
 import com.amazonaws.services.s3.AmazonS3Client;
-import com.firebase.client.Firebase;
-import com.firebase.client.ServerValue;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 import com.grahm.livepost.adapters.ExpandableListAdapter;
 import com.grahm.livepost.asynctask.S3PutObjectTask;
 import com.grahm.livepost.interfaces.OnPutImageListener;
@@ -159,7 +159,7 @@ public class NewStory extends ActionBarActivity implements OnPutImageListener{
     private void saveSession(String url){
         SharedPreferences prefs = getSharedPreferences(CHAT_PREFS_KEY, 0);
         String mUsername = prefs.getString(USERNAME_KEY, null);
-        Firebase ref = new Firebase(getString(R.string.firebase_url)).child("posts");
+        DatabaseReference ref  = FirebaseDatabase.getInstance().getReference("posts");
         mUser = Utilities.getUser(ref,this,getIntent().getExtras());
         Story story = new Story(
                 mUsername, mUser.getName(),txtCategory.getText().toString(),null,

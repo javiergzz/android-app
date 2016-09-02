@@ -8,9 +8,10 @@ import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 
-import com.firebase.client.Firebase;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 import com.grahm.livepost.R;
 import com.grahm.livepost.activities.SplashScreen;
 import com.grahm.livepost.util.Utilities;
@@ -21,7 +22,8 @@ import com.grahm.livepost.util.Utilities;
 public class FirebaseActivity extends AppCompatActivity {
     private static final String TAG = "FirebaseActivity";
     protected FirebaseAuth.AuthStateListener mAuthListener;
-    protected Firebase mFirebaseRef;
+    private FirebaseDatabase mFirebaseDB;
+    private DatabaseReference mFirebaseRef;
     protected FirebaseAuth mAuth;
     protected FirebaseUser mFirebaseUser;
     protected User mUser;
@@ -30,7 +32,8 @@ public class FirebaseActivity extends AppCompatActivity {
     @Override
     protected void onCreate(@Nullable final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        mFirebaseRef = new Firebase(getString(R.string.firebase_url));
+        mFirebaseDB = FirebaseDatabase.getInstance();
+        mFirebaseRef = mFirebaseDB.getReference();
         mAuth = FirebaseAuth.getInstance();
         mFirebaseUser = mAuth.getCurrentUser();
         checkAuth(savedInstanceState);
@@ -72,6 +75,5 @@ public class FirebaseActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        Firebase.setAndroidContext(this);
     }
 }

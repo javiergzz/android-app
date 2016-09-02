@@ -26,10 +26,10 @@ import android.widget.Spinner;
 import android.widget.TextView;
 
 import com.amazonaws.auth.BasicAWSCredentials;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 import com.google.gson.Gson;
 import com.amazonaws.services.s3.AmazonS3Client;
-import com.firebase.client.Firebase;
-import com.firebase.client.FirebaseError;
 import com.grahm.livepost.activities.MainActivity;
 import com.grahm.livepost.asynctask.CreateStoryTask;
 import com.grahm.livepost.interfaces.OnFragmentInteractionListener;
@@ -63,7 +63,7 @@ public class NewStoryFragment extends Fragment implements OnPutImageListener {
     public static final String SESSION_KEY = "session";
     public static final String PAGE_KEY = "page";
     public static final String URI_KEY = "uri";
-    private Firebase mFirebaseRef;
+    private DatabaseReference mFirebaseRef;
     private static final String TAG = "NewStoryFragment";
     private AmazonS3Client s3Client = new AmazonS3Client(new BasicAWSCredentials(GV.ACCESS_KEY_ID, GV.SECRET_KEY));
     private CreateStoryTask mStoryTask = null;
@@ -117,7 +117,7 @@ public class NewStoryFragment extends Fragment implements OnPutImageListener {
         }
         mUser = Utilities.getUser(mFirebaseRef,getActivity(),savedInstanceState);
         mStory = mStory == null ? new Story() : mStory;
-        mFirebaseRef = new Firebase(getString(R.string.firebase_url));
+        mFirebaseRef = FirebaseDatabase.getInstance().getReference();
         mNewSessionViewsManager = new NewSessionViewsManager();
     }
 

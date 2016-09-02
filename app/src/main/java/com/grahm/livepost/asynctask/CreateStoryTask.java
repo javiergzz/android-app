@@ -14,6 +14,7 @@ import android.util.Log;
 import android.util.TypedValue;
 
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.ServerValue;
 import com.google.gson.Gson;
 import com.amazonaws.services.s3.AmazonS3Client;
@@ -22,8 +23,6 @@ import com.amazonaws.services.s3.model.GeneratePresignedUrlRequest;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.PutObjectRequest;
 import com.amazonaws.services.s3.model.ResponseHeaderOverrides;
-import com.firebase.client.Firebase;
-import com.firebase.client.FirebaseError;
 import com.grahm.livepost.interfaces.OnPutImageListener;
 import com.grahm.livepost.R;
 import com.grahm.livepost.objects.Update;
@@ -55,11 +54,10 @@ public class CreateStoryTask extends AsyncTask<Uri, String, String> {
     private Story mStory;
     private String mUid;
     private User mUser;
-    Firebase mFirebaseRef;
-    FirebaseError mFirebaseError;
+    DatabaseReference mFirebaseRef;
     SharedPreferences mSharedPref;
 
-    public CreateStoryTask(Story story, Firebase ref, Context context, AmazonS3Client client, OnPutImageListener listener, Boolean showDialog) {
+    public CreateStoryTask(Story story, DatabaseReference ref, Context context, AmazonS3Client client, OnPutImageListener listener, Boolean showDialog) {
         mUid = null;
         mContext = context;
         mS3Client = client;
@@ -160,7 +158,7 @@ public class CreateStoryTask extends AsyncTask<Uri, String, String> {
     private synchronized void addFirebaseEntry() {
         try {
             mStory.setIsLive(true);
-            Firebase ref = mFirebaseRef.push();
+            DatabaseReference ref = mFirebaseRef.push();
             ref.setValue(mStory);
             String key = ref.getKey();
             //Set Timestamps

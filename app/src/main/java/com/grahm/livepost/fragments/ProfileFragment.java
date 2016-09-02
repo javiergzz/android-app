@@ -15,11 +15,13 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.firebase.client.DataSnapshot;
-import com.firebase.client.Firebase;
-import com.firebase.client.FirebaseError;
-import com.firebase.client.Query;
-import com.firebase.client.ValueEventListener;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.Query;
+import com.google.firebase.database.ValueEventListener;
 import com.google.gson.Gson;
 import com.grahm.livepost.R;
 import com.grahm.livepost.adapters.StoryLinearListAdapter;
@@ -53,7 +55,7 @@ public class ProfileFragment extends Fragment {
     @BindView(R.id.profile_email) TextView mEmailView;
     private User mUser;
     private ProfileViewsManager mProfileViewsManager;
-    private Firebase mFirebaseRef;
+    private DatabaseReference mFirebaseRef;
 
     private ProfileSectionsPagerAdapter mSectionsPagerAdapter;
 
@@ -70,7 +72,7 @@ public class ProfileFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        mFirebaseRef = new Firebase(getString(R.string.firebase_url));
+        mFirebaseRef = FirebaseDatabase.getInstance().getReference();
         mUser = Utilities.getUser(mFirebaseRef,getActivity(),savedInstanceState);
     }
 
@@ -148,9 +150,9 @@ public class ProfileFragment extends Fragment {
                 Map<String,Object> m = mUser.getPosts_contributed();
                 if(m!=null) {
                     final RecyclerView recyclerView = ButterKnife.findById(layout, R.id.profile_list);
-                    final Firebase f = mFirebaseRef.child("posts");
+                    final DatabaseReference f = mFirebaseRef.child("posts");
                     recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
-                    String uid = mFirebaseRef.getAuth().getUid();
+                    String uid = FirebaseAuth.getInstance().getCurrentUser().getUid();
                     final StoryLinearListAdapter storyLinearListAdapter = new StoryLinearListAdapter(f, (AppCompatActivity) getActivity(), 1, mUser.getPosts_contributed());
                     recyclerView.setAdapter(storyLinearListAdapter);
 
@@ -166,7 +168,7 @@ public class ProfileFragment extends Fragment {
                         }
 
                         @Override
-                        public void onCancelled(FirebaseError firebaseError) {
+                        public void onCancelled(DatabaseError firebaseError) {
 
                         }
                     });

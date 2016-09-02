@@ -29,12 +29,13 @@ import android.widget.Toast;
 
 import com.amazonaws.auth.BasicAWSCredentials;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 import com.google.gson.Gson;
 import com.amazonaws.services.s3.AmazonS3Client;
-import com.firebase.client.DataSnapshot;
-import com.firebase.client.Firebase;
-import com.firebase.client.FirebaseError;
-import com.firebase.client.ValueEventListener;
 import com.grahm.livepost.activities.LoginActivity;
 import com.grahm.livepost.activities.MainActivity;
 import com.grahm.livepost.adapters.ChatAdapter;
@@ -80,7 +81,7 @@ public class FragmentChatClass extends Fragment implements AbsListView.OnItemCli
     @BindView(R.id.msg_list)
     RecyclerView mListView;
     public static MainActivity.FragmentsEnum page = MainActivity.FragmentsEnum.CHAT;
-    private Firebase mFirebaseRef;
+    private DatabaseReference mFirebaseRef;
     private PostImageTask mPostTask;
     private String mId, mAuthor;
     private OnFragmentInteractionListener mListener;
@@ -129,7 +130,7 @@ public class FragmentChatClass extends Fragment implements AbsListView.OnItemCli
                 .setImagesFolderName("images")
                 .saveInAppExternalFilesDir()
                 .setCopyExistingPicturesToPublicLocation(true);
-        mFirebaseRef = new Firebase(getResources().getString(R.string.firebase_url)).child("updates").child(mId);
+        mFirebaseRef = FirebaseDatabase.getInstance().getReference("updates").child(mId);
     }
 
     @Override
@@ -209,7 +210,7 @@ public class FragmentChatClass extends Fragment implements AbsListView.OnItemCli
             }
 
             @Override
-            public void onCancelled(FirebaseError firebaseError) {
+            public void onCancelled(DatabaseError firebaseError) {
                 // No-op
             }
         });

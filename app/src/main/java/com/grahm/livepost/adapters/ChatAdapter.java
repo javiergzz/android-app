@@ -17,14 +17,11 @@ import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
-import com.firebase.client.AuthData;
-import com.firebase.client.DataSnapshot;
-import com.firebase.client.Firebase;
-import com.firebase.client.FirebaseError;
-import com.firebase.client.MutableData;
-import com.firebase.client.Query;
-import com.firebase.client.Transaction;
-import com.firebase.client.ValueEventListener;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.Query;
 import com.google.gson.Gson;
 import com.grahm.livepost.activities.LoginActivity;
 import com.grahm.livepost.R;
@@ -58,8 +55,9 @@ public class ChatAdapter extends FirebaseListAdapter<Update> {
     protected String mUsername;
     private DisplayImageOptions mOptions;
     private ImageLoader mImageLoader;
-    private Firebase mFirebaseRef;
-    private Firebase mUserFirebaseRef;
+    private FirebaseDatabase mFirebaseDB;
+    private DatabaseReference mFirebaseRef;
+    private DatabaseReference mUserFirebaseRef;
     private User mUser;
     private String mUid;
 
@@ -76,12 +74,12 @@ public class ChatAdapter extends FirebaseListAdapter<Update> {
                 .build();
         mImageLoader = ImageLoader.getInstance();
         mImageLoader.init(config);
-        mFirebaseRef =  new Firebase(mActivity.getResources().getString(R.string.firebase_url));
+        mFirebaseRef =  mFirebaseDB.getReference();
         String s = mActivity.getSharedPreferences(mActivity.getString(R.string.preference_file_key),Context.MODE_PRIVATE).getString("user",null);
         mUser= s!=null? new Gson().fromJson(s,User.class):null;
-        AuthData a = mFirebaseRef.getAuth();
-        if(a!=null){
-            mUid = a.getUid();
+        FirebaseUser mFirebaseUser = FirebaseAuth.getInstance().getCurrentUser();
+        if(mFirebaseUser!=null){
+            mUid = mFirebaseUser.getUid();
         }
         mUserFirebaseRef = mFirebaseRef.child("users/"+mUid);
     }
@@ -97,48 +95,8 @@ public class ChatAdapter extends FirebaseListAdapter<Update> {
 
 
 
-    protected void likeMessage(final Firebase upvotesRef, final int likeCount,final String key){
-        //mUserFirebaseRef.child("likes").
 
-        mUserFirebaseRef.child("likes").addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                if(!dataSnapshot.hasChild(key)) {
-                    Map<String, Object> m = new HashMap<String, Object>();
-                    m.put(mUsername, true);
-                    upvotesRef.child("likes").updateChildren(m);
-                    Map<String, Object> n = new HashMap<String, Object>();
-                    n.put(key, true);
-                    mUserFirebaseRef.child("likes").updateChildren(n);
-
-                    upvotesRef.child("countLikes").runTransaction(new Transaction.Handler() {
-                        @Override
-                        public Transaction.Result doTransaction(MutableData currentData) {
-                            currentData.setValue(likeCount + 1);
-                            return Transaction.success(currentData); //we can also abort by calling Transaction.abort()
-                        }
-
-                        @Override
-                        public void onComplete(FirebaseError firebaseError, boolean committed, DataSnapshot currentData) {
-                            if (firebaseError != null)
-                                Log.e(TAG, firebaseError.getMessage());
-                            //This method will be called once with the results of the transaction.
-                        }
-                    });
-                }
-            }
-
-            @Override
-            public void onCancelled(FirebaseError firebaseError) {
-
-            }
-        });
-
-
-    }
     public void loadBitmap(String resUrl, ImageView imageView) {
-        //FilenameUtils.removeExtension(resUrl)+"_";
-        //String s = resUrl.
         mImageLoader.displayImage(resUrl, imageView);
     }
     @Override
@@ -181,16 +139,6 @@ public class ChatAdapter extends FirebaseListAdapter<Update> {
             h.mDateView.setText(timeMsg);
         }
 
-        likeListener = new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if(mFirebaseRef.getAuth()==null){
-                    mActivity.startActivityForResult(new Intent(mActivity, LoginActivity.class), 1);
-                }else {
-                    likeMessage(mFirebaseRef.child("updates/" + mChatKey + "/" + key), m.getCount_likes(), key);
-                }
-            }
-        };
         h.mImgLikeView.setOnClickListener(likeListener);
     }
     public class ChatViewHolder extends RecyclerView.ViewHolder {
