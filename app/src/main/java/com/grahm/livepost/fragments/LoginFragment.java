@@ -18,6 +18,7 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.TwitterAuthProvider;
 import com.grahm.livepost.R;
+import com.twitter.sdk.android.Twitter;
 import com.twitter.sdk.android.core.Callback;
 import com.twitter.sdk.android.core.Result;
 import com.twitter.sdk.android.core.TwitterApiClient;
@@ -40,6 +41,7 @@ public class LoginFragment extends Fragment {
             String msg = "@" + session.getUserName() + " logged in! (#" + session.getUserId() + ")";
             Toast.makeText(getActivity().getApplicationContext(), msg, Toast.LENGTH_LONG).show();
             handleTwitterSession(session);
+            getProfilePicture(session);
         }
         @Override
         public void failure(TwitterException exception) {
@@ -119,7 +121,6 @@ public class LoginFragment extends Fragment {
                     @Override
                     public void onComplete(@NonNull Task<AuthResult> task) {
                         Log.d(TAG_CLASS, "signInWithCredential:onComplete:" + task.isSuccessful());
-                        getProfilePicture();
                         if (!task.isSuccessful()) {
                             Log.w(TAG_CLASS, "signInWithCredential", task.getException());
                             Toast.makeText(getActivity(), "Authentication failed.",
@@ -129,7 +130,7 @@ public class LoginFragment extends Fragment {
                 });
     }
 
-    private void getProfilePicture(){
+    private void getProfilePicture(TwitterSession session){
         Callback<User> callbackUser = new Callback<User>() {
             @Override
             public void success(Result<User> userResult) {
@@ -139,6 +140,12 @@ public class LoginFragment extends Fragment {
                 String photoUrlBiggerSize   = userResult.data.profileImageUrl.replace("_normal", "_bigger");
                 String photoUrlMiniSize     = userResult.data.profileImageUrl.replace("_normal", "_mini");
                 String photoUrlOriginalSize = userResult.data.profileImageUrl.replace("_normal", "");
+                Log.i("name", name);
+                Log.i("email", email + " lolx");
+                Log.i("photoUrlNormalSize", photoUrlNormalSize);
+                Log.i("photoUrlBiggerSize", photoUrlBiggerSize);
+                Log.i("photoUrlMiniSize", photoUrlMiniSize);
+                Log.i("photoUrlOriginalSize", photoUrlOriginalSize);
             }
 
             @Override
@@ -146,8 +153,8 @@ public class LoginFragment extends Fragment {
                 Log.d("TwitterKit", "Verify Credentials Failure", exc);
             }
         };
-        TwitterApiClient twitterApiClient = TwitterCore.getInstance().getApiClient();
-        twitterApiClient.getAccountService().verifyCredentials(true, false);
+        TwitterApiClient twitterApiClient = TwitterCore.getInstance().getApiClient(session);
+        twitterApiClient.getAccountService().verifyCredentials(true, false, callbackUser);
     }
 
 }
