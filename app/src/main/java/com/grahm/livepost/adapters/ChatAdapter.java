@@ -37,6 +37,7 @@ import com.nostra13.universalimageloader.core.ImageLoaderConfiguration;
 
 import org.apache.commons.io.FilenameUtils;
 
+import java.sql.Timestamp;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -134,7 +135,7 @@ public class ChatAdapter extends FirebaseListAdapter<Update> {
             });
         }
         String timeMsg;
-        timeMsg = Utilities.getTimeMsg(m.getTimestamp());
+        timeMsg = Utilities.getTimeMsg(new Timestamp(m.getTimestamp()));
         if(!TextUtils.isEmpty(timeMsg)){
             h.mDateView.setText(timeMsg);
         }

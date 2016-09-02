@@ -41,12 +41,16 @@ public class Story implements Serializable {
         this.last_message = last_message;
     }
 
-    public Timestamp getLast_time() {
-        return new Timestamp(last_time);
+    public Long getLast_time() {
+        return last_time;
     }
 
-    public void setLast_time(Timestamp last_time) {
-        this.last_time = last_time.getTime();
+    public Long getTimestamp(){
+        return timestamp;
+    }
+
+    public void setLast_time(Long last_time) {
+        this.last_time = last_time;
     }
 
     public double getLat() {
@@ -89,12 +93,9 @@ public class Story implements Serializable {
         this.subcategory = subcategory;
     }
 
-    public Timestamp getTimestamp() {
-        return new Timestamp(timestamp);
-    }
 
-    public void setTimestamp(Timestamp timestamp) {
-        this.timestamp = timestamp.getTime();
+    public void setTimestamp(Long timestamp) {
+        this.timestamp = timestamp;
     }
 
     public String getTitle() {
@@ -117,13 +118,13 @@ public class Story implements Serializable {
     private String author_name;
     private String category;
     private String last_message;
-    private long last_time;
-    private double lat;
-    private double lng;
+    private Long last_time;
+    private Double lat;
+    private Double lng;
     private String location;
     private String posts_picture;
     private String subcategory;
-    private long timestamp;
+    private Long timestamp;
     private String title;
     private String isLive;
 

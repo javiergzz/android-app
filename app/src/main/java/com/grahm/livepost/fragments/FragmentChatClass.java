@@ -144,7 +144,7 @@ public class FragmentChatClass extends Fragment implements AbsListView.OnItemCli
             public void onSuccess(String url) {
                 mUser = Utilities.getUser(mFirebaseRef,getActivity(),savedInstanceState);
                 mFirebaseRef.getRoot().child("posts/" + mId + "/last_message").setValue(url);
-                Update m = new Update(0,null,url,mUser.getProfile_picture(), mUser.getName(), mUser.getEmail(),new Timestamp(System.currentTimeMillis()/1000L));
+                Update m = new Update(0,null,url,mUser.getProfile_picture(), mUser.getName(), mUser.getEmail(),System.currentTimeMillis()/1000L);
                 // Create a new, auto-generated child of that chat location, and save our chat data there
                 mFirebaseRef.push().setValue(m);
             }
@@ -284,7 +284,7 @@ public class FragmentChatClass extends Fragment implements AbsListView.OnItemCli
                 final String currentDateTimeString = DateFormat.getDateTimeInstance().format(new Date());
                 String[] parts = mUser.getProfile_picture().split("\\?");
 
-                Update m = new Update(0,null,input,parts[0], mUser.getName(), mUser.getEmail(),new Timestamp(System.currentTimeMillis()/1000L));
+                Update m = new Update(0,null,input,parts[0], mUser.getName(), mUser.getEmail(),System.currentTimeMillis()/1000L);
                 // Create a new, auto-generated child of that chat location, and save our chat data there
                 mFirebaseRef.push().setValue(m);
                 //Update Shared Preferences

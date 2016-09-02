@@ -6,14 +6,14 @@ import java.util.Map;
 public class Update {
 
     private String message;
-    private Timestamp timestamp;
+    private Long timestamp;
     private String sender_key;
     private String sender;
     private String profile_picture;
     private Map<String,Integer> likes;
     private int count_likes;
     public Update(){}
-    public Update(int count_likes, Map<String, Integer> likes, String message, String profile_picture, String sender, String sender_key, Timestamp timestamp) {
+    public Update(int count_likes, Map<String, Integer> likes, String message, String profile_picture, String sender, String sender_key, Long timestamp) {
         this.count_likes = count_likes;
         this.likes = likes;
         this.message = message;
@@ -71,11 +71,11 @@ public class Update {
         this.sender_key = sender_key;
     }
 
-    public Timestamp getTimestamp() {
-        return timestamp;
+    public Long getTimestamp() {
+        return (Long)timestamp;
     }
 
-    public void setTimestamp(Timestamp timestamp) {
+    public void setTimestamp(Long timestamp) {
         this.timestamp = timestamp;
     }
 }

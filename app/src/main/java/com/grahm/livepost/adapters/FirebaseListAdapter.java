@@ -12,10 +12,13 @@ import android.view.LayoutInflater;
 import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.GenericTypeIndicator;
 import com.google.firebase.database.Query;
+import com.grahm.livepost.objects.Story;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -52,10 +55,10 @@ public abstract class FirebaseListAdapter<T> extends  RecyclerView.Adapter<Recyc
      *                    instance of the corresponding view with the data from an instance of mModelClass.
      * @param activity    The activity containing the ListView
      */
-    public FirebaseListAdapter(Query mRef, Class<T> mModelClass, int mLayout, Activity activity) {
+    public FirebaseListAdapter(Query mRef, final Class<T> mModelClass, int mLayout, Activity activity) {
         this(mRef, mModelClass, mLayout, activity,false);
     }
-    public FirebaseListAdapter(Query mRef, Class<T> mModelClass, int mLayout, Activity activity, final boolean mSearchingFlag) {
+    public FirebaseListAdapter(Query mRef, final Class<T> mModelClass, int mLayout, Activity activity, final boolean mSearchingFlag) {
         this.mSearchingFlag=mSearchingFlag;
         this.mRef = mRef;
         this.mModelClass = mModelClass;

@@ -11,6 +11,8 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.grahm.livepost.R;
 import com.grahm.livepost.objects.FirebaseActivity;
 import com.grahm.livepost.util.Utilities;
+import com.nostra13.universalimageloader.cache.memory.impl.WeakMemoryCache;
+import com.nostra13.universalimageloader.core.DisplayImageOptions;
 import com.nostra13.universalimageloader.core.ImageLoader;
 import com.nostra13.universalimageloader.core.ImageLoaderConfiguration;
 
@@ -30,7 +32,14 @@ public class SplashScreen extends FirebaseActivity {
         final boolean onboarding = settings.getBoolean(PREFS_ONBOARDING, false);
 //        final Class activity = (onboarding) ? (isLogin) ? MainActivity.class : SignUpPage.class : Onboarding.class;
         setContentView(R.layout.activity_splash_screen);
-        ImageLoaderConfiguration config = new ImageLoaderConfiguration.Builder(this).build();
+        DisplayImageOptions options = new DisplayImageOptions.Builder().cacheInMemory(true)
+                .cacheOnDisk(true).resetViewBeforeLoading(true).build();
+        ImageLoaderConfiguration config = new ImageLoaderConfiguration.Builder(this)
+                .memoryCache(new WeakMemoryCache())
+                .denyCacheImageMultipleSizesInMemory()
+                .threadPoolSize(5)
+                .defaultDisplayImageOptions(options)
+                .build();
         ImageLoader.getInstance().init(config);
         FirebaseAuth auth = FirebaseAuth.getInstance();
         DatabaseReference ref = FirebaseDatabase.getInstance().getReference();

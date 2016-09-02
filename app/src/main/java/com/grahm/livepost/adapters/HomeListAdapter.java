@@ -5,6 +5,7 @@ import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.RecyclerView;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -53,16 +54,7 @@ public class HomeListAdapter extends FirebaseListAdapter<Story> {
 
         mActivity = activity;
         mOnFragmentInteractionListener = (OnFragmentInteractionListener) mActivity;
-        DisplayImageOptions options = new DisplayImageOptions.Builder().cacheInMemory(true)
-                .cacheOnDisk(true).resetViewBeforeLoading(true).build();
-        ImageLoaderConfiguration config = new ImageLoaderConfiguration.Builder(mCtx)
-                .memoryCache(new WeakMemoryCache())
-                .denyCacheImageMultipleSizesInMemory()
-                .threadPoolSize(5)
-                .defaultDisplayImageOptions(options)
-                .build();
         mImageLoader = ImageLoader.getInstance();
-        if (!mImageLoader.isInited()) mImageLoader.init(config);
     }
 
     @Override
@@ -101,8 +93,10 @@ public class HomeListAdapter extends FirebaseListAdapter<Story> {
                     mOnFragmentInteractionListener.onFragmentInteraction(MainActivity.CHAT_IDX, args);
                 }
             });
-            String [] parts = story.getPosts_picture().split("\\?");
-            loadBitmap(parts[0], iholder.mIconView, iholder.mProgressImgView, false);
+            if(story.getPosts_picture()!=null && !story.getPosts_picture().isEmpty()) {
+                String[] parts = story.getPosts_picture().split("\\?");
+                loadBitmap(parts[0], iholder.mIconView, iholder.mProgressImgView, false);
+            }
         }
     }
 
@@ -173,7 +167,6 @@ public class HomeListAdapter extends FirebaseListAdapter<Story> {
         //final Session s = getItem(position);
         //if(s.getCategory()==HEADER_ID)
         //    return TYPE_HEADER;
-
         return TYPE_ITEM;
     }
 

@@ -14,7 +14,7 @@ public class User implements Serializable {
     private  Map<String, Object> posts_contributed;
     private  Map<String, Object> posts_created;
     private String profile_picture;
-    private long timestamp;
+    private Long timestamp;
     private String uid;
 
     public String getEmail() {

@@ -119,7 +119,7 @@ public class StoryListAdapter extends FirebaseListAdapter<Story> {
             iholder.mTitleView.setText(s.getTitle());
              String authorStr = s.getAuthor_name()==null?s.getAuthor(): s.getAuthor_name();
             iholder.mCategoryView.setText("By " + authorStr + " in " + s.getCategory());
-            String lastTime= Utilities.getTimeMsg(s.getLast_time());
+            String lastTime= Utilities.getTimeMsg(new Timestamp(s.getLast_time()));
             iholder.mDateTimeView.setText(lastTime);
             loadBitmap(s.getPosts_picture(), iholder.mIconView, iholder.mProgressImgView, false);
             iholder.mSelArea.setOnClickListener(new View.OnClickListener() {
