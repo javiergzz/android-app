@@ -11,10 +11,11 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
-import com.firebase.client.DataSnapshot;
-import com.firebase.client.Firebase;
-import com.firebase.client.FirebaseError;
-import com.firebase.client.ValueEventListener;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 import com.grahm.livepost.R;
 import com.grahm.livepost.adapters.HomeListAdapter;
 
@@ -27,37 +28,41 @@ public class HomeFragment extends Fragment {
     private static final String TAG = "HomeFragment";
     private static final String ARG_SECTION_NUMBER = "section_number";
     private ValueEventListener mConnectedListener;
-    private Firebase ref;
+    private DatabaseReference mFirebaseRef;
     private Context mContext;
     private HomeListAdapter mHomeListAdapter;
 
     public HomeFragment() {}
-
+    public static HomeFragment newInstance(Bundle args) {
+        HomeFragment fragment = new HomeFragment();
+        //args.putInt(ARG_LIST_TYPE, listType);
+        fragment.setArguments(args);
+        return fragment;
+    }
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        ref = new Firebase(getString(R.string.firebase_url)).child("users/javier@livepostnews/posts_created");
+        mFirebaseRef = FirebaseDatabase.getInstance().getReference("posts");
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        View rootView = inflater.inflate(R.layout.fragment_main, container, false);
-        Context context = rootView.getContext();
+        RecyclerView rootView = (RecyclerView)inflater.inflate(R.layout.fragment_main, container, false);
         mContext = rootView.getContext();
         if (rootView instanceof RecyclerView) {
             RecyclerView recyclerView = (RecyclerView) rootView;
-            LinearLayoutManager llm = new LinearLayoutManager(context);
+            LinearLayoutManager llm = new LinearLayoutManager(mContext);
             llm.setOrientation(LinearLayoutManager.VERTICAL);
             recyclerView.setLayoutManager(llm);
             setupAdapter(recyclerView);
         }
-
         return rootView;
     }
 
     private void setupAdapter(final RecyclerView recyclerView){
-        mHomeListAdapter = new HomeListAdapter(ref.orderByPriority(), (AppCompatActivity)getActivity(), R.layout.item_story, 1 ,false);
+        Log.d(TAG,mFirebaseRef.toString());
+        mHomeListAdapter = new HomeListAdapter(mFirebaseRef.orderByChild("last_time").limitToLast(20), (AppCompatActivity)getActivity(), R.layout.item_story, 1 ,false);
         recyclerView.setAdapter(mHomeListAdapter);
         mHomeListAdapter.registerAdapterDataObserver(new RecyclerView.AdapterDataObserver() {
             @Override
@@ -71,7 +76,7 @@ public class HomeFragment extends Fragment {
     @Override
     public void onStart() {
         super.onStart();
-        mConnectedListener = ref.getRoot().child(".info/connected").addValueEventListener(new ValueEventListener() {
+        mConnectedListener = mFirebaseRef.getRoot().child(".info/connected").addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 boolean connected = (Boolean) dataSnapshot.getValue();
@@ -85,7 +90,7 @@ public class HomeFragment extends Fragment {
             }
 
             @Override
-            public void onCancelled(FirebaseError firebaseError) {
+            public void onCancelled(DatabaseError firebaseError) {
                 // No-op
             }
         });
@@ -94,6 +99,6 @@ public class HomeFragment extends Fragment {
     @Override
     public void onStop() {
         super.onStop();
-        ref.getRoot().child(".info/connected").removeEventListener(mConnectedListener);
+        mFirebaseRef.getRoot().child(".info/connected").removeEventListener(mConnectedListener);
     }
 }

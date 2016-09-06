@@ -16,7 +16,7 @@ public class SignUpPage extends AppCompatActivity {
         findViewById(R.id.btn_login_livepost).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent mainIntent = new Intent(SignUpPage.this, MainActivity.class);
+                Intent mainIntent = new Intent(SignUpPage.this, Login.class);
                 SignUpPage.this.startActivity(mainIntent);
                 SignUpPage.this.finish();
             }
