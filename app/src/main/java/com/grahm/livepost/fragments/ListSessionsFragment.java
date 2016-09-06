@@ -27,16 +27,9 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
-import com.grahm.livepost.activities.MainActivity;
-import com.grahm.livepost.activities.NewStory;
-import com.grahm.livepost.activities.LoginActivity;
 import com.grahm.livepost.adapters.StoryListAdapter;
 import com.grahm.livepost.R;
-import com.grahm.livepost.objects.Story;
 import com.grahm.livepost.interfaces.OnFragmentInteractionListener;
-
-import java.util.List;
-import java.util.Map;
 
 public class ListSessionsFragment extends Fragment {
     private static final String TAG= "ListSessionsFragment";

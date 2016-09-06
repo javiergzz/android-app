@@ -36,7 +36,6 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.google.gson.Gson;
 import com.amazonaws.services.s3.AmazonS3Client;
-import com.grahm.livepost.activities.LoginActivity;
 import com.grahm.livepost.activities.MainActivity;
 import com.grahm.livepost.adapters.ChatAdapter;
 import com.grahm.livepost.asynctask.CreateStoryTask;

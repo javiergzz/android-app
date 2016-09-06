@@ -26,6 +26,7 @@ android {
 }
 repositories {
     maven { url "https://jitpack.io" }
+    maven { url 'https://maven.fabric.io/public' }
 }
 dependencies {
     compile fileTree(include: ['*.jar'], dir: 'libs')
@@ -61,4 +62,8 @@ dependencies {
 
     // FirebaseUI Auth only
     compile 'com.firebaseui:firebase-ui-auth:0.5.1'
+    compile 'com.android.volley:volley:1.0.0'
+    compile('com.twitter.sdk.android:twitter:1.11.0@aar') {
+        transitive = true;
+    }
 }

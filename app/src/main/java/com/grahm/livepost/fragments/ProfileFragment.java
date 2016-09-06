@@ -191,7 +191,7 @@ public class ProfileFragment extends Fragment {
 
             public void onSetup(ViewGroup layout) {
                 mUser.getEmail();
-                Query q = mFirebaseRef.child("posts").orderByChild("author").equalTo(mUser.getEmail().replace(".",""));
+                Query q = mFirebaseRef.child("posts").orderByChild("author").equalTo(mUser.getEmail().replace(".","<dot>"));
                     RecyclerView recyclerView = ButterKnife.findById(layout, R.id.profile_list);
                     recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
                     recyclerView.setAdapter(new StoryListAdapter(q, (AppCompatActivity) getActivity(), 0, 1, false));

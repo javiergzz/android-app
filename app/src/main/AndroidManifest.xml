@@ -56,6 +56,10 @@
             android:theme="@style/Theme.Transparent"
             android:parentActivityName=".activities.MainActivity"/>
         <activity
+            android:name=".activities.Login"
+            android:configChanges="orientation|keyboardHidden|screenSize"
+            android:theme="@style/AppTheme.NoActionBar"></activity>
+        <activity
             android:name=".activities.RegistrationActivity"
             android:label="@string/title_activity_login"
             android:parentActivityName=".activities.MainActivity"

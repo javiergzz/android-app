@@ -52,7 +52,7 @@ public class Utilities {
             mUser = new Gson().fromJson(ctx.getSharedPreferences(ctx.getString(R.string.preference_file_key), Context.MODE_PRIVATE).getString("user", null), User.class);
             mFirebaseRef=mFirebaseRef==null? FirebaseDatabase.getInstance().getReference():mFirebaseRef;
 
-            mFirebaseRef.getRoot().child("users/"+mFirebaseUser.getEmail().replace(".","")).addValueEventListener(new ValueEventListener() {
+            mFirebaseRef.getRoot().child("users/"+mFirebaseUser.getEmail().replace(".","<dot>")).addValueEventListener(new ValueEventListener() {
                 @Override
                 public void onDataChange(DataSnapshot dataSnapshot) {
                     mUser =dataSnapshot.getValue(User.class);

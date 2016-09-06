@@ -1,5 +1,7 @@
 package com.grahm.livepost.objects;
 
+import android.text.TextUtils;
+
 import java.io.Serializable;
 import java.sql.Timestamp;
 import java.util.List;
@@ -64,7 +66,12 @@ public class User implements Serializable {
     public void setUid(String uid) {
         this.uid = uid;
     }
+    public void merge(User user){
 
+        this.name = TextUtils.isEmpty(user.getName()) ? this.name : user.getName();
+        this.email = TextUtils.isEmpty(user.getEmail()) ? this.email : user.getEmail();
+        //this.password = TextUtils.isEmpty(user.getPassword()) ? this.password : user.getPassword();
+    }
     public User() {
     }
 

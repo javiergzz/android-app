@@ -143,14 +143,15 @@ public class RegisterUserTask extends AsyncTask<Uri, String, String> {
                     // signed in user can be handled in the listener.
                     if (!task.isSuccessful()) {
                         Log.e(TAG,"User creation failed");
-                        dialog.setMessage("User creation failed");
+                        dialog.setMessage(mContext.getString(R.string.user_reg_failed) +task.getException().getMessage());
+                        dialog.cancel();
                         return;
                     }
                     //If user creation was successful, store extra data object
                     // mUid = mFirebaseAuth.getCurrentUser().getUid();
                     mUser.setUid(mFirebaseAuth.getCurrentUser().getUid());
-                    mFirebaseRef.child("users/"+mUser.getEmail().replace(".","")).setValue(mUser);
-                    mFirebaseRef.child("users/"+mUser.getEmail().replace(".","")+"/timestamp").setValue(ServerValue.TIMESTAMP);
+                    mFirebaseRef.child("users/"+mUser.getEmail().replace(".","<dot>")).setValue(mUser);
+                    mFirebaseRef.child("users/"+mUser.getEmail().replace(".","<dot>")+"/timestamp").setValue(ServerValue.TIMESTAMP);
                     SharedPreferences.Editor editor = mSharedPref.edit();
                     //Write user data to shared preferences
                     Gson gson = new Gson();

@@ -174,7 +174,7 @@ public class CreateStoryTask extends AsyncTask<Uri, String, String> {
             //Add post to "posts created"
             Map<String, Object> posts = new HashMap<String, Object>();
             posts.put(key, mStory);
-            mFirebaseRef.getRoot().child("users/"+FirebaseAuth.getInstance().getCurrentUser().getEmail().replace(".","")).child("/posts_created").updateChildren(posts);
+            mFirebaseRef.getRoot().child("users/"+FirebaseAuth.getInstance().getCurrentUser().getEmail().replace(".","<dot>")).child("/posts_created").updateChildren(posts);
 
         } catch (Exception e) {
             e.printStackTrace();

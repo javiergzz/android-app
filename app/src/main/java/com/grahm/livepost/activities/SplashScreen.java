@@ -15,6 +15,10 @@ import com.nostra13.universalimageloader.cache.memory.impl.WeakMemoryCache;
 import com.nostra13.universalimageloader.core.DisplayImageOptions;
 import com.nostra13.universalimageloader.core.ImageLoader;
 import com.nostra13.universalimageloader.core.ImageLoaderConfiguration;
+import com.twitter.sdk.android.Twitter;
+import com.twitter.sdk.android.core.TwitterAuthConfig;
+
+import io.fabric.sdk.android.Fabric;
 
 public class SplashScreen extends FirebaseActivity {
 
@@ -50,7 +54,7 @@ public class SplashScreen extends FirebaseActivity {
             mForwardActivity = MainActivity.class;
         } else {
             // not signed in
-            mForwardActivity = SignUpPage.class;
+            mForwardActivity = Login.class;
 
         }
 
@@ -62,6 +66,9 @@ public class SplashScreen extends FirebaseActivity {
                 SplashScreen.this.finish();
             }
         }, SPLASH_DISPLAY_LENGTH);
+
+
+
 
     }
 
