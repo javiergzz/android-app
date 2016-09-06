@@ -32,9 +32,7 @@ public class SplashScreen extends FirebaseActivity {
         super.onCreate(savedInstanceState);
 
         SharedPreferences settings = getSharedPreferences(PREFS_NAME, 0);
-        final boolean isLogin = settings.getBoolean(PREFS_LOGIN, false);
         final boolean onboarding = settings.getBoolean(PREFS_ONBOARDING, false);
-//        final Class activity = (onboarding) ? (isLogin) ? MainActivity.class : SignUpPage.class : Onboarding.class;
         setContentView(R.layout.activity_splash_screen);
         DisplayImageOptions options = new DisplayImageOptions.Builder().cacheInMemory(true)
                 .cacheOnDisk(true).resetViewBeforeLoading(true).build();
@@ -48,7 +46,10 @@ public class SplashScreen extends FirebaseActivity {
         FirebaseAuth auth = FirebaseAuth.getInstance();
         DatabaseReference ref = FirebaseDatabase.getInstance().getReference();
 
-        if (auth.getCurrentUser() != null) {
+        //Choose between Onboarding, Main Activity or Login/Signup activities depending on local content and firebase token status
+        if(!onboarding){
+            mForwardActivity = Onboarding.class;
+        } else if (auth.getCurrentUser() != null) {
             //Signed in
             Utilities.getUser(ref,this,savedInstanceState);
             mForwardActivity = MainActivity.class;
