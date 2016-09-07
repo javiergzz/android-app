@@ -3,6 +3,7 @@ package com.grahm.livepost.activities;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.Color;
@@ -12,6 +13,7 @@ import android.os.Handler;
 import android.text.TextUtils;
 import android.view.KeyEvent;
 import android.view.View;
+import android.view.View.OnClickListener;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
@@ -89,6 +91,16 @@ public class Onboarding extends AppCompatActivity implements OnCallbackImageList
         }
     };
 
+    private OnClickListener mLoginListener = new OnClickListener() {
+        @Override
+        public void onClick(View v) {
+            viewUser.setOnClickListener(null);
+            Intent loginIntent = new Intent(Onboarding.this, Login.class);
+            loginIntent.putExtra("isOnboarding", true);
+            Onboarding.this.startActivity(loginIntent);
+        }
+    };
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -101,6 +113,7 @@ public class Onboarding extends AppCompatActivity implements OnCallbackImageList
         imgStory = (ImageView) findViewById(R.id.img_story);
         viewHeader = (RelativeLayout) findViewById(R.id.viewHeader);
         viewUser = (LinearLayout) findViewById(R.id.viewUser);
+        viewUser.setOnClickListener(mLoginListener);
         Resources res = getResources();
         nameMessages = res.getStringArray(R.array.on_board_messages);
         txtStoryTitle.setOnEditorActionListener(saveTitle);

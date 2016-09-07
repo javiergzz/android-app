@@ -4,6 +4,7 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentStatePagerAdapter;
 
+import com.grahm.livepost.fragments.LPLoginFragment;
 import com.grahm.livepost.fragments.LoginFragment;
 import com.grahm.livepost.fragments.NameFragment;
 import com.grahm.livepost.fragments.ProfilePictureFragment;
@@ -34,6 +35,8 @@ public class ProfilePagerAdapter extends FragmentStatePagerAdapter {
                 return new NameFragment().newInstance(mListener);
             case 3:
                 return new SignUpFragment().newInstance(mListener);
+            case 4:
+                return new LPLoginFragment().newInstance();
             default:
                 return new LoginFragment();
         }

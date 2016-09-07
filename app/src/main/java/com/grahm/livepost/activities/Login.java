@@ -39,7 +39,7 @@ import static com.grahm.livepost.fragments.LoginFragment.loginButton;
 public class Login extends AppCompatActivity implements OnFragmentInteractionListener {
 
     private static final String TAG_CLASS = "Login".toUpperCase();
-    private static final int NUM_PAGES = 4;
+    private static final int NUM_PAGES = 5;
     private ViewPager mPager;
     private PagerAdapter mPagerAdapter;
     private OnFragmentInteractionListener mListener;
@@ -56,7 +56,10 @@ public class Login extends AppCompatActivity implements OnFragmentInteractionLis
     };
     private Uri mIimageUri;
     private User mUser = new User();
-
+    private static final int POS_LOGIN_FRAGMENT = 0;
+    private static final int POS_LOGIN = 4;
+    private boolean mLogin = false;
+    private boolean isOnboarding = false;
 
 
     @Override
@@ -67,14 +70,24 @@ public class Login extends AppCompatActivity implements OnFragmentInteractionLis
         mPager = (ViewPager) findViewById(R.id.pager);
         mPagerAdapter = new ProfilePagerAdapter(getSupportFragmentManager(), NUM_PAGES, mListener);
         mPager.setAdapter(mPagerAdapter);
+        Bundle extras = getIntent().getExtras();
+        if (extras != null) {
+            isOnboarding = extras.getBoolean("isOnboarding", false);
+        }
     }
 
     @Override
     public void onBackPressed() {
         if (mPager.getCurrentItem() == 0) {
-            super.onBackPressed();
+            if(!isOnboarding){
+                super.onBackPressed();
+            }
         } else {
-            mPager.setCurrentItem(mPager.getCurrentItem() - 1);
+            if(mLogin){
+                mPager.setCurrentItem(POS_LOGIN_FRAGMENT);
+            }else{
+                mPager.setCurrentItem(mPager.getCurrentItem() - 1);
+            }
         }
     }
 
@@ -82,6 +95,10 @@ public class Login extends AppCompatActivity implements OnFragmentInteractionLis
         mPager.setCurrentItem(mPager.getCurrentItem() + 1);
     }
 
+    public void openLogin(View v){
+        mLogin = true;
+        mPager.setCurrentItem(POS_LOGIN);
+    }
     @Override
     public void onFragmentInteraction(User user, boolean signup) {
         mUser.merge(user);
@@ -125,7 +142,7 @@ public class Login extends AppCompatActivity implements OnFragmentInteractionLis
     }
 
     public void uploadPhoto(){
-        String userId = mUser.getEmail().replace("." , "_dot_");
+        String userId = mUser.getEmail().replace("." , "<dot>");
         Long tsLong = System.currentTimeMillis()/1000;
         String ts = tsLong.toString();
         String pictureName = userId + "_" + ts;
