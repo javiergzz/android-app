@@ -20,7 +20,7 @@ import com.twitter.sdk.android.core.TwitterAuthConfig;
 
 import io.fabric.sdk.android.Fabric;
 
-public class SplashScreen extends FirebaseActivity {
+public class SplashScreen extends AppCompatActivity {
 
     private static final int SPLASH_DISPLAY_LENGTH = 3000;
     public static final String PREFS_NAME = "PrefsFile";
@@ -47,9 +47,10 @@ public class SplashScreen extends FirebaseActivity {
         DatabaseReference ref = FirebaseDatabase.getInstance().getReference();
 
         //Choose between Onboarding, Main Activity or Login/Signup activities depending on local content and firebase token status
-        if(!onboarding){
-            mForwardActivity = Onboarding.class;
-        } else if (auth.getCurrentUser() != null) {
+//        if(!onboarding){
+//            mForwardActivity = Onboarding.class;
+//        } else
+        if (auth.getCurrentUser() != null) {
             //Signed in
             Utilities.getUser(ref,this,savedInstanceState);
             mForwardActivity = MainActivity.class;
@@ -62,15 +63,15 @@ public class SplashScreen extends FirebaseActivity {
         new Handler().postDelayed(new Runnable() {
             @Override
             public void run() {
-                Intent mainIntent = new Intent(SplashScreen.this, mForwardActivity);
-                SplashScreen.this.startActivity(mainIntent);
-                SplashScreen.this.finish();
+                forward();
             }
         }, SPLASH_DISPLAY_LENGTH);
 
 
-
-
     }
-
+    private void forward(){
+        Intent mainIntent = new Intent(SplashScreen.this, mForwardActivity);
+        SplashScreen.this.startActivity(mainIntent);
+        SplashScreen.this.finish();
+    }
 }

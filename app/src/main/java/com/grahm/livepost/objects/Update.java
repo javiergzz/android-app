@@ -1,9 +1,10 @@
 package com.grahm.livepost.objects;
 
+import java.io.Serializable;
 import java.sql.Timestamp;
 import java.util.Map;
 
-public class Update {
+public class Update implements Serializable{
 
     private String message;
     private Long timestamp;
@@ -13,14 +14,13 @@ public class Update {
     private Map<String,Integer> likes;
     private int count_likes;
     public Update(){}
-    public Update(int count_likes, Map<String, Integer> likes, String message, String profile_picture, String sender, String sender_key, Long timestamp) {
+    public Update(int count_likes, Map<String, Integer> likes, String message, String profile_picture, String sender, String sender_key) {
         this.count_likes = count_likes;
         this.likes = likes;
         this.message = message;
         this.profile_picture = profile_picture;
         this.sender = sender;
         this.sender_key = sender_key;
-        this.timestamp = timestamp;
     }
 
     public int getCount_likes() {

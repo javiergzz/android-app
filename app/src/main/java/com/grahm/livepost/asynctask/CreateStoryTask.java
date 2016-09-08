@@ -166,10 +166,11 @@ public class CreateStoryTask extends AsyncTask<Uri, String, String> {
             //Set Timestamps
             ref.child("last_time").setValue(ServerValue.TIMESTAMP);
             //(int count_likes, Map<String, Integer> likes, String message, String profile_picture, String sender, String sender_key, long timestamp)
-            mFirebaseRef.getRoot().child("updates/"+key).push()
-                    .setValue(new Update(0,null,mStory.getPosts_picture(),mUser.getProfile_picture(),mStory.getAuthor_name(),mStory.getAuthor(),mStory.getTimestamp()));
 
 
+            DatabaseReference r = mFirebaseRef.getRoot().child("updates/"+key).push();
+            r.setValue(new Update(0,null,mStory.getPosts_picture(),mUser.getProfile_picture(),mStory.getAuthor_name(),mStory.getAuthor()));
+            r.child("timestamp").setValue(ServerValue.TIMESTAMP);
 
             //Add post to "posts created"
             Map<String, Object> posts = new HashMap<String, Object>();

@@ -31,6 +31,16 @@ repositories {
 dependencies {
     compile fileTree(include: ['*.jar'], dir: 'libs')
     //compile 'com.android.support.constraint:constraint-layout:1.0.0-alpha3'
+    apt 'com.jakewharton:butterknife-compiler:8.4.0'
+    // Single target that includes all FirebaseUI libraries
+    
+
+    // FirebaseUI Database only
+    
+    // FirebaseUI Auth only
+    compile('com.twitter.sdk.android:twitter:1.11.0@aar') {
+        transitive = true;
+    }
     compile 'com.amazonaws:aws-android-sdk-core:2.2.+'
     compile 'com.amazonaws:aws-android-sdk-s3:2.2.+'
     compile 'com.amazonaws:aws-android-sdk-ddb:2.2.+'
@@ -53,17 +63,8 @@ dependencies {
     compile 'com.soundcloud.android:android-crop:1.0.1@aar'
     compile 'com.github.jkwiecien:EasyImage:1.2.3'
     compile 'com.github.siyamed:android-shape-imageview:0.9.+@aar'
-    apt 'com.jakewharton:butterknife-compiler:8.4.0'
-    // Single target that includes all FirebaseUI libraries
     compile 'com.firebaseui:firebase-ui:0.5.1'
-
-    // FirebaseUI Database only
     compile 'com.firebaseui:firebase-ui-database:0.5.1'
-
-    // FirebaseUI Auth only
     compile 'com.firebaseui:firebase-ui-auth:0.5.1'
     compile 'com.android.volley:volley:1.0.0'
-    compile('com.twitter.sdk.android:twitter:1.11.0@aar') {
-        transitive = true;
-    }
 }

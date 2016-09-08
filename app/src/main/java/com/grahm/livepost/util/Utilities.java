@@ -72,7 +72,7 @@ public class Utilities {
         return mUser;
     }
     public static String getTimeMsg(Timestamp t){
-        return new SimpleDateFormat("MM/dd/yyyy").format(t);
+        return new SimpleDateFormat("hh:mma MM/dd/yyyy").format(t);
     }
 
     public static User readUser(Context ctx){
