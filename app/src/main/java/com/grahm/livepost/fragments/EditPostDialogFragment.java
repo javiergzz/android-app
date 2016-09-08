@@ -47,7 +47,7 @@ public class EditPostDialogFragment extends DialogFragment {
 
         ImageButton imgButton = (ImageButton)v.findViewById(R.id.img);
         EditText text = (EditText)v.findViewById(R.id.content);
-        String message =mMsg.getMessage();
+        String message = mMsg.getMessage();
         if(message.contains(".png")||message.contains(".jpg")){
             text.setVisibility(View.GONE);
             mImageLoader.displayImage(message, (ImageView) imgButton);

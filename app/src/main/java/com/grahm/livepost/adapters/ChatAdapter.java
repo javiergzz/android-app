@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.os.Bundle;
+import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
 import android.support.v7.widget.RecyclerView;
@@ -61,6 +62,7 @@ public class ChatAdapter extends FirebaseListAdapter<Update> {
         if(mFirebaseUser!=null){
             mUid = mFirebaseUser.getUid();
             mUser= Utilities.getUser(mFirebaseDB.getReference(),activity,null);
+            mUsername = mUser.getName();
         }
     }
 
@@ -89,6 +91,8 @@ public class ChatAdapter extends FirebaseListAdapter<Update> {
         ChatViewHolder h = (ChatViewHolder)holder;
         final Update m = getItem(position);
         final String key = getItemKey(position);
+        h.mItem = m;
+        h.mView.setTag(m);
         h.mAuthorView.setText(m.getSender() + " ");
         final String msg = m.getMessage();
         if(msg.contains(".png")||msg.contains(".jpg")){
@@ -100,14 +104,9 @@ public class ChatAdapter extends FirebaseListAdapter<Update> {
             h.mImgChatView.setVisibility(View.GONE);
             h.mMessageView.setText(m.getMessage());
         }
+
         if(mUsername!=null && mUsername == m.getSender()){
-            h.mView.setOnLongClickListener(new View.OnLongClickListener() {
-                @Override
-                public boolean onLongClick(View v) {
-                    //TODO
-                    return false;
-                }
-            });
+
             //Edition
         }
         String timeMsg;
@@ -128,6 +127,14 @@ public class ChatAdapter extends FirebaseListAdapter<Update> {
         public ChatViewHolder(View view) {
             super(view);
             mView = view;
+            view.setOnLongClickListener(new View.OnLongClickListener() {
+                @Override
+                public boolean onLongClick(View v) {
+                    Log.d(TAG,"Longclick");
+                    showDialog((Update)v.getTag());
+                    return true;
+                }
+            });
             mMessageView=(TextView)view.findViewById(R.id.message);
             mAuthorView=(TextView)view.findViewById(R.id.author);
             mDateView=(TextView)view.findViewById(R.id.date);
