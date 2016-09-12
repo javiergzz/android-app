@@ -93,7 +93,7 @@ public class HomeListAdapter extends FirebaseListAdapter<Story> {
                     mOnFragmentInteractionListener.onFragmentInteraction(MainActivity.CHAT_IDX, args);
                 }
             });
-            if(story.getPosts_picture()!=null && !story.getPosts_picture().isEmpty()) {
+            if (story.getPosts_picture() != null && !story.getPosts_picture().isEmpty()) {
                 String[] parts = story.getPosts_picture().split("\\?");
                 loadBitmap(parts[0], iholder.mIconView, iholder.mProgressImgView, false);
             }

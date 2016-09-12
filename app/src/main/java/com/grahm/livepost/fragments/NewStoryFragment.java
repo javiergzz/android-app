@@ -3,7 +3,7 @@ package com.grahm.livepost.fragments;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
+import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.design.widget.TextInputLayout;
@@ -21,20 +21,20 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.Spinner;
 import android.widget.TextView;
 
 import com.amazonaws.auth.BasicAWSCredentials;
+import com.amazonaws.services.s3.AmazonS3Client;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
-import com.google.gson.Gson;
-import com.amazonaws.services.s3.AmazonS3Client;
+import com.grahm.livepost.R;
 import com.grahm.livepost.activities.MainActivity;
 import com.grahm.livepost.asynctask.CreateStoryTask;
 import com.grahm.livepost.interfaces.OnFragmentInteractionListener;
 import com.grahm.livepost.interfaces.OnPutImageListener;
-import com.grahm.livepost.R;
 import com.grahm.livepost.objects.MultipartFormField;
 import com.grahm.livepost.objects.Story;
 import com.grahm.livepost.objects.User;
@@ -42,12 +42,10 @@ import com.grahm.livepost.util.GV;
 import com.grahm.livepost.util.Utilities;
 
 import java.io.File;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.List;
 
-import butterknife.*;
+import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 import pl.aprilapps.easyphotopicker.DefaultCallback;
@@ -74,18 +72,14 @@ public class NewStoryFragment extends Fragment implements OnPutImageListener {
     private NewSessionViewsManager mNewSessionViewsManager;
 
     // UI references.
-    @BindView(R.id.new_session_pager)
+    @BindView(R.id.new_story_pager)
     public ViewPager mViewPager;
-    @BindView(R.id.new_session_toolbar)
+    @BindView(R.id.new_story_toolbar)
     public Toolbar mToolbar;
-    @BindView(R.id.new_session_progress)
+    @BindView(R.id.new_story_progress)
     public ProgressBar mProgressBarView;
-    @BindView(R.id.new_session_progress_str)
+    @BindView(R.id.new_story_progress_str)
     public TextView mProgressBarTextView;
-    @BindView(R.id.new_session_progress_circle)
-    public View mProgressView;
-    @BindView(R.id.new_session_form)
-    public View mStoryFormView;
 
     private OnFragmentInteractionListener mListener;
 
@@ -110,12 +104,12 @@ public class NewStoryFragment extends Fragment implements OnPutImageListener {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         if (savedInstanceState != null) {
-            mStory = (Story)savedInstanceState.getSerializable(SESSION_KEY);
+            mStory = (Story) savedInstanceState.getSerializable(SESSION_KEY);
             mCurrentItem = savedInstanceState.getInt(PAGE_KEY, 0);
             String uriString = savedInstanceState.getString(URI_KEY);
-            mUri = uriString==null?null:Uri.parse(uriString);
+            mUri = uriString == null ? null : Uri.parse(uriString);
         }
-        mUser = Utilities.getUser(mFirebaseRef,getActivity(),savedInstanceState);
+        mUser = Utilities.getUser(mFirebaseRef, getActivity(), savedInstanceState);
         mStory = mStory == null ? new Story() : mStory;
         mFirebaseRef = FirebaseDatabase.getInstance().getReference();
         mNewSessionViewsManager = new NewSessionViewsManager();
@@ -139,8 +133,8 @@ public class NewStoryFragment extends Fragment implements OnPutImageListener {
         return view;
     }
 
-    private void toolbarSetup(){
-        mToolbar.setNavigationIcon(R.drawable.ic_arrow_back_black_36dp);
+    private void toolbarSetup() {
+//        mToolbar.setNavigationIcon(R.drawable.ic_arrow_back_black_36dp);
         mToolbar.setNavigationOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -183,7 +177,7 @@ public class NewStoryFragment extends Fragment implements OnPutImageListener {
         super.onSaveInstanceState(outState);
         outState.putInt(PAGE_KEY, mViewPager.getCurrentItem());
         outState.putSerializable(SESSION_KEY, mStory);
-        if(mUri!=null)
+        if (mUri != null)
             outState.putString(URI_KEY, mUri.toString());
     }
 
@@ -192,13 +186,14 @@ public class NewStoryFragment extends Fragment implements OnPutImageListener {
         super.onDetach();
         mListener = null;
     }
+
     //Listener to avoid transfering clicks to the views below this fragment.
-    @OnClick(R.id.new_session_background)
-    public void backgroundEmptyClick(){
+    @OnClick(R.id.new_story_background)
+    public void backgroundEmptyClick() {
         //Leave Empty
     }
 
-    @OnClick(R.id.new_session_next_button)
+    @OnClick(R.id.new_story_btn_next)
     public void nextButton() {
         int vCount = mViewPager.getAdapter().getCount();
         int current = mViewPager.getCurrentItem();
@@ -212,15 +207,16 @@ public class NewStoryFragment extends Fragment implements OnPutImageListener {
         }
     }
 
-    public void attemptSessionCreation(){
+    public void attemptSessionCreation() {
         if (mStoryTask != null) return;
 
-        mStory.setAuthor(mUser.getEmail().replace(".","<dot>"));
+        mStory.setAuthor(mUser.getEmail().replace(".", "<dot>"));
         mStory.setAuthor_name(mUser.getName());
-        mStoryTask = new CreateStoryTask(mStory,mFirebaseRef.child("posts"),getActivity(),s3Client,this,true);
-        if(mUri!= null) mStoryTask.execute(mUri);
+        mStoryTask = new CreateStoryTask(mStory, mFirebaseRef.child("posts"), getActivity(), s3Client, this, true);
+        if (mUri != null) mStoryTask.execute(mUri);
 
     }
+
     /**
      * This interface must be implemented by activities that contain this
      * fragment to allow an interaction in this fragment to be communicated
@@ -268,20 +264,22 @@ public class NewStoryFragment extends Fragment implements OnPutImageListener {
             public boolean onValidate() {
                 final TextView storyNameView = ButterKnife.findById(mViewPager, R.id.new_session_story_name);
                 String s = storyNameView.getText().toString().trim();
-                if (TextUtils.isEmpty(s) || s.length() < 5) {
+                if (TextUtils.isEmpty(s) || s.length() < 2) {
                     storyNameView.setError(mNewSessionErrors.ERROR_TITLE);
                     return false;
                 }
                 mStory.setTitle(s);
                 return true;
             }
-            public void onSetup(ViewGroup layout){
+
+            public void onSetup(ViewGroup layout) {
                 ButterKnife.findById(layout, R.id.new_session_story_name).requestFocus();
             }
         }
 
         public class CategoryField extends MultipartFormField {
             private Spinner mSpinner;
+            private ListView mList;
 
             public int getTitle() {
                 return R.string.ns_category;
@@ -296,31 +294,23 @@ public class NewStoryFragment extends Fragment implements OnPutImageListener {
             }
 
             public void onSetup(ViewGroup layout) {
-                mSpinner = ButterKnife.findById(layout, R.id.new_session_category_spinner);
-                // Create an ArrayAdapter using the string array and a default spinner layout
-                ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(getActivity(),
-                        R.array.categories, android.R.layout.simple_spinner_item);
-                // Specify the layout to use when the list of choices appears
-                adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-                // Apply the adapter to the spinner
-                mSpinner.setAdapter(adapter);
-                mSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-                    @Override
-                    public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                        mStory.setCategory(mSpinner.getSelectedItem().toString());
-                    }
 
+                ArrayAdapter adapter = new ArrayAdapter(getActivity().getApplicationContext(), R.layout.item_category,
+                         R.id.txt_category, getActivity().getResources().getStringArray(R.array.categories));
+                mList = ButterKnife.findById(layout, R.id.list_categories);
+                mList.setAdapter(adapter);
+                mList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
                     @Override
-                    public void onNothingSelected(AdapterView<?> parent) {
-
+                    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                        Object listItem = mList.getItemAtPosition(position);
+                        mStory.setCategory(listItem.toString());
+                        view.setBackgroundColor(Color.rgb(234,234,234));
                     }
                 });
-                mSpinner.performClick();
-
-
             }
 
         }
+
         public class ImageField extends MultipartFormField {
 
             public int getTitle() {
@@ -333,9 +323,9 @@ public class NewStoryFragment extends Fragment implements OnPutImageListener {
 
             public void onSetup(ViewGroup layout) {
                 ImageButton imageButton = (ImageButton) layout.findViewById(R.id.new_session_avatar);
-                if(mUri!=null){
-                    ButterKnife.findById(layout,R.id.new_session_avatar_layout).setVisibility(View.GONE);
-                    ImageView resultView = (ImageView)layout.findViewById(R.id.new_session_selected_img);
+                if (mUri != null) {
+                    ButterKnife.findById(layout, R.id.new_session_avatar_layout).setVisibility(View.GONE);
+                    ImageView resultView = (ImageView) layout.findViewById(R.id.new_session_selected_img);
                     resultView.setVisibility(View.VISIBLE);
                     resultView.setImageResource(R.drawable.ic_add_a_photo_black_48dp);
                     resultView.setImageURI(mUri);
@@ -357,9 +347,9 @@ public class NewStoryFragment extends Fragment implements OnPutImageListener {
             }
 
             public boolean onValidate() {
-                if(mUri ==null){
-                    TextInputLayout t = ButterKnife.findById(mViewPager,R.id.new_session_avatar_input);
-                    if(t!=null)
+                if (mUri == null) {
+                    TextInputLayout t = ButterKnife.findById(mViewPager, R.id.new_session_avatar_input);
+                    if (t != null)
                         t.setError(mNewSessionErrors.ERROR_NO_IMG);
                     return false;
                 }
@@ -376,8 +366,8 @@ public class NewStoryFragment extends Fragment implements OnPutImageListener {
         EasyImage.handleActivityResult(requestCode, resultCode, data, getActivity(), new DefaultCallback() {
             @Override
             public void onImagePickerError(Exception e, EasyImage.ImageSource source, int type) {
-                TextInputLayout t = ButterKnife.findById(mViewPager,R.id.new_session_avatar_input);
-                if(t!=null)
+                TextInputLayout t = ButterKnife.findById(mViewPager, R.id.new_session_avatar_input);
+                if (t != null)
                     t.setError(e.getMessage());
             }
 
@@ -389,7 +379,8 @@ public class NewStoryFragment extends Fragment implements OnPutImageListener {
         });
 
     }
-    private void onPhotoReturned(File imageFile){
+
+    private void onPhotoReturned(File imageFile) {
         mUri = Uri.fromFile(imageFile);
         ButterKnife.findById(mViewPager, R.id.new_session_avatar_layout).setVisibility(View.GONE);
         ImageView resultView = ButterKnife.findById(mViewPager, R.id.new_session_selected_img);
@@ -405,10 +396,12 @@ public class NewStoryFragment extends Fragment implements OnPutImageListener {
         Log.e(TAG, mUri.toString());
         mStory.setPosts_picture(mUri.toString());
     }
+
     @Override
     public void onSuccess(String url) {
-        mListener.onFragmentInteraction(MainActivity.HOME_IDX,null);
+        mListener.onFragmentInteraction(MainActivity.HOME_IDX, null);
     }
+
     private class NewSessionPagerAdapter extends PagerAdapter {
         LayoutInflater mInflater;
 

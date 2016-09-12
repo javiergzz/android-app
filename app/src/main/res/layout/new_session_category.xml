@@ -4,15 +4,11 @@
     android:layout_height="wrap_content"
     android:orientation="vertical">
 
-    <android.support.design.widget.TextInputLayout
+    <ListView
+        android:id="@+id/list_categories"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
-        <Spinner
-            android:id="@+id/new_session_category_spinner"
-            android:background="@color/light_grey"
-            android:layout_width="match_parent"
-            android:layout_height="80dp"
-            />
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="85dp">
+    </ListView>
 
-    </android.support.design.widget.TextInputLayout>
 </LinearLayout>

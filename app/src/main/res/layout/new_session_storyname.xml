@@ -6,14 +6,15 @@
 
     <android.support.design.widget.TextInputLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_vertical">
 
 
         <EditText
             android:id="@+id/new_session_story_name"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="@string/prompt_session_name"
+            android:hint="@string/prompt_story_title"
             android:inputType="textCapSentences"
             android:maxLines="1"
             android:singleLine="true" />

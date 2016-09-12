@@ -8,7 +8,6 @@ import android.provider.MediaStore;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
-import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
 
@@ -19,7 +18,6 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
-import com.google.firebase.FirebaseException;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
@@ -36,26 +34,23 @@ import com.grahm.livepost.util.Utilities;
 import com.grahm.livepost.utils.Config;
 
 import org.json.JSONObject;
-import org.w3c.dom.Text;
 
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
-
-import butterknife.BindView;
-import butterknife.OnClick;
 
 import static com.grahm.livepost.fragments.LoginFragment.loginButton;
 
 public class Login extends AppCompatActivity implements OnFragmentInteractionListener {
 
     private static final String TAG_CLASS = "Login".toUpperCase();
-    public  static final int LOGIN_FRAGMENT_IDX = 0;
-    public  static final int NAME_FRAGMENT_IDX = 1;
-    public  static final int PROFILE_FRAGMENT_IDX = 2;
-    public  static final int SIGNUP_FRAGMENT_IDX = 3;
-    private static final int NUM_PAGES = 4;
-    @BindView(R.id.pager) public  ViewPager mPager;
+    public static final int LOGIN_FRAGMENT_IDX = 0;
+    public static final int NAME_FRAGMENT_IDX = 1;
+    public static final int PROFILE_FRAGMENT_IDX = 2;
+    public static final int SIGNUP_FRAGMENT_IDX = 3;
+    public static final int LOGIN_LP_FRAGMENT_IDX = 4;
+    private static final int NUM_PAGES = 5;
+    private ViewPager mPager;
     private PagerAdapter mPagerAdapter;
     private OnFragmentInteractionListener mListener;
     private static final int TAKE_PICTURE = 1;
@@ -74,16 +69,16 @@ public class Login extends AppCompatActivity implements OnFragmentInteractionLis
     private String mPassword;
     private DatabaseReference mFirebaseRef;
     private RegisterUserTask mAuthTask = null;
-
-
+    private boolean mLogin = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_signup);
+        mPager = (ViewPager) findViewById(R.id.pager);
         mFirebaseRef = FirebaseDatabase.getInstance().getReference();
-        mUser = Utilities.getUser(mFirebaseRef,this,savedInstanceState);
-        mUser = mUser==null?new User():mUser;
+        mUser = Utilities.getUser(mFirebaseRef, this, savedInstanceState);
+        mUser = mUser == null ? new User() : mUser;
         mListener = this;
         mPagerAdapter = new ProfilePagerAdapter(getSupportFragmentManager(), NUM_PAGES, mListener);
         mPager.setAdapter(mPagerAdapter);
@@ -94,29 +89,34 @@ public class Login extends AppCompatActivity implements OnFragmentInteractionLis
         if (mPager.getCurrentItem() == 0) {
             super.onBackPressed();
         } else {
-            mPager.setCurrentItem(mPager.getCurrentItem() - 1);
+            if(mLogin){
+                mLogin = false;
+                mPager.setCurrentItem(LOGIN_FRAGMENT_IDX, false);
+            }else{
+                mPager.setCurrentItem(mPager.getCurrentItem() - 1);
+            }
         }
     }
 
     //Done button callback
     public void doSwipe(View v) {
-        if (v.getTag() != null && v.getTag().toString() == "login") {
-            Intent mainIntent = new Intent(Login.this, LoginActivity.class);
-            Login.this.startActivity(mainIntent);
-        }else {
-            mPager.setCurrentItem(mPager.getCurrentItem() + 1);
-        }
+        mPager.setCurrentItem(mPager.getCurrentItem() + 1);
+    }
+
+    public void openLogin(View v){
+        mLogin = true;
+        mPager.setCurrentItem(LOGIN_LP_FRAGMENT_IDX, false);
     }
 
     @Override
     public void onFragmentInteraction(int id, Bundle args) {
-        boolean signup = args.getBoolean("signup",false);
-        if(args.containsKey("password"))mPassword = args.getString("password","");
-        User user = (User)args.get("user");
+        boolean signup = args.getBoolean("signup", false);
+        if (args.containsKey("password")) mPassword = args.getString("password", "");
+        User user = (User) args.get("user");
         mUser.merge(user);
-        if(signup){
+        if (signup) {
             attemptRegistration(mIimageUri);
-        }else{
+        } else {
             mPager.setCurrentItem(mPager.getCurrentItem() + 1);
         }
     }
@@ -130,11 +130,11 @@ public class Login extends AppCompatActivity implements OnFragmentInteractionLis
             Bitmap media;
             switch (requestCode) {
                 case PHOTO_SELECTED:
-                    try{
+                    try {
                         mIimageUri = data.getData();
                         media = MediaStore.Images.Media.getBitmap(this.getContentResolver(), data.getData());
                         ProfilePictureFragment.setImage(media);
-                    }catch(IOException e){
+                    } catch (IOException e) {
                         Log.e(TAG_CLASS, "Error: " + e);
                     }
                     break;
@@ -154,39 +154,40 @@ public class Login extends AppCompatActivity implements OnFragmentInteractionLis
         }
     }
 
-    public void uploadPhoto(){
-        String userId = mUser.getEmail().replace("." , "_dot_");
-        Long tsLong = System.currentTimeMillis()/1000;
+    public void uploadPhoto() {
+        String userId = mUser.getEmail().replace(".", "<dot>");
+        Long tsLong = System.currentTimeMillis() / 1000;
         String ts = tsLong.toString();
         String pictureName = userId + "_" + ts;
         Controls.createDialog(Login.this, "Compressing Photo...", false);
         new S3PutObjectTask(Login.this, s3Client, OnPutImageListener, pictureName, false).execute(mIimageUri);
     }
+
     private void attemptRegistration(Uri pictureUri) {
         if (mAuthTask != null) {
             return;
         }
         Controls.createDialog(Login.this, getString(R.string.login_compressing_dialog), false);
-        mAuthTask = new RegisterUserTask(mUser, mPassword,mFirebaseRef, FirebaseAuth.getInstance(),this,s3Client,OnPutImageListener,true);
+        mAuthTask = new RegisterUserTask(mUser, mPassword, mFirebaseRef, FirebaseAuth.getInstance(), this, s3Client, OnPutImageListener, true);
         mAuthTask.execute(pictureUri);
 
     }
 
-    private void signUpUser(){
+    private void signUpUser() {
         RequestQueue queue = Volley.newRequestQueue(this);
         String url = getString(R.string.heroku_url);
-        Map<String,String> params = new HashMap<String, String>();
-        params.put("email",mUser.getEmail().toString().toLowerCase());
-        params.put("name",mUser.getName());
+        Map<String, String> params = new HashMap<String, String>();
+        params.put("email", mUser.getEmail().toString().toLowerCase());
+        params.put("name", mUser.getName());
         params.put("password", mPassword);
-        params.put("picture",mUser.getProfile_picture());
+        params.put("picture", mUser.getProfile_picture());
         JSONObject json = new JSONObject(params);
         JsonObjectRequest request = new JsonObjectRequest(url, json, new Response.Listener<JSONObject>() {
             @Override
             public void onResponse(JSONObject response) {
                 Log.i(TAG_CLASS, response.toString());
                 //If response failed, its string will contain an error code. #TODO this should be improved
-                if(!response.toString().contains("code")){
+                if (!response.toString().contains("code")) {
                     Intent mainIntent = new Intent(Login.this, MainActivity.class);
                     Login.this.startActivity(mainIntent);
                     Login.this.finish();
@@ -202,4 +203,5 @@ public class Login extends AppCompatActivity implements OnFragmentInteractionLis
         Controls.setDialogMessage("Loading...");
         queue.add(request);
     }
+
 }

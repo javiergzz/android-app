@@ -131,7 +131,7 @@ public class CreateStoryTask extends AsyncTask<Uri, String, String> {
 
         int maxLargeWidth = Math.round(TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, r.getDimension(R.dimen.max_large_width), d));
         int maxLargeHeight = Math.round(TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, r.getDimension(R.dimen.max_large_height), d));
-        mPictureName = mUser.getName()+"_"+mStory.getTitle()+"_"+System.currentTimeMillis()/1000L;
+        mPictureName = mUser.getName().trim().toLowerCase()+"_"+mStory.getTitle().toLowerCase()+"_"+System.currentTimeMillis()/1000L;
         uploadImage(mPictureName + "_thumb.jpg", srcUri, thumbSize, thumbSize);
         uploadImage(mPictureName + "_l_thumb.jpg", srcUri, largeThumbWidth, largeThumbMaxHeight);
         uploadImage(mPictureName + "_md.jpg", srcUri, maxMediumWidth, maxMediumHeight);
@@ -177,6 +177,7 @@ public class CreateStoryTask extends AsyncTask<Uri, String, String> {
             mFirebaseRef.getRoot().child("users/"+FirebaseAuth.getInstance().getCurrentUser().getEmail().replace(".","<dot>")).child("/posts_created").updateChildren(posts);
 
         } catch (Exception e) {
+            Log.e(TAG, e.getMessage().toString());
             e.printStackTrace();
         }
     }
@@ -197,11 +198,11 @@ public class CreateStoryTask extends AsyncTask<Uri, String, String> {
 
         metadata.setContentLength(bos.size());
         try {
-            PutObjectRequest por = new PutObjectRequest(GV.PICTURE_BUCKET, pictureName, bs, metadata).withCannedAcl(CannedAccessControlList.PublicRead);
+            PutObjectRequest por = new PutObjectRequest(GV.DEV_BUCKET, pictureName, bs, metadata).withCannedAcl(CannedAccessControlList.PublicRead);
             mS3Client.putObject(por);
             ResponseHeaderOverrides override = new ResponseHeaderOverrides();
             override.setContentType("image/jpeg");
-            GeneratePresignedUrlRequest urlRequest = new GeneratePresignedUrlRequest(GV.PICTURE_BUCKET, pictureName);
+            GeneratePresignedUrlRequest urlRequest = new GeneratePresignedUrlRequest(GV.DEV_BUCKET, pictureName);
             urlRequest.setExpiration(new Date(System.currentTimeMillis() + 3600000));
             urlRequest.setResponseHeaders(override);
             URL urlUri = mS3Client.generatePresignedUrl(urlRequest);

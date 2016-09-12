@@ -2,6 +2,7 @@ package com.grahm.livepost.fragments;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
@@ -21,6 +22,8 @@ import com.google.firebase.auth.TwitterAuthProvider;
 import com.grahm.livepost.R;
 import com.grahm.livepost.activities.Login;
 import com.grahm.livepost.activities.LoginActivity;
+import com.grahm.livepost.activities.MainActivity;
+import com.grahm.livepost.activities.SplashScreen;
 import com.twitter.sdk.android.Twitter;
 import com.twitter.sdk.android.core.Callback;
 import com.twitter.sdk.android.core.Result;
@@ -45,6 +48,11 @@ public class LoginFragment extends Fragment {
             TwitterSession session = result.data;
             String msg = "@" + session.getUserName() + " logged in! (#" + session.getUserId() + ")";
             Toast.makeText(getActivity().getApplicationContext(), msg, Toast.LENGTH_LONG).show();
+            SharedPreferences.Editor editor = sharedPref.edit();
+            editor.putString("username", "@" + session.getUserName().toLowerCase());
+            editor.putString(SplashScreen.PREFS_AUTH, SplashScreen.PREFS_TWITTER);
+            editor.putBoolean(SplashScreen.PREFS_LOGIN, true);
+            editor.commit();
             handleTwitterSession(session);
             getProfilePicture(session);
         }
@@ -53,6 +61,8 @@ public class LoginFragment extends Fragment {
             Log.d("TwitterKit", "Login with Twitter failure", exception);
         }
     };
+
+    SharedPreferences sharedPref;
 
     public LoginFragment() {
 
@@ -87,6 +97,7 @@ public class LoginFragment extends Fragment {
                 }
             }
         };
+        sharedPref = getActivity().getSharedPreferences(SplashScreen.PREFS_NAME, Context.MODE_PRIVATE);
         return view;
     }
 
@@ -150,6 +161,15 @@ public class LoginFragment extends Fragment {
                 Log.i("photoUrlBiggerSize", photoUrlBiggerSize);
                 Log.i("photoUrlMiniSize", photoUrlMiniSize);
                 Log.i("photoUrlOriginalSize", photoUrlOriginalSize);
+
+                SharedPreferences.Editor editor = sharedPref.edit();
+                editor.putString("tw_picture", photoUrlNormalSize);
+                editor.putString("tw_name", name);
+                editor.commit();
+
+                Intent mainIntent = new Intent(getActivity(), MainActivity.class);
+                startActivity(mainIntent);
+                getActivity().finish();
             }
 
             @Override

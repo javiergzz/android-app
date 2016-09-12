@@ -3,27 +3,31 @@
     android:id="@+id/new_session_avatar_input"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    android:paddingLeft="@dimen/activity_horizontal_margin"
+    android:paddingRight="@dimen/activity_horizontal_margin"
     android:gravity="center">
-<LinearLayout
-    android:id="@+id/new_session_avatar_layout"
-    android:layout_width="120dp"
-    android:layout_height="120dp"
-    android:orientation="vertical"
-    android:background="@color/light_grey"
-    android:gravity="center">
-<ImageButton
-    android:id="@+id/new_session_avatar"
-    android:layout_width="wrap_content"
-    android:layout_height="wrap_content"
-    android:scaleType="fitCenter"
-    android:src="@drawable/ic_add_a_photo_black_48dp"
-    android:layout_gravity="center" />
-</LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/new_session_avatar_layout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:orientation="vertical">
+
+        <ImageButton
+            android:id="@+id/new_session_avatar"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:scaleType="fitCenter"
+            android:src="@drawable/ic_add_a_photo_black_48dp" />
+    </LinearLayout>
+
     <ImageView
         android:id="@+id/new_session_selected_img"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:maxHeight="200dp"/>
+        android:maxHeight="200dp" />
 
 </android.support.design.widget.TextInputLayout>
 

@@ -1,14 +1,22 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string-array name="categories">
-        <item>News</item>
-        <item>Entertainment</item>
-        <item>Sports</item>
-        <item>Technology &amp; Sciencee</item>
+        <item>Breaking News</item>
         <item>Business</item>
+        <item>Crime</item>
+        <item>Entertainment</item>
         <item>Events</item>
-        <item>Lifestyle</item>
-        <item>Interviews</item>
+        <item>Fashion</item>
+        <item>Food</item>
+        <item>Funny</item>
+        <item>Miscellaneous</item>
+        <item>Music</item>
+        <item>News</item>
+        <item>Politics</item>
+        <item>Religion</item>
+        <item>Sports</item>
+        <item>Technology</item>
+        <item>Travel</item>
     </string-array>
     <string-array name="homeModeArray">
         <item>Staggered Grid</item>
