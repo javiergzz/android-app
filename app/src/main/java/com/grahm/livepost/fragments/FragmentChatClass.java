@@ -187,7 +187,7 @@ public class FragmentChatClass extends Fragment implements AbsListView.OnItemCli
             LinearLayoutManager llm = new LinearLayoutManager(getActivity());
             llm.setOrientation(LinearLayoutManager.VERTICAL);
             mListView.setLayoutManager(llm);
-            mMessagesListAdapter = new ChatAdapter(mFirebaseRef.limitToLast(50), getActivity(), R.layout.chat_message_one, mId);
+            mMessagesListAdapter = new ChatAdapter(mFirebaseRef.limitToLast(50), getActivity(), mId);
             mListView.setAdapter(mMessagesListAdapter);
             mMessagesListAdapter.registerAdapterDataObserver(new RecyclerView.AdapterDataObserver() {
                 @Override
@@ -303,21 +303,5 @@ public class FragmentChatClass extends Fragment implements AbsListView.OnItemCli
             }
 
     }
-
-    public void loadImage(Context ctx, Intent data) {
-        if (data != null) {
-            //try {
-            Random r = new Random();
-            mIimageUri = data.getData();
-            //TODO .- imagen selectedImage ?
-            //Bitmap selectedImage = MediaStore.Images.Media.getBitmap(ctx.getContentResolver(), mIimageUri);
-            new S3PutObjectTask(ctx, s3Client, putImageListener, mId + mUser.getName() + r.nextInt(100000), false).execute(mIimageUri);
-            //new S3PutObjectTask(NewSession.this, s3Client, putImageListener, pictureName, true).execute(mIimageUri);
-            //} catch (IOException e) {
-            // Log.e(TAG_CLASS, "Error: " + e);
-            //}
-        }
-    }
-
 
 }

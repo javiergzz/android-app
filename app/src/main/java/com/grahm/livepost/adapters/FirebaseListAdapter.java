@@ -38,8 +38,6 @@ public abstract class FirebaseListAdapter<T> extends  RecyclerView.Adapter<Recyc
 
     private Query mRef;
     private Class<T> mModelClass;
-    private int mLayout;
-    private LayoutInflater mInflater;
     private List<T> mModels;
     private Map<String, T> mModelKeys;
     private List<String> mKeys;
@@ -51,22 +49,18 @@ public abstract class FirebaseListAdapter<T> extends  RecyclerView.Adapter<Recyc
      * @param mRef        The Firebase location to watch for data changes. Can also be a slice of a location, using some
      *                    combination of <code>limit()</code>, <code>startAt()</code>, and <code>endAt()</code>,
      * @param mModelClass Firebase will marshall the data at a location into an instance of a class that you provide
-     * @param mLayout     This is the mLayout used to represent a single list item. You will be responsible for populating an
-     *                    instance of the corresponding view with the data from an instance of mModelClass.
-     * @param activity    The activity containing the ListView
      */
-    public FirebaseListAdapter(Query mRef, final Class<T> mModelClass, int mLayout, Activity activity) {
-        this(mRef, mModelClass, mLayout, activity,false);
+    public FirebaseListAdapter(Query mRef, final Class<T> mModelClass) {
+        this(mRef, mModelClass,false);
     }
-    public FirebaseListAdapter(Query mRef, final Class<T> mModelClass, int mLayout, Activity activity, final boolean mSearchingFlag) {
+    public FirebaseListAdapter(Query mRef, final Class<T> mModelClass,final boolean keepsynced) {
         this.mSearchingFlag=mSearchingFlag;
         this.mRef = mRef;
         this.mModelClass = mModelClass;
-        this.mLayout = mLayout;
-        mInflater = activity.getLayoutInflater();
         mModels = new ArrayList<T>();
         mModelKeys = new HashMap<String, T>();
         mKeys = new ArrayList<String>();
+        mRef.keepSynced(true);
         // Look for all child events. We will then map them to our own internal ArrayList, which backs ListView
         mListener = this.mRef.addChildEventListener(new ChildEventListener() {
             @Override

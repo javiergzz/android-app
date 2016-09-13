@@ -32,6 +32,7 @@ import com.nostra13.universalimageloader.core.DisplayImageOptions;
 import com.nostra13.universalimageloader.core.ImageLoader;
 import com.nostra13.universalimageloader.core.ImageLoaderConfiguration;
 
+import java.io.Serializable;
 import java.sql.Timestamp;
 
 import butterknife.*;
@@ -39,6 +40,10 @@ import butterknife.*;
 public class ChatAdapter extends FirebaseListAdapter<Update> {
     private static final String TAG = "ChatAdapter";
     public static final String MSG_KEY = "msg";
+    public static final String KEY_KEY = "key";
+    public static final String STORY_KEY = "story";
+    public static final int KEY_IDX = 0;
+    public static final int ITEM_IDX = 1;
     private String mChatKey;
     private FragmentActivity mActivity;
     protected String mUsername;
@@ -50,28 +55,29 @@ public class ChatAdapter extends FirebaseListAdapter<Update> {
     private String mUid;
 
 
-    public ChatAdapter(Query ref, FragmentActivity activity, int layout, String chatKey) {
-        super(ref, Update.class, layout, activity, false);
+    public ChatAdapter(Query ref, FragmentActivity activity, String chatKey) {
+        super(ref, Update.class, false);
         this.mActivity = activity;
         this.mChatKey = chatKey;
-                ImageLoaderConfiguration config  =  new ImageLoaderConfiguration.Builder(activity).build();
+
+        //Init imageloader if necessary
         mImageLoader = ImageLoader.getInstance();
-        if(!mImageLoader.isInited()) mImageLoader.init(config);
+        if(!mImageLoader.isInited()){
+            ImageLoaderConfiguration config  =  new ImageLoaderConfiguration.Builder(activity).build();
+            mImageLoader.init(config);
+        }
         mFirebaseDB=FirebaseDatabase.getInstance();
         FirebaseUser mFirebaseUser = FirebaseAuth.getInstance().getCurrentUser();
         if(mFirebaseUser!=null){
             mUid = mFirebaseUser.getUid();
             mUser= Utilities.getUser(mFirebaseDB.getReference(),activity,null);
-            mUsername = mUser.getName();
+            mUsername = mUser.getEmail();
         }
     }
 
-    public void showDialog(Update m) {
+    public void showDialog(ChatTag tag) {
         FragmentManager fragmentManager = mActivity.getSupportFragmentManager();
-        EditPostDialogFragment newFragment = EditPostDialogFragment.newInstance(m);
-        Bundle b = new Bundle();
-        b.putSerializable(MSG_KEY,m);
-        newFragment.setArguments(b);
+        EditPostDialogFragment newFragment = EditPostDialogFragment.newInstance(mChatKey,tag.key,tag.update);
         newFragment.show(fragmentManager, "dialog");
     }
 
@@ -90,9 +96,10 @@ public class ChatAdapter extends FirebaseListAdapter<Update> {
     public void onBindViewHolder(final RecyclerView.ViewHolder holder, int position) {
         ChatViewHolder h = (ChatViewHolder)holder;
         final Update m = getItem(position);
+        if(m == null){ Log.e(TAG,"Error: Empty Item at position "+position);return;}
         final String key = getItemKey(position);
         h.mItem = m;
-        h.mView.setTag(m);
+        h.mView.setTag(new ChatTag(key,m));
         h.mAuthorView.setText(m.getSender() + " ");
         final String msg = m.getMessage();
         if(msg.contains(".png")||msg.contains(".jpg")){
@@ -105,15 +112,15 @@ public class ChatAdapter extends FirebaseListAdapter<Update> {
             h.mMessageView.setText(m.getMessage());
         }
 
-        if(mUsername!=null && mUsername == m.getSender()){
 
-            //Edition
+        String timeMsg=null;
+        Long timelong = m.getTimestamp();
+        if (timelong!=null){
+            Timestamp t = new Timestamp(timelong);
+            timeMsg = Utilities.getTimeMsg(t);
+            if(!TextUtils.isEmpty(timeMsg)){h.mDateView.setText(timeMsg);}
         }
-        String timeMsg;
-        timeMsg = Utilities.getTimeMsg(new Timestamp(m.getTimestamp()));
-        if(!TextUtils.isEmpty(timeMsg)){
-            h.mDateView.setText(timeMsg);
-        }
+
 
     }
     public class ChatViewHolder extends RecyclerView.ViewHolder {
@@ -131,7 +138,12 @@ public class ChatAdapter extends FirebaseListAdapter<Update> {
                 @Override
                 public boolean onLongClick(View v) {
                     Log.d(TAG,"Longclick");
-                    showDialog((Update)v.getTag());
+                    ChatTag u = (ChatTag)v.getTag();
+                    String sender  = u.update.getSender_key().replace("<dot>",".");
+                    if(mUsername!=null && mUsername.equals(sender)){
+                        //Edition dialog
+                        showDialog((ChatTag) v.getTag());
+                    }
                     return true;
                 }
             });
@@ -139,6 +151,15 @@ public class ChatAdapter extends FirebaseListAdapter<Update> {
             mAuthorView=(TextView)view.findViewById(R.id.author);
             mDateView=(TextView)view.findViewById(R.id.date);
             mImgChatView=(ImageView)view.findViewById(R.id.imgChat);
+        }
+    }
+    public class ChatTag implements Serializable{
+        public Update update;
+        public String key;
+        ChatTag(){}
+        ChatTag(String key, Update update){
+            this.key = key;
+            this.update = update;
         }
     }
 

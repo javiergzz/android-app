@@ -31,7 +31,7 @@ public class SplashScreen extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        SharedPreferences settings = getSharedPreferences(PREFS_NAME, 0);
+        SharedPreferences settings = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
         final boolean onboarding = settings.getBoolean(PREFS_ONBOARDING, false);
         setContentView(R.layout.activity_splash_screen);
         DisplayImageOptions options = new DisplayImageOptions.Builder().cacheInMemory(true)
@@ -43,6 +43,7 @@ public class SplashScreen extends AppCompatActivity {
                 .defaultDisplayImageOptions(options)
                 .build();
         ImageLoader.getInstance().init(config);
+        FirebaseDatabase.getInstance().setPersistenceEnabled(true);
         FirebaseAuth auth = FirebaseAuth.getInstance();
         DatabaseReference ref = FirebaseDatabase.getInstance().getReference();
 

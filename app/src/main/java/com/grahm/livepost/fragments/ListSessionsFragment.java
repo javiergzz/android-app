@@ -73,7 +73,7 @@ public class ListSessionsFragment extends Fragment {
         return view;
     }
     private void setupAdapter(final RecyclerView recyclerView){
-        mStoryListAdapter = new StoryListAdapter(mFirebaseRef.limitToLast(50),(AppCompatActivity)getActivity(), R.layout.item_session,1,false);
+        mStoryListAdapter = new StoryListAdapter(mFirebaseRef.limitToLast(50),(AppCompatActivity)getActivity(),1,false);
         recyclerView.setAdapter(mStoryListAdapter);
         mStoryListAdapter.registerAdapterDataObserver(new RecyclerView.AdapterDataObserver() {
             @Override

@@ -83,8 +83,7 @@ public class ProfileFragment extends Fragment {
         ButterKnife.bind(this, view);
 
         ImageLoader imageLoader = ImageLoader.getInstance();
-        String[] parts = mUser.getProfile_picture().split("\\?");
-        imageLoader.displayImage(parts[0], mImageView);
+        imageLoader.displayImage(Utilities.trimProfilePic(mUser), mImageView);
 
         mTitleView.setText(mUser.getName());
         mEmailView.setText(mUser.getEmail());
@@ -194,7 +193,7 @@ public class ProfileFragment extends Fragment {
                 Query q = mFirebaseRef.child("posts").orderByChild("author").equalTo(mUser.getEmail().replace(".","<dot>"));
                     RecyclerView recyclerView = ButterKnife.findById(layout, R.id.profile_list);
                     recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
-                    recyclerView.setAdapter(new StoryListAdapter(q, (AppCompatActivity) getActivity(), 0, 1, false));
+                    recyclerView.setAdapter(new StoryListAdapter(q, (AppCompatActivity) getActivity(), 0, false));
             }
         }
     }

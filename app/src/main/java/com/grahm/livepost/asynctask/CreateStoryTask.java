@@ -170,7 +170,7 @@ public class CreateStoryTask extends AsyncTask<Uri, String, String> {
 
             DatabaseReference r = mFirebaseRef.getRoot().child("updates/"+key).push();
             r.setValue(new Update(0,null,mStory.getPosts_picture(),mUser.getProfile_picture(),mStory.getAuthor_name(),mStory.getAuthor()));
-            r.child("timestamp").setValue(ServerValue.TIMESTAMP);
+            r.child(Story.TIMESTAMP_FIELD_STR).setValue(ServerValue.TIMESTAMP);
 
             //Add post to "posts created"
             Map<String, Object> posts = new HashMap<String, Object>();
@@ -191,7 +191,6 @@ public class CreateStoryTask extends AsyncTask<Uri, String, String> {
         metadata.setContentType(resolver.getType(srcUri));
         /* Get byte stream */
         ByteArrayOutputStream bos = new ByteArrayOutputStream();
-        //scaledBitmap.compress(Bitmap.CompressFormat.PNG, 0 /*ignored for PNG*/, bos);
         scaledBitmap.compress(Bitmap.CompressFormat.JPEG, 80, bos);
         byte[] bitmapdata = bos.toByteArray();
         ByteArrayInputStream bs = new ByteArrayInputStream(bitmapdata);

@@ -19,6 +19,7 @@ import android.view.View;
 
 
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.FirebaseDatabase;
 import com.grahm.livepost.R;
 import com.grahm.livepost.adapters.HomeFragmentAdapter;
 import com.grahm.livepost.fragments.FragmentChatClass;
@@ -64,7 +65,6 @@ public class MainActivity extends FirebaseActivity implements OnFragmentInteract
 
     private FragmentsEnum mCurrentPage;
     private SectionsFragmentManager mSectionsFragmentManager;
-    private Intent starterIntent;
     protected Menu mMenu;
 
 
@@ -161,7 +161,9 @@ public class MainActivity extends FirebaseActivity implements OnFragmentInteract
                 mSectionsFragmentManager.setPage(FragmentsEnum.NEW_STORY,args);
                 break;
             case CHAT_IDX:
-                mSectionsFragmentManager.setPage(FragmentsEnum.CHAT,args);
+                Intent mainIntent = new Intent(this, ChatActivity.class);
+                mainIntent.putExtras(args);
+                this.startActivity(mainIntent);
                 break;
         }
     }

@@ -79,8 +79,8 @@ public class StoryListAdapter extends FirebaseListAdapter<Story> {
     private OnFragmentInteractionListener mOnFragmentInteractionListener;
 
 
-    public StoryListAdapter(Query ref, AppCompatActivity activity, int layout, int listType, boolean searchingFlag) {
-        super(ref, Story.class, layout, activity, searchingFlag);
+    public StoryListAdapter(Query ref, AppCompatActivity activity, int listType, boolean searchingFlag) {
+        super(ref, Story.class, searchingFlag);
         Log.e(TAG, ref.toString());
         mListType = listType;
         mVItemLayout = listType == STAGGERED?R.layout.item_session_staggered: R.layout.item_session;

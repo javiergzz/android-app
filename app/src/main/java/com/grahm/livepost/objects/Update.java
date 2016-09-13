@@ -5,7 +5,15 @@ import java.sql.Timestamp;
 import java.util.Map;
 
 public class Update implements Serializable{
-
+    //Strings for references
+    public static final String MESSAGE_FIELD_STR = "message";
+    public static final String TIMESTAMP_FIELD_STR = "timestamp";
+    public static final String SENDER_KEY_FIELD_STR = "sender_key";
+    public static final String SENDER_FIELD_STR = "sender";
+    public static final String PROFILE_PICTURE_FIELD_STR = "profile_picture";
+    public static final String LIKES_FIELD_STR = "likes";
+    public static final String COUNT_LIKES_FIELD_STR = "count_likes";
+    //Variables
     private String message;
     private Long timestamp;
     private String sender_key;
@@ -13,6 +21,7 @@ public class Update implements Serializable{
     private String profile_picture;
     private Map<String,Integer> likes;
     private int count_likes;
+    //Empty constructor mandatory for Firebase
     public Update(){}
     public Update(int count_likes, Map<String, Integer> likes, String message, String profile_picture, String sender, String sender_key) {
         this.count_likes = count_likes;
@@ -22,7 +31,7 @@ public class Update implements Serializable{
         this.sender = sender;
         this.sender_key = sender_key;
     }
-
+    //Getters & setters
     public int getCount_likes() {
         return count_likes;
     }
@@ -72,7 +81,7 @@ public class Update implements Serializable{
     }
 
     public Long getTimestamp() {
-        return (Long)timestamp;
+        return timestamp;
     }
 
     public void setTimestamp(Long timestamp) {
