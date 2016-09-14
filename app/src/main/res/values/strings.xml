@@ -61,10 +61,14 @@
     <string name="ns_category">Choose a category</string>
     <string name="ns_image">Add an image</string>
     <string name="ns_creating_text">Posting...</string>
+
     <!-- New Session Errors-->
     <string name="ns_story_name_error">Your story name must have at least 5 characters!</string>
     <string name="ns_story_no_img_error">You need an image to create a story</string>
 
+
+    <!-- Asynctasks stuff-->
+    <string name="at_deleting">Deleting...</string>
     <!--Fragment Headers -->
     <string name="home_str">Livepost</string>
     <string name="chat_str">Favorites</string>

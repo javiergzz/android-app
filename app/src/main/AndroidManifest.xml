@@ -69,16 +69,6 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="com.grahm.livepost.activities.MainActivity" />
         </activity>
-        <activity
-            android:name=".activities.LoginPrompt"
-            android:configChanges="orientation|keyboardHidden|screenSize"
-            android:label="@string/title_activity_login_prompt"
-            android:parentActivityName=".activities.MainActivity"
-            android:theme="@style/FullscreenTheme">
-            <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value="com.grahm.livepost.activities.MainActivity" />
-        </activity>
         <activity android:name="com.soundcloud.android.crop.CropImageActivity" />
         <activity android:name=".activities.ChatActivity"></activity>
     </application>
