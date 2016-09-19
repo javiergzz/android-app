@@ -22,6 +22,8 @@ public class Controls {
     }
 
     public static void setDialogMessage(String message){
-        dialog.setMessage(message);
+        if(dialog != null){
+            dialog.setMessage(message);
+        }
     }
 }

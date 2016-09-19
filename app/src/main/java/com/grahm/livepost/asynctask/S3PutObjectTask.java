@@ -32,6 +32,8 @@ import java.io.ByteArrayOutputStream;
 import java.net.URL;
 import java.util.Date;
 
+import static com.grahm.livepost.util.GV.BASE_URL_AMAZON;
+
 public class S3PutObjectTask extends AsyncTask<Uri, String, String> {
 
     public static final int ASPECT_HEIGHT = -1;
@@ -77,7 +79,9 @@ public class S3PutObjectTask extends AsyncTask<Uri, String, String> {
             dialog.dismiss();
         }
         if(mListener != null){
-            mListener.onSuccess(mPictureName);
+            // TODO replace bucket.
+            String url = BASE_URL_AMAZON + "dev/" + mPictureName + ".jpg";
+            mListener.onSuccess(url);
         }
     }
 
@@ -141,11 +145,11 @@ public class S3PutObjectTask extends AsyncTask<Uri, String, String> {
 
         metadata.setContentLength(bos.size());
         try {
-            PutObjectRequest por = new PutObjectRequest( GV.PICTURE_BUCKET, pictureName, bs, metadata).withCannedAcl(CannedAccessControlList.PublicRead);
+            PutObjectRequest por = new PutObjectRequest( GV.DEV_BUCKET, pictureName, bs, metadata).withCannedAcl(CannedAccessControlList.PublicRead);
             mS3Client.putObject(por);
             ResponseHeaderOverrides override = new ResponseHeaderOverrides();
             override.setContentType("image/jpeg");
-            GeneratePresignedUrlRequest urlRequest = new GeneratePresignedUrlRequest( GV.PICTURE_BUCKET, pictureName );
+            GeneratePresignedUrlRequest urlRequest = new GeneratePresignedUrlRequest( GV.DEV_BUCKET, pictureName );
             urlRequest.setExpiration(new Date( System.currentTimeMillis() + 3600000));
             urlRequest.setResponseHeaders(override);
             URL urlUri = mS3Client.generatePresignedUrl( urlRequest );

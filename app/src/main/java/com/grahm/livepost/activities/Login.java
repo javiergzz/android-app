@@ -1,10 +1,13 @@
 package com.grahm.livepost.activities;
 
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
-import android.provider.MediaStore;
+import android.support.annotation.NonNull;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
@@ -13,14 +16,14 @@ import android.view.View;
 
 import com.amazonaws.auth.BasicAWSCredentials;
 import com.amazonaws.services.s3.AmazonS3Client;
-import com.android.volley.RequestQueue;
-import com.android.volley.Response;
-import com.android.volley.VolleyError;
-import com.android.volley.toolbox.JsonObjectRequest;
-import com.android.volley.toolbox.Volley;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.gson.Gson;
 import com.grahm.livepost.R;
 import com.grahm.livepost.adapters.ProfilePagerAdapter;
 import com.grahm.livepost.asynctask.RegisterUserTask;
@@ -33,11 +36,10 @@ import com.grahm.livepost.ui.Controls;
 import com.grahm.livepost.util.Utilities;
 import com.grahm.livepost.utils.Config;
 
-import org.json.JSONObject;
+import java.io.File;
 
-import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
+import pl.aprilapps.easyphotopicker.DefaultCallback;
+import pl.aprilapps.easyphotopicker.EasyImage;
 
 import static com.grahm.livepost.fragments.LoginFragment.loginButton;
 
@@ -61,7 +63,8 @@ public class Login extends AppCompatActivity implements OnFragmentInteractionLis
         @Override
         public void onSuccess(String url) {
             mUser.setProfile_picture(url);
-            signUpUser();
+            Controls.dismissDialog();
+            saveUserOnProperties();
         }
     };
     private Uri mIimageUri;
@@ -70,11 +73,15 @@ public class Login extends AppCompatActivity implements OnFragmentInteractionLis
     private DatabaseReference mFirebaseRef;
     private RegisterUserTask mAuthTask = null;
     private boolean mLogin = false;
+    FirebaseAuth mAuth;
+    private FirebaseAuth.AuthStateListener mAuthListener;
+    private String mUid;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_signup);
+        mAuth = FirebaseAuth.getInstance();
         mPager = (ViewPager) findViewById(R.id.pager);
         mFirebaseRef = FirebaseDatabase.getInstance().getReference();
         mUser = Utilities.getUser(mFirebaseRef, this, savedInstanceState);
@@ -82,6 +89,22 @@ public class Login extends AppCompatActivity implements OnFragmentInteractionLis
         mListener = this;
         mPagerAdapter = new ProfilePagerAdapter(getSupportFragmentManager(), NUM_PAGES, mListener);
         mPager.setAdapter(mPagerAdapter);
+
+        mAuthListener = new FirebaseAuth.AuthStateListener() {
+            @Override
+            public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
+                FirebaseUser user = firebaseAuth.getCurrentUser();
+                if (user != null) {
+                    Log.i(TAG_CLASS, "onAuthStateChanged:signed_in:" + user.getUid());
+                    if(!mLogin){
+                        uploadPhoto(user.getUid());
+                    }
+                } else {
+                    Log.e(TAG_CLASS, "onAuthStateChanged:signed_out");
+                }
+            }
+        };
+
     }
 
     @Override
@@ -89,13 +112,30 @@ public class Login extends AppCompatActivity implements OnFragmentInteractionLis
         if (mPager.getCurrentItem() == 0) {
             super.onBackPressed();
         } else {
-            if(mLogin){
+            if (mLogin) {
                 mLogin = false;
                 mPager.setCurrentItem(LOGIN_FRAGMENT_IDX, false);
-            }else{
+            } else {
                 mPager.setCurrentItem(mPager.getCurrentItem() - 1);
             }
         }
+    }
+
+    private void saveUserOnProperties() {
+        SharedPreferences.Editor editor = getApplicationContext().getSharedPreferences(SplashScreen.PREFS_NAME, Context.MODE_PRIVATE).edit();
+        //Write user data to shared preferences
+        Gson gson = new Gson();
+        String json = gson.toJson(mUser);
+        editor.putString("user", json);
+        editor.putString("uid", mUid);
+        editor.putString("username", mUser.getEmail());
+        editor.putBoolean(SplashScreen.PREFS_LOGIN, true);
+        editor.putString(SplashScreen.PREFS_AUTH, SplashScreen.PREFS_LIVEPOST);
+        editor.commit();
+        Utilities.saveUserOnFirebase(mUid, mUser);
+        Intent mainIntent = new Intent(Login.this, MainActivity.class);
+        startActivity(mainIntent);
+        Login.this.finish();
     }
 
     //Done button callback
@@ -103,7 +143,7 @@ public class Login extends AppCompatActivity implements OnFragmentInteractionLis
         mPager.setCurrentItem(mPager.getCurrentItem() + 1);
     }
 
-    public void openLogin(View v){
+    public void openLogin(View v) {
         mLogin = true;
         mPager.setCurrentItem(LOGIN_LP_FRAGMENT_IDX, false);
     }
@@ -115,35 +155,32 @@ public class Login extends AppCompatActivity implements OnFragmentInteractionLis
         User user = (User) args.get("user");
         mUser.merge(user);
         if (signup) {
-            attemptRegistration(mIimageUri);
+            signUpUser();
         } else {
             mPager.setCurrentItem(mPager.getCurrentItem() + 1);
         }
     }
 
+    @Override
+    public void onStart() {
+        super.onStart();
+        mAuth.addAuthStateListener(mAuthListener);
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+        if (mAuthListener != null) {
+            mAuth.removeAuthStateListener(mAuthListener);
+        }
+    }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         Log.i(TAG_CLASS, "resultCode: " + requestCode);
         if (resultCode == RESULT_OK) {
-            Bitmap media;
             switch (requestCode) {
-                case PHOTO_SELECTED:
-                    try {
-                        mIimageUri = data.getData();
-                        media = MediaStore.Images.Media.getBitmap(this.getContentResolver(), data.getData());
-                        ProfilePictureFragment.setImage(media);
-                    } catch (IOException e) {
-                        Log.e(TAG_CLASS, "Error: " + e);
-                    }
-                    break;
-                case TAKE_PICTURE:
-                    mIimageUri = data.getData();
-                    Bundle extras = data.getExtras();
-                    media = (Bitmap) extras.get("data");
-                    ProfilePictureFragment.setImage(media);
-                    break;
                 case TWITTER_LOGIN:
                     loginButton.onActivityResult(requestCode, resultCode, data);
                     break;
@@ -152,56 +189,53 @@ public class Login extends AppCompatActivity implements OnFragmentInteractionLis
 
             }
         }
+
+        EasyImage.handleActivityResult(requestCode, resultCode, data, Login.this, new DefaultCallback() {
+            @Override
+            public void onImagePickerError(Exception e, EasyImage.ImageSource source, int type) {}
+
+            @Override
+            public void onImagePicked(File imageFile, EasyImage.ImageSource source, int type) {
+                //Handle the image
+                onPhotoReturned(imageFile);
+            }
+        });
+
+
+
     }
 
-    public void uploadPhoto() {
-        String userId = mUser.getEmail().replace(".", "<dot>");
+    private void onPhotoReturned(File imageFile) {
+        mIimageUri = Uri.fromFile(imageFile);
+        Bitmap media = BitmapFactory.decodeFile(imageFile.getPath());
+        ProfilePictureFragment.setImage(media);
+    }
+
+    public void uploadPhoto(String uid) {
+        mUid = uid;
         Long tsLong = System.currentTimeMillis() / 1000;
-        String ts = tsLong.toString();
-        String pictureName = userId + "_" + ts;
-        Controls.createDialog(Login.this, "Compressing Photo...", false);
+        String pictureName = uid + "_" + tsLong.toString();
         new S3PutObjectTask(Login.this, s3Client, OnPutImageListener, pictureName, false).execute(mIimageUri);
     }
 
-    private void attemptRegistration(Uri pictureUri) {
-        if (mAuthTask != null) {
-            return;
-        }
-        Controls.createDialog(Login.this, getString(R.string.login_compressing_dialog), false);
-        mAuthTask = new RegisterUserTask(mUser, mPassword, mFirebaseRef, FirebaseAuth.getInstance(), this, s3Client, OnPutImageListener, true);
-        mAuthTask.execute(pictureUri);
-
-    }
-
     private void signUpUser() {
-        RequestQueue queue = Volley.newRequestQueue(this);
-        String url = getString(R.string.heroku_url);
-        Map<String, String> params = new HashMap<String, String>();
-        params.put("email", mUser.getEmail().toString().toLowerCase());
-        params.put("name", mUser.getName());
-        params.put("password", mPassword);
-        params.put("picture", mUser.getProfile_picture());
-        JSONObject json = new JSONObject(params);
-        JsonObjectRequest request = new JsonObjectRequest(url, json, new Response.Listener<JSONObject>() {
-            @Override
-            public void onResponse(JSONObject response) {
-                Log.i(TAG_CLASS, response.toString());
-                //If response failed, its string will contain an error code. #TODO this should be improved
-                if (!response.toString().contains("code")) {
-                    Intent mainIntent = new Intent(Login.this, MainActivity.class);
-                    Login.this.startActivity(mainIntent);
-                    Login.this.finish();
-                }
-                Controls.dismissDialog();
-            }
-        }, new Response.ErrorListener() {
-            @Override
-            public void onErrorResponse(VolleyError error) {
-                Controls.dismissDialog();
-            }
-        });
-        Controls.setDialogMessage("Loading...");
-        queue.add(request);
+        Controls.createDialog(Login.this, "Loading...", false);
+        mAuth.createUserWithEmailAndPassword(mUser.getEmail().toString().toLowerCase(), mPassword)
+                .addOnFailureListener(this, new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        Controls.dismissDialog();
+                        if(e != null){
+                            Log.e(TAG_CLASS, "createUserWithEmail:onFailure:" + e.getMessage());
+                        }
+                    }
+                })
+                .addOnSuccessListener(this, new OnSuccessListener<AuthResult>() {
+                    @Override
+                    public void onSuccess(AuthResult authResult) {
+                        Log.d(TAG_CLASS, "createUserWithEmail:onComplete:" + authResult.getUser().getUid());
+                    }
+                });
     }
 
 }

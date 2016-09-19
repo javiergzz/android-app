@@ -20,6 +20,8 @@ import com.grahm.livepost.activities.Login;
 import com.grahm.livepost.interfaces.OnFragmentInteractionListener;
 import com.grahm.livepost.objects.User;
 
+import pl.aprilapps.easyphotopicker.EasyImage;
+
 
 public class ProfilePictureFragment extends Fragment {
 
@@ -106,29 +108,7 @@ public class ProfilePictureFragment extends Fragment {
     }
 
     private void showAlertMedia(){
-        new AlertDialog.Builder(getActivity())
-            .setTitle("Alert")
-            .setMessage("Select an option")
-            .setPositiveButton("Take a picture", new DialogInterface.OnClickListener() {
-                public void onClick(DialogInterface dialog, int which) {
-                    dispatchTakePictureIntent();
-                }
-            })
-            .setNegativeButton("Select a Media", new DialogInterface.OnClickListener() {
-                public void onClick(DialogInterface dialog, int which) {
-                    Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
-                    intent.setType("image/*");
-                    getActivity().startActivityForResult(intent, PHOTO_SELECTED);
-                }
-            })
-            .show();
-    }
-
-    private void dispatchTakePictureIntent() {
-        Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-        if (takePictureIntent.resolveActivity(getActivity().getPackageManager()) != null) {
-            getActivity().startActivityForResult(takePictureIntent, REQUEST_IMAGE_CAPTURE);
-        }
+        EasyImage.openChooserWithDocuments(getActivity(), "Choose a profile picture", 1);
     }
 
 }

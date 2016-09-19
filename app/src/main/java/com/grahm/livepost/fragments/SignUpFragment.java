@@ -1,11 +1,9 @@
 package com.grahm.livepost.fragments;
 
-import android.app.AlertDialog;
 import android.content.Context;
-import android.content.DialogInterface;
-import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v7.app.AppCompatActivity;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -14,9 +12,6 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
 
-import com.amazonaws.auth.BasicAWSCredentials;
-import com.amazonaws.services.s3.AmazonS3Client;
-import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.grahm.livepost.R;
@@ -24,8 +19,9 @@ import com.grahm.livepost.activities.Login;
 import com.grahm.livepost.asynctask.RegisterUserTask;
 import com.grahm.livepost.interfaces.OnFragmentInteractionListener;
 import com.grahm.livepost.objects.User;
-import com.grahm.livepost.util.GV;
 import com.grahm.livepost.util.Utilities;
+
+import pl.aprilapps.easyphotopicker.EasyImage;
 
 
 public class SignUpFragment extends Fragment {
@@ -71,7 +67,11 @@ public class SignUpFragment extends Fragment {
         mUser = Utilities.getUser(mFirebaseRef,getActivity(),savedInstanceState);
         mUser = mUser==null?new User():mUser;
         super.onCreate(savedInstanceState);
-        if (getArguments() != null) {}
+        AppCompatActivity activity = (AppCompatActivity) getActivity();
+        EasyImage.configuration(activity)
+                .setImagesFolderName("images")
+                .saveInAppExternalFilesDir()
+                .setCopyExistingPicturesToPublicLocation(true);
     }
 
     @Override

@@ -54,7 +54,6 @@ public class LoginFragment extends Fragment {
             editor.putBoolean(SplashScreen.PREFS_LOGIN, true);
             editor.commit();
             handleTwitterSession(session);
-            getProfilePicture(session);
         }
         @Override
         public void failure(TwitterException exception) {
@@ -125,7 +124,7 @@ public class LoginFragment extends Fragment {
         }
     }
 
-    private void handleTwitterSession(TwitterSession session) {
+    private void handleTwitterSession(final TwitterSession session) {
         Log.d(TAG_CLASS, "handleTwitterSession:" + session);
 
         AuthCredential credential = TwitterAuthProvider.getCredential(
@@ -141,6 +140,8 @@ public class LoginFragment extends Fragment {
                             Log.w(TAG_CLASS, "signInWithCredential", task.getException());
                             Toast.makeText(getActivity(), "Authentication failed.",
                                     Toast.LENGTH_SHORT).show();
+                        }else{
+                            getProfilePicture(session);
                         }
                     }
                 });
