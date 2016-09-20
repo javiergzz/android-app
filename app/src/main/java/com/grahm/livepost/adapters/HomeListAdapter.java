@@ -5,6 +5,7 @@ import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.RecyclerView;
+import android.text.Html;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -75,14 +76,17 @@ public class HomeListAdapter extends FirebaseListAdapter<Story> {
             iholder.mItem = story;
             final String lastMessage = story.getLast_message();
             if (lastMessage != null && lastMessage != "") {
-                if (lastMessage.contains(".png")) {
-                    iholder.mLastMsgView.setVisibility(View.GONE);
+                if (lastMessage.contains(".png") || lastMessage.contains(".jpg")) {
+                    iholder.mLastMsgView.setText("Image");
+                } else if(lastMessage.contains(".mp4") || lastMessage.contains(".MOV")) {
+                    iholder.mLastMsgView.setText("Video");
                 } else {
                     iholder.mLastMsgView.setText(lastMessage);
                 }
             }
             iholder.mTitleView.setText(story.getTitle());
-            iholder.mCategoryView.setText(" in " + story.getCategory());
+            String stringFormat = "<b>" + story.getAuthor_name() + "</b>" + " in " + "<b>" + story.getCategory() + "</b>";
+            iholder.mCategoryView.setText(Html.fromHtml(stringFormat));
 
             iholder.mView.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -142,8 +146,8 @@ public class HomeListAdapter extends FirebaseListAdapter<Story> {
         public ViewHolderI(View view) {
             super(view);
             mView = view;
-            mTitleView = (TextView) view.findViewById(R.id.title);
-            mCategoryView = (TextView) view.findViewById(R.id.category);
+            mTitleView = (TextView) view.findViewById(R.id.s_title);
+            mCategoryView = (TextView) view.findViewById(R.id.s_category);
             mLastMsgView = (TextView) view.findViewById(R.id.lastMessage);
             mIconView = (ImageView) view.findViewById(R.id.imgProfile);
             mProgressImgView = (ProgressBar) view.findViewById(R.id.progress_img);

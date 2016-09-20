@@ -16,6 +16,7 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.google.gson.Gson;
 import com.grahm.livepost.R;
+import com.grahm.livepost.activities.SplashScreen;
 import com.grahm.livepost.objects.User;
 
 import java.sql.Timestamp;
@@ -58,13 +59,14 @@ public class Utilities {
             return null;
         }
         final Gson gson = new Gson();
-        final SharedPreferences SP = ctx.getSharedPreferences(ctx.getString(R.string.preference_file_key), Context.MODE_PRIVATE);
+//        final SharedPreferences SP = ctx.getSharedPreferences(ctx.getString(R.string.preference_file_key), Context.MODE_PRIVATE);
+        final SharedPreferences SP = ctx.getSharedPreferences(SplashScreen.PREFS_NAME, Context.MODE_PRIVATE);
         if (savedInstanceState == null) {
-            mUser = new Gson().fromJson(ctx.getSharedPreferences(ctx.getString(R.string.preference_file_key), Context.MODE_PRIVATE).getString("user", null), User.class);
+//            mUser = new Gson().fromJson(ctx.getSharedPreferences(ctx.getString(R.string.preference_file_key), Context.MODE_PRIVATE).getString("user", null), User.class);
+            mUser = new Gson().fromJson(ctx.getSharedPreferences(SplashScreen.PREFS_NAME, Context.MODE_PRIVATE).getString("user", null), User.class);
             mFirebaseRef = mFirebaseRef == null ? FirebaseDatabase.getInstance().getReference() : mFirebaseRef;
-
-            // TODO validation livepost : firebase
-            mFirebaseRef.getRoot().child("users/" + mFirebaseUser.getEmail().replace(".", "<dot>")).addValueEventListener(new ValueEventListener() {
+            String uid = ctx.getSharedPreferences(SplashScreen.PREFS_NAME, Context.MODE_PRIVATE).getString("uid", "");
+            mFirebaseRef.getRoot().child("users/" + uid).addValueEventListener(new ValueEventListener() {
                 @Override
                 public void onDataChange(DataSnapshot dataSnapshot) {
                     mUser = dataSnapshot.getValue(User.class);

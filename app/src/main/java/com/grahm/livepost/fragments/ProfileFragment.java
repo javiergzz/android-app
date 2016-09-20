@@ -1,7 +1,6 @@
 package com.grahm.livepost.fragments;
 
 import android.content.Context;
-import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.view.PagerAdapter;
@@ -9,6 +8,7 @@ import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -30,13 +30,11 @@ import com.grahm.livepost.objects.MultipartFormField;
 import com.grahm.livepost.objects.User;
 import com.grahm.livepost.util.Utilities;
 import com.nostra13.universalimageloader.core.ImageLoader;
-import com.nostra13.universalimageloader.core.listener.SimpleImageLoadingListener;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import butterknife.*;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
@@ -49,6 +47,7 @@ import butterknife.OnClick;
  * create an instance of this fragment.
  */
 public class ProfileFragment extends Fragment {
+    private static final String TAG_CLASS = "PROFILEFRAGMENT";
     @BindView(R.id.profile_pic) public ImageView mImageView;
     @BindView(R.id.pager) public ViewPager mViewPager;
     @BindView(R.id.profile_name) TextView mTitleView;
