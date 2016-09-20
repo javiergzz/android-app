@@ -12,6 +12,7 @@
     <string name="firebase_url">https://livepost-dev-30ad0.firebaseio.com/</string>
     <string name="heroku_url">http://rest-livepost-dev.herokuapp.com/v1/signup</string>
     <string name="amazon_image_path">"http://sessionsandroid.s3.amazonaws.com/images/"</string>
+    <string name="embed_url">https://developer-livepost.firebaseapp.com/?</string>
     <string name="delete_text">Are you sure you want to delete this story?</string>
     <string name="delete_confirm">Delete</string>
     <string name="delete_cancel">Cancel</string>
@@ -288,6 +289,16 @@
 
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
-    <item type="id" name="chat_key" />
-    <item type="id" name="chat_item" />
+    <item name="chat_key" type="id" />
+    <item name="chat_item" type="id" />
+    <string name="title_activity_contributors">ContributorsActivity</string>
+
+    <!-- Story Settings -->
+    <string name="story_settings_title">Details</string>
+    <string name="story_settings_code_title">Story code</string>
+    <string name="story_settings_code_btn">Copy code</string>
+    <string name="story_settings_contributors_title">Contributors</string>
+    <string name="story_settings_contributors_add_btn">Add</string>
+    <string name="story_settings_contributors_delete_btn">Delete</string>
+    <string name="story_code">StoryCode</string>
 </resources>

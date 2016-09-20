@@ -13,7 +13,6 @@ import android.util.DisplayMetrics;
 import android.util.Log;
 import android.util.TypedValue;
 
-import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.ServerValue;
 import com.google.gson.Gson;
@@ -31,8 +30,6 @@ import com.grahm.livepost.objects.User;
 import com.grahm.livepost.util.GV;
 import com.nostra13.universalimageloader.core.ImageLoader;
 import com.nostra13.universalimageloader.core.assist.ImageSize;
-
-import org.w3c.dom.Text;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -175,7 +172,7 @@ public class CreateStoryTask extends AsyncTask<Uri, String, String> {
             //Add post to "posts created"
             Map<String, Object> posts = new HashMap<String, Object>();
             posts.put(key, mStory);
-            mFirebaseRef.getRoot().child("users/"+FirebaseAuth.getInstance().getCurrentUser().getEmail().replace(".","<dot>")).child("/posts_created").updateChildren(posts);
+            mFirebaseRef.getRoot().child("users/"+mUser.getAuthorString()).child("/posts_created").updateChildren(posts);
 
         } catch (Exception e) {
             e.printStackTrace();

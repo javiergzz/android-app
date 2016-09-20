@@ -43,6 +43,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import butterknife.BindView;
+import butterknife.ButterKnife;
 import butterknife.OnClick;
 
 import static com.grahm.livepost.fragments.LoginFragment.loginButton;
@@ -55,7 +56,7 @@ public class Login extends AppCompatActivity implements OnFragmentInteractionLis
     public  static final int PROFILE_FRAGMENT_IDX = 2;
     public  static final int SIGNUP_FRAGMENT_IDX = 3;
     private static final int NUM_PAGES = 4;
-    @BindView(R.id.pager) public  ViewPager mPager;
+    @BindView(R.id.pager_signup) public  ViewPager mPager;
     private PagerAdapter mPagerAdapter;
     private OnFragmentInteractionListener mListener;
     private static final int TAKE_PICTURE = 1;
@@ -81,6 +82,7 @@ public class Login extends AppCompatActivity implements OnFragmentInteractionLis
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_signup);
+        ButterKnife.bind(this);
         mFirebaseRef = FirebaseDatabase.getInstance().getReference();
         mUser = Utilities.getUser(mFirebaseRef,this,savedInstanceState);
         mUser = mUser==null?new User():mUser;
@@ -100,12 +102,13 @@ public class Login extends AppCompatActivity implements OnFragmentInteractionLis
 
     //Done button callback
     public void doSwipe(View v) {
-        if (v.getTag() != null && v.getTag().toString() == "login") {
+
+            mPager.setCurrentItem(mPager.getCurrentItem() + 1);
+
+    }
+    public void doLogin(View v) {
             Intent mainIntent = new Intent(Login.this, LoginActivity.class);
             Login.this.startActivity(mainIntent);
-        }else {
-            mPager.setCurrentItem(mPager.getCurrentItem() + 1);
-        }
     }
 
     @Override

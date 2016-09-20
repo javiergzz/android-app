@@ -89,7 +89,7 @@
                 android:text="@string/log_in"
                 android:textColor="#364457"
                 android:background="#FFFFFF"
-                android:onClick="doSwipe"
+                android:onClick="doLogin"
                 android:tag="login"
                 android:textAllCaps="false"/>
         </LinearLayout>

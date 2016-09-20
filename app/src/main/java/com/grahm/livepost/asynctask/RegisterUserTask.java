@@ -148,10 +148,10 @@ public class RegisterUserTask extends AsyncTask<Uri, String, String> {
                         return;
                     }
                     //If user creation was successful, store extra data object
-                    // mUid = mFirebaseAuth.getCurrentUser().getUid();
-                    mUser.setUid(mFirebaseAuth.getCurrentUser().getUid());
-                    mFirebaseRef.child("users/"+mUser.getEmail().replace(".","<dot>")).setValue(mUser);
-                    mFirebaseRef.child("users/"+mUser.getEmail().replace(".","<dot>")+"/timestamp").setValue(ServerValue.TIMESTAMP);
+                    mUid = mFirebaseAuth.getCurrentUser().getUid();
+                    mUser.setUid(mUid);
+                    mFirebaseRef.child("users/"+mUid).setValue(mUser);
+                    mFirebaseRef.child("users/"+mUid+"/timestamp").setValue(ServerValue.TIMESTAMP);
                     SharedPreferences.Editor editor = mSharedPref.edit();
                     //Write user data to shared preferences
                     Gson gson = new Gson();

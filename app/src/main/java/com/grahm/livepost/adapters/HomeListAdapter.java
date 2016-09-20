@@ -89,6 +89,7 @@ public class HomeListAdapter extends FirebaseListAdapter<Story> {
                 public void onClick(View v) {
                     Bundle args = new Bundle();
                     args.putString("key", key);
+                    args.putSerializable("story",iholder.mItem);
                     mOnFragmentInteractionListener.onFragmentInteraction(MainActivity.CHAT_IDX, args);
                 }
             });

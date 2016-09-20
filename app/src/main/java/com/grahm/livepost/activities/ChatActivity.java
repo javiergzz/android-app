@@ -1,48 +1,41 @@
 package com.grahm.livepost.activities;
 
-import android.app.Activity;
-import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.net.Uri;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.Toolbar;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.KeyEvent;
-import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
-import android.view.ViewGroup;
 import android.view.inputmethod.EditorInfo;
 import android.widget.AbsListView;
 import android.widget.AdapterView;
 import android.widget.EditText;
-import android.widget.LinearLayout;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.amazonaws.auth.BasicAWSCredentials;
 import com.amazonaws.services.s3.AmazonS3Client;
-import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ServerValue;
-import com.google.firebase.database.ValueEventListener;
-import com.google.gson.Gson;
 import com.grahm.livepost.R;
 import com.grahm.livepost.adapters.ChatAdapter;
 import com.grahm.livepost.asynctask.PostImageTask;
-import com.grahm.livepost.interfaces.OnFragmentInteractionListener;
 import com.grahm.livepost.interfaces.OnPutImageListener;
 import com.grahm.livepost.objects.FirebaseActivity;
+import com.grahm.livepost.objects.Story;
 import com.grahm.livepost.objects.Update;
 import com.grahm.livepost.objects.User;
 import com.grahm.livepost.util.GV;
 import com.grahm.livepost.util.Utilities;
+import com.nostra13.universalimageloader.core.ImageLoader;
 
 import java.io.File;
 import java.util.HashMap;
@@ -59,19 +52,26 @@ public class ChatActivity extends FirebaseActivity implements AbsListView.OnItem
     private static final String TAG_CLASS = "ChatActivity";
     public static final String TAG_ID = "key";
     public static final String TAG_USER = "user";
+    public static final String TAG_STORY = "story";
     private static final int TAKE_PICTURE = 0;
     private static final int PHOTO_SELECTED = 1;
 
     @BindView(R.id.messageInput)
-    EditText mInputText;
+    public EditText mInputText;
     @BindView(R.id.msg_list)
-    RecyclerView mListView;
+    public RecyclerView mListView;
+    @BindView(R.id.main_toolbar)
+    public Toolbar mToolbar;
+    @BindView(R.id.main_backdrop)
+    public ImageView mBackdropImageView;
     public static MainActivity.FragmentsEnum page = MainActivity.FragmentsEnum.CHAT;
     private DatabaseReference mFirebaseRef;
     private PostImageTask mPostTask;
     private String mId;
+    private Story mStory;
     private Uri mIimageUri;
     private AmazonS3Client s3Client = new AmazonS3Client(new BasicAWSCredentials(GV.ACCESS_KEY_ID, GV.SECRET_KEY));
+    private ImageLoader mImageLoader= ImageLoader.getInstance();
 
     private ChatAdapter mMessagesListAdapter;
     private User mUser;
@@ -91,6 +91,7 @@ public class ChatActivity extends FirebaseActivity implements AbsListView.OnItem
     @Override
     public void onSaveInstanceState(Bundle outState) {
         outState.putString(TAG_ID, mId);
+        outState.putSerializable(TAG_STORY,mStory);
         outState.putSerializable(TAG_USER, mUser);
         getIntent().putExtra(TAG_USER,mUser);
         super.onSaveInstanceState(outState);
@@ -101,6 +102,7 @@ public class ChatActivity extends FirebaseActivity implements AbsListView.OnItem
         if(args!=null){
             mId = args.getString(TAG_ID);
             mUser = Utilities.getUser(mFirebaseRef,this,args);
+            mStory = (Story) args.getSerializable(TAG_STORY);
         }
     }
 
@@ -114,6 +116,7 @@ public class ChatActivity extends FirebaseActivity implements AbsListView.OnItem
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_chat);
+        setSupportActionBar(mToolbar);
         restoreState(savedInstanceState);
         EasyImage.configuration(this)
                 .setImagesFolderName("images")
@@ -121,8 +124,13 @@ public class ChatActivity extends FirebaseActivity implements AbsListView.OnItem
                 .setCopyExistingPicturesToPublicLocation(true);
         mFirebaseRef = FirebaseDatabase.getInstance().getReference("updates").child(mId);
         ButterKnife.bind(this);
+        setupViews();
     }
 
+    private void setupViews(){
+        setupMenu();
+        mImageLoader.displayImage(mStory.getPosts_picture(),mBackdropImageView);
+    }
 
 
     @OnEditorAction(R.id.messageInput)
@@ -135,7 +143,7 @@ public class ChatActivity extends FirebaseActivity implements AbsListView.OnItem
 
     @OnClick(R.id.btnAddPicture)
     public void addPictureCallback() {
-        Log.d("FragmentChatClass","Choosing Image");
+        Log.d(TAG_CLASS,"Choosing Image");
         Long l = System.currentTimeMillis()/1000L;
         EasyImage.openChooserWithDocuments(this, mId+"_"+l, 1);
     }
@@ -211,5 +219,41 @@ public class ChatActivity extends FirebaseActivity implements AbsListView.OnItem
             mInputText.setText("");
         }
 
+    }
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        int id = item.getItemId();
+        switch (id) {
+            case R.id.action_settings_chat:
+                startActivityForResult(new Intent(this, StorySettingsActivity.class), 1);
+                return true;
+        };
+        return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.menu_chat, menu);
+        setTitle(mStory.getTitle());
+        return super.onCreateOptionsMenu(menu);
+    }
+
+    private void setupMenu(){
+        mToolbar.setTitle(mStory.getTitle());
+        mToolbar.inflateMenu(R.menu.menu_chat);
+        mToolbar.setOnMenuItemClickListener(new Toolbar.OnMenuItemClickListener() {
+            @Override public boolean onMenuItemClick(MenuItem item) {
+                int id = item.getItemId();
+                switch (id) {
+                    case R.id.action_settings_chat:
+                        Intent intent = new Intent(ChatActivity.this, StorySettingsActivity.class);
+                        intent.putExtra(TAG_STORY,mStory);
+                        intent.putExtra(TAG_ID,mId);
+                        startActivityForResult(intent, 1);
+                        return true;
+                };
+                return true;
+            }
+        });
     }
 }

@@ -26,8 +26,31 @@ public class User implements Serializable {
     private  Map<String, Object> posts_created;
     private String profile_picture;
     private Long timestamp;
+    private String username;
+    private String twitter;
     private String uid;
     //Getters & setters
+
+    public String getAuthorString(){
+        return TextUtils.isEmpty(uid)?twitter:uid;
+    }
+
+    public String getUsername() {
+        return username;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
+    }
+
+    public String getTwitter() {
+        return twitter;
+    }
+
+    public void setTwitter(String twitter) {
+        this.twitter = twitter;
+    }
+
     public String getEmail() {
         return email;
     }

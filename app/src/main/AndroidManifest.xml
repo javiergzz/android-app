@@ -70,7 +70,19 @@
                 android:value="com.grahm.livepost.activities.MainActivity" />
         </activity>
         <activity android:name="com.soundcloud.android.crop.CropImageActivity" />
-        <activity android:name=".activities.ChatActivity"></activity>
+        <activity
+            android:name=".activities.ChatActivity"
+            android:parentActivityName=".activities.MainActivity"
+            android:theme="@style/AppTheme.NoActionBar" />
+        <activity
+            android:name=".activities.StorySettingsActivity"
+            android:label="@string/title_activity_contributors"
+            android:parentActivityName=".activities.ChatActivity"
+            android:theme="@style/AppTheme.NoActionBar">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.grahm.livepost.activities.ChatActivity" />
+        </activity>
     </application>
 
 </manifest>
