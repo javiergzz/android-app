@@ -33,6 +33,7 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ServerValue;
 import com.google.firebase.database.ValueEventListener;
 import com.google.gson.Gson;
 import com.amazonaws.services.s3.AmazonS3Client;
@@ -143,9 +144,11 @@ public class FragmentChatClass extends Fragment implements AbsListView.OnItemCli
             public void onSuccess(String url) {
                 mUser = Utilities.getUser(mFirebaseRef,getActivity(),savedInstanceState);
                 mFirebaseRef.getRoot().child("posts/" + mId + "/last_message").setValue(url);
-                Update m = new Update(0,null,url,mUser.getProfile_picture(), mUser.getName(), mUser.getEmail(),System.currentTimeMillis()/1000L);
+                Update m = new Update(0,null,url,mUser.getProfile_picture(), mUser.getName(), mUser.getEmail());
                 // Create a new, auto-generated child of that chat location, and save our chat data there
-                mFirebaseRef.push().setValue(m);
+                DatabaseReference r = mFirebaseRef.push();
+                r.setValue(m);
+                r.child("timestamp").setValue(ServerValue.TIMESTAMP);
             }
         };
         return view;
@@ -161,6 +164,7 @@ public class FragmentChatClass extends Fragment implements AbsListView.OnItemCli
 
     @OnClick(R.id.btnAddPicture)
     public void addPictureCallback() {
+        Log.d("FragmentChatClass","Choosing Image");
         Long l = System.currentTimeMillis()/1000L;
         EasyImage.openChooserWithDocuments(this, mId+"_"+l, 1);
     }
@@ -184,7 +188,7 @@ public class FragmentChatClass extends Fragment implements AbsListView.OnItemCli
             LinearLayoutManager llm = new LinearLayoutManager(getActivity());
             llm.setOrientation(LinearLayoutManager.VERTICAL);
             mListView.setLayoutManager(llm);
-            mMessagesListAdapter = new ChatAdapter(mFirebaseRef.limitToLast(50), getActivity(), R.layout.chat_message_one, mId);
+            mMessagesListAdapter = new ChatAdapter(mFirebaseRef.limitToLast(50), getActivity(), mId);
             mListView.setAdapter(mMessagesListAdapter);
             mMessagesListAdapter.registerAdapterDataObserver(new RecyclerView.AdapterDataObserver() {
                 @Override
@@ -194,7 +198,7 @@ public class FragmentChatClass extends Fragment implements AbsListView.OnItemCli
                 }
             });
         } catch (Exception e) {
-            Log.e(TAG_CLASS, "Bad adapter");
+            Log.e(TAG_CLASS, "Bad adapter:"+e.toString());
         }
         // Finally, a little indication of connection status
         mConnectedListener = mFirebaseRef.getRoot().child(".info/connected").addValueEventListener(new ValueEventListener() {
@@ -280,12 +284,14 @@ public class FragmentChatClass extends Fragment implements AbsListView.OnItemCli
             if (!TextUtils.isEmpty(input)) {
                 //TODO
                 mFirebaseRef.getRoot().child("posts/" + mId + "/last_message").setValue(input);
-                final String currentDateTimeString = DateFormat.getDateTimeInstance().format(new Date());
-                String[] parts = mUser.getProfile_picture().split("\\?");
+                String str = mUser.getProfile_picture()==null?"":mUser.getProfile_picture();
+                String[] parts = str.split("\\?");
 
-                Update m = new Update(0,null,input,parts[0], mUser.getName(), mUser.getEmail(),System.currentTimeMillis()/1000L);
+                Update m = new Update(0,null,input,parts[0], mUser.getName(), mUser.getEmail());
                 // Create a new, auto-generated child of that chat location, and save our chat data there
-                mFirebaseRef.push().setValue(m);
+                DatabaseReference r = mFirebaseRef.push();
+                r.setValue(m);
+                r.child("timestamp").setValue(ServerValue.TIMESTAMP);
                 //Update Shared Preferences
                 Map<String,Object> map = mUser.getPosts_contributed()==null?new HashMap<String,Object>():mUser.getPosts_contributed();
                 map.put(mId, true);
@@ -298,21 +304,5 @@ public class FragmentChatClass extends Fragment implements AbsListView.OnItemCli
             }
 
     }
-
-    public void loadImage(Context ctx, Intent data) {
-        if (data != null) {
-            //try {
-            Random r = new Random();
-            mIimageUri = data.getData();
-            //TODO .- imagen selectedImage ?
-            //Bitmap selectedImage = MediaStore.Images.Media.getBitmap(ctx.getContentResolver(), mIimageUri);
-            new S3PutObjectTask(ctx, s3Client, putImageListener, mId + mUser.getName() + r.nextInt(100000), false).execute(mIimageUri);
-            //new S3PutObjectTask(NewSession.this, s3Client, putImageListener, pictureName, true).execute(mIimageUri);
-            //} catch (IOException e) {
-            // Log.e(TAG_CLASS, "Error: " + e);
-            //}
-        }
-    }
-
 
 }

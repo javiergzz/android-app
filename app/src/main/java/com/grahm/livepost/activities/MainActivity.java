@@ -64,7 +64,6 @@ public class MainActivity extends FirebaseActivity implements OnFragmentInteract
 
     private FragmentsEnum mCurrentPage;
     private SectionsFragmentManager mSectionsFragmentManager;
-    private Intent starterIntent;
     protected Menu mMenu;
 
 
@@ -161,7 +160,9 @@ public class MainActivity extends FirebaseActivity implements OnFragmentInteract
                 mSectionsFragmentManager.setPage(FragmentsEnum.NEW_STORY,args);
                 break;
             case CHAT_IDX:
-                mSectionsFragmentManager.setPage(FragmentsEnum.CHAT,args);
+                Intent mainIntent = new Intent(this, ChatActivity.class);
+                mainIntent.putExtras(args);
+                this.startActivity(mainIntent);
                 break;
         }
     }

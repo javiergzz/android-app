@@ -44,6 +44,7 @@ public class HomeFragment extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         mFirebaseRef = FirebaseDatabase.getInstance().getReference("posts");
+        mFirebaseRef.keepSynced(true);
     }
 
     @Override
@@ -63,7 +64,7 @@ public class HomeFragment extends Fragment {
 
     private void setupAdapter(final RecyclerView recyclerView){
         Log.d(TAG,mFirebaseRef.toString());
-        mHomeListAdapter = new HomeListAdapter(mFirebaseRef.orderByChild("last_time").limitToLast(20), (AppCompatActivity)getActivity(), R.layout.item_story, 1 ,false);
+        mHomeListAdapter = new HomeListAdapter(mFirebaseRef.orderByChild("last_time").limitToLast(20), (AppCompatActivity)getActivity(),  1 ,false);
         recyclerView.setAdapter(mHomeListAdapter);
         mHomeListAdapter.registerAdapterDataObserver(new RecyclerView.AdapterDataObserver() {
             @Override

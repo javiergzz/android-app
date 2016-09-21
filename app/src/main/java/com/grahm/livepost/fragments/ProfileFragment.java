@@ -24,6 +24,7 @@ import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 import com.google.gson.Gson;
 import com.grahm.livepost.R;
+import com.grahm.livepost.adapters.StoryContributedLinearListAdapter;
 import com.grahm.livepost.adapters.StoryLinearListAdapter;
 import com.grahm.livepost.adapters.StoryListAdapter;
 import com.grahm.livepost.objects.MultipartFormField;
@@ -82,8 +83,7 @@ public class ProfileFragment extends Fragment {
         ButterKnife.bind(this, view);
 
         ImageLoader imageLoader = ImageLoader.getInstance();
-        String[] parts = mUser.getProfile_picture().split("\\?");
-        imageLoader.displayImage(parts[0], mImageView);
+        imageLoader.displayImage(Utilities.trimProfilePic(mUser), mImageView);
 
         mTitleView.setText(mUser.getName());
         mEmailView.setText(mUser.getEmail());
@@ -152,7 +152,7 @@ public class ProfileFragment extends Fragment {
                     final DatabaseReference f = mFirebaseRef.child("posts");
                     recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
                     String uid = FirebaseAuth.getInstance().getCurrentUser().getUid();
-                    final StoryLinearListAdapter storyLinearListAdapter = new StoryLinearListAdapter(f, (AppCompatActivity) getActivity(), 1, mUser.getPosts_contributed());
+                    final StoryContributedLinearListAdapter storyLinearListAdapter = new StoryContributedLinearListAdapter(f, (AppCompatActivity) getActivity(), 1, mUser.getPosts_contributed());
                     recyclerView.setAdapter(storyLinearListAdapter);
 
                     mFirebaseRef.child("users/"+uid).addValueEventListener(new ValueEventListener() {
@@ -161,7 +161,7 @@ public class ProfileFragment extends Fragment {
                             //mUser = new Gson().fromJson(getActivity().getSharedPreferences(getString(R.string.preference_file_key), Context.MODE_PRIVATE).getString("user", null), User.class);
                             mUser = dataSnapshot.getValue(User.class);
                             getActivity().getSharedPreferences(getString(R.string.preference_file_key), Context.MODE_PRIVATE).edit().putString("user",new Gson().toJson(mUser,User.class)).commit();
-                            StoryLinearListAdapter sessionLinearListAdapter = new StoryLinearListAdapter(f, (AppCompatActivity) getActivity(), 1, mUser.getPosts_contributed());
+                            StoryContributedLinearListAdapter sessionLinearListAdapter = new StoryContributedLinearListAdapter(f, (AppCompatActivity) getActivity(), 1, mUser.getPosts_contributed());
                             recyclerView.setAdapter(sessionLinearListAdapter);
                             sessionLinearListAdapter.notifyDataSetChanged();
                         }
@@ -190,10 +190,10 @@ public class ProfileFragment extends Fragment {
 
             public void onSetup(ViewGroup layout) {
                 mUser.getEmail();
-                Query q = mFirebaseRef.child("posts").orderByChild("author").equalTo(mUser.getEmail().replace(".","<dot>"));
+                Query q = mFirebaseRef.child("posts").orderByChild("author").equalTo(mUser.getAuthorString());
                     RecyclerView recyclerView = ButterKnife.findById(layout, R.id.profile_list);
                     recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
-                    recyclerView.setAdapter(new StoryListAdapter(q, (AppCompatActivity) getActivity(), 0, 1, false));
+                    recyclerView.setAdapter(new StoryListAdapter(q, (AppCompatActivity) getActivity(), 0, false));
             }
         }
     }

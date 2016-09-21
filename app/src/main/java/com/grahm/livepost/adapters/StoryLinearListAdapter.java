@@ -22,6 +22,7 @@ import com.amazonaws.auth.BasicAWSCredentials;
 import com.amazonaws.services.s3.AmazonS3Client;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.Query;
 import com.grahm.livepost.activities.MainActivity;
 import com.grahm.livepost.asynctask.S3PutObjectTask;
 import com.grahm.livepost.fragments.FragmentChatClass;
@@ -45,7 +46,7 @@ import com.nostra13.universalimageloader.core.listener.ImageLoadingListener;
 
 import org.apache.commons.io.FilenameUtils;
 
-public class StoryLinearListAdapter extends FirebaseListFilteredAdapter<Story> {
+public class StoryLinearListAdapter extends FirebaseListAdapter<Story> {
     private static final int TYPE_HEADER = 0;
     private static final int TYPE_ITEM = 1;
     public static final int LIST = 1;
@@ -61,8 +62,8 @@ public class StoryLinearListAdapter extends FirebaseListFilteredAdapter<Story> {
     private OnFragmentInteractionListener mOnFragmentInteractionListener;
 
 
-    public StoryLinearListAdapter(DatabaseReference ref, AppCompatActivity activity, int listType, Map<String,Object> filter) {
-        super(ref, Story.class, activity, filter);
+    public StoryLinearListAdapter(Query ref, AppCompatActivity activity, int listType) {
+        super(ref, Story.class);
         mListType = listType;
         mVItemLayout = listType == STAGGERED?R.layout.item_session_staggered:R.layout.item_session;
         mCtx = activity.getApplicationContext();

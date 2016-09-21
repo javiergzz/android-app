@@ -1,3 +1,4 @@
+
 package com.grahm.livepost.objects;
 
 import java.io.Serializable;
@@ -8,7 +9,35 @@ import java.sql.Timestamp;
  */
 
 public class Story implements Serializable {
+    public static final String AUTHOR_FIELD_STR = "author";
+    public static final String AUTHOR_NAME_FIELD_STR = "author_name";
+    public static final String CATEGORY_FIELD_STR = "category";
+    public static final String LAST_MESSAGE_FIELD_STR = "last_message";
+    public static final String LAST_TIME_FIELD_STR = "last_time";
+    public static final String LAT_FIELD_STR = "lat";
+    public static final String LNG_FIELD_STR = "lng";
+    public static final String LOCATION_FIELD_STR = "location";
+    public static final String POSTS_PICTURE_FIELD_STR = "posts_picture";
+    public static final String SUBCATEGORY_FIELD_STR = "subcategory";
+    public static final String TIMESTAMP_FIELD_STR = "timestamp";
+    public static final String TITLE_FIELD_STR = "title";
+    public static final String ISLIVE_FIELD_STR = "isLive";
 
+    //Private variables
+    private String author;
+    private String author_name;
+    private String category;
+    private String last_message;
+    private Long last_time;
+    private Double lat;
+    private Double lng;
+    private String location;
+    private String posts_picture;
+    private String subcategory;
+    private Long timestamp;
+    private String title;
+    private String isLive;
+    //Getters & setters
     public String getAuthor() {
         return author;
     }
@@ -53,19 +82,19 @@ public class Story implements Serializable {
         this.last_time = last_time;
     }
 
-    public Double getLat() {
+    public double getLat() {
         return lat;
     }
 
-    public void setLat(Double lat) {
+    public void setLat(double lat) {
         this.lat = lat;
     }
 
-    public Double getLng() {
+    public double getLng() {
         return lng;
     }
 
-    public void setLng(Double lng) {
+    public void setLng(double lng) {
         this.lng = lng;
     }
 
@@ -111,23 +140,9 @@ public class Story implements Serializable {
     }
 
     public void setIsLive(boolean live) {
-       this.isLive = String.valueOf(live);
+        this.isLive = String.valueOf(live);
     }
-
-    private String author;
-    private String author_name;
-    private String category;
-    private String last_message;
-    private Long last_time;
-    private Double lat;
-    private Double lng;
-    private String location;
-    private String posts_picture;
-    private String subcategory;
-    private Long timestamp;
-    private String title;
-    private String isLive;
-
+    //Empty constructor mandatory for Firebase
     public Story (){}
 
     public Story(String author, String author_name, String category, String last_message, double lat, double lng, String location, String posts_picture, String subcategory, String title,boolean isLive) {

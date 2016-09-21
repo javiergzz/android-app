@@ -1,69 +1,47 @@
 package com.grahm.livepost.adapters;
 
-import android.app.Activity;
 import android.content.Context;
 import android.content.DialogInterface;
-import android.content.SharedPreferences;
-import android.content.res.Resources;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.graphics.drawable.BitmapDrawable;
-import android.graphics.drawable.Drawable;
 import android.net.Uri;
-import android.os.AsyncTask;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
-import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentActivity;
-import android.support.v4.app.FragmentManager;
-import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
-import android.util.LruCache;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.amazonaws.auth.BasicAWSCredentials;
 import com.amazonaws.services.s3.AmazonS3Client;
-import com.daimajia.swipe.SimpleSwipeListener;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
 import com.grahm.livepost.R;
+import com.grahm.livepost.activities.MainActivity;
 import com.grahm.livepost.asynctask.S3PutObjectTask;
 import com.grahm.livepost.fragments.FragmentChatClass;
 import com.grahm.livepost.interfaces.OnFragmentInteractionListener;
-import com.grahm.livepost.specialViews.SwipeLayout;
-import com.grahm.livepost.activities.MainActivity;
 import com.grahm.livepost.objects.Story;
+import com.grahm.livepost.specialViews.SwipeLayout;
 import com.grahm.livepost.util.GV;
-import com.grahm.livepost.util.Utilities;
 import com.nostra13.universalimageloader.core.ImageLoader;
 import com.nostra13.universalimageloader.core.ImageLoaderConfiguration;
 import com.nostra13.universalimageloader.core.assist.FailReason;
 import com.nostra13.universalimageloader.core.listener.ImageLoadingListener;
 
-
 import org.apache.commons.io.FilenameUtils;
 
-import java.sql.Date;
-import java.sql.Timestamp;
-import java.text.Format;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 
-import butterknife.*;
-import butterknife.ButterKnife;
-
-public class StoryListAdapter extends FirebaseListAdapter<Story> {
+public class StoryContributedLinearListAdapter extends FirebaseListFilteredAdapter<Story> {
     private static final int TYPE_HEADER = 0;
     private static final int TYPE_ITEM = 1;
     public static final int LIST = 1;
@@ -79,11 +57,10 @@ public class StoryListAdapter extends FirebaseListAdapter<Story> {
     private OnFragmentInteractionListener mOnFragmentInteractionListener;
 
 
-    public StoryListAdapter(Query ref, AppCompatActivity activity, int listType, boolean searchingFlag) {
-        super(ref, Story.class, searchingFlag);
-        Log.e(TAG, ref.toString());
+    public StoryContributedLinearListAdapter(DatabaseReference ref, AppCompatActivity activity, int listType, Map<String,Object> filter) {
+        super(ref, Story.class,activity,filter);
         mListType = listType;
-        mVItemLayout = listType == STAGGERED?R.layout.item_session_staggered: R.layout.item_session;
+        mVItemLayout = listType == STAGGERED?R.layout.item_session_staggered:R.layout.item_session;
         mCtx = activity.getApplicationContext();
 
         mActivity = activity;
@@ -95,7 +72,10 @@ public class StoryListAdapter extends FirebaseListAdapter<Story> {
 
     @Override
     public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-            return new ViewHolderI(LayoutInflater.from(parent.getContext()).inflate(mVItemLayout, parent, false));
+        //if(viewType == TYPE_ITEM)
+        return new ViewHolderI(LayoutInflater.from(parent.getContext()).inflate(mVItemLayout, parent, false));
+        //else
+        //    return new ViewHolderH(LayoutInflater.from(parent.getContext()).inflate(R.layout.fragment_item_header, parent, false));
     }
 
     @Override
@@ -110,16 +90,22 @@ public class StoryListAdapter extends FirebaseListAdapter<Story> {
             iholder.mItem = s;
             final String lastMessage = s.getLast_message();
             if(lastMessage!=null && lastMessage!="") {
-                if (lastMessage.contains("https://")||lastMessage.contains("http://")) {
+                if (lastMessage.contains(".png")||lastMessage.contains(".jpg")) {
                     iholder.mLastMsgView.setVisibility(View.GONE);
                 } else {
                     iholder.mLastMsgView.setText(lastMessage);
                 }
             }
+            //iholder.mFollowersView.setText(String.valueOf(s.get()));
             iholder.mTitleView.setText(s.getTitle());
-             String authorStr = s.getAuthor_name()==null?s.getAuthor(): s.getAuthor_name();
+            String authorStr = s.getAuthor_name()==null?s.getAuthor(): s.getAuthor_name();
             iholder.mCategoryView.setText("By " + authorStr + " in " + s.getCategory());
-            String lastTime= Utilities.getTimeMsg(new Timestamp(s.getLast_time()));
+
+            String lastTime= new SimpleDateFormat("dd/MM/yyyy").format(s.getLast_time());
+            String timestamp =  new SimpleDateFormat("dd/MM/yyyy").format(s.getTimestamp());
+            if(lastTime==null){
+                lastTime = timestamp;
+            }
             iholder.mDateTimeView.setText(lastTime);
             loadBitmap(s.getPosts_picture(), iholder.mIconView, iholder.mProgressImgView, false);
             iholder.mSelArea.setOnClickListener(new View.OnClickListener() {
@@ -150,7 +136,7 @@ public class StoryListAdapter extends FirebaseListAdapter<Story> {
         iholder.mDelButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Log.d(TAG,"Delete "+key);
+                Log.d(TAG, "Delete " + key);
                 promptDeletion(key);
             }
         });
@@ -172,7 +158,7 @@ public class StoryListAdapter extends FirebaseListAdapter<Story> {
                 //TODO Security
                 DatabaseReference ref = FirebaseDatabase.getInstance().getReference("posts/").child(key);
                 ref.removeValue();
-                ref = FirebaseDatabase.getInstance().getReference("updates/").child(key);
+                ref =  FirebaseDatabase.getInstance().getReference("updates/").child(key);
                 ref.removeValue();
                 Log.d(TAG, "Deleted Session " + key);
             }
@@ -184,22 +170,22 @@ public class StoryListAdapter extends FirebaseListAdapter<Story> {
             }
         });
 
-    // Create the AlertDialog
+        // Create the AlertDialog
         AlertDialog dialog = builder.create();
         dialog.show();
     }
 
     void reupload(final String resUrl, final ImageView imageView, final ProgressBar progressBar){
         /** Image Compression and re-upload ran once **/
-            AmazonS3Client s3Client = new AmazonS3Client(new BasicAWSCredentials(GV.ACCESS_KEY_ID, GV.SECRET_KEY));
-            List<String> tempList = Arrays.asList(resUrl.split("/"));
-            String pictureName = tempList.get(tempList.size() - 1);
-            if (pictureName.contains(".")) {
-                List<String> tempList2 = Arrays.asList(pictureName.split("\\."));
-                pictureName = tempList2.get(0);
-            }
-            Uri uri = Uri.parse(resUrl);
-            new S3PutObjectTask(mCtx, s3Client, null, pictureName, false).execute(uri);
+        AmazonS3Client s3Client = new AmazonS3Client(new BasicAWSCredentials(GV.ACCESS_KEY_ID, GV.SECRET_KEY));
+        List<String> tempList = Arrays.asList(resUrl.split("/"));
+        String pictureName = tempList.get(tempList.size() - 1);
+        if (pictureName.contains(".")) {
+            List<String> tempList2 = Arrays.asList(pictureName.split("\\."));
+            pictureName = tempList2.get(0);
+        }
+        Uri uri = Uri.parse(resUrl);
+        new S3PutObjectTask(mCtx, s3Client, null, pictureName, false).execute(uri);
     }
 
     public void loadBitmap(final String resUrl, final ImageView imageView, final ProgressBar progressBar,final boolean retry) {
@@ -224,15 +210,15 @@ public class StoryListAdapter extends FirebaseListAdapter<Story> {
         mImageLoader.displayImage(resString, imageView, new ImageLoadingListener() {
             @Override
             public void onLoadingStarted(String imageUri, View view) {
-                ((ImageView)view).setImageResource(R.drawable.default_placeholder);
+                ((ImageView) view).setImageResource(R.drawable.default_placeholder);
                 progressBar.setVisibility(View.VISIBLE);
             }
 
             @Override
             public void onLoadingFailed(String imageUri, View view, FailReason failReason) {
-                Log.e(TAG,"failed to load "+imageUri);
-                if(!retry) {
-                    reupload(resUrl, imageView,  progressBar);
+                Log.e(TAG, "failed to load " + imageUri);
+                if (!retry) {
+                    reupload(resUrl, imageView, progressBar);
                     //loadBitmap(imageUri, imageView, progressBar, true);
                 }
             }

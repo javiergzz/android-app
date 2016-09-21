@@ -47,8 +47,8 @@ public class HomeListAdapter extends FirebaseListAdapter<Story> {
     private OnFragmentInteractionListener mOnFragmentInteractionListener;
 
 
-    public HomeListAdapter(Query ref, AppCompatActivity activity, int layout, int listType, boolean searchingFlag) {
-        super(ref, Story.class, layout, activity, searchingFlag);
+    public HomeListAdapter(Query ref, AppCompatActivity activity,  int listType, boolean searchingFlag) {
+        super(ref, Story.class, searchingFlag);
         mListType = listType;
         mVItemLayout = listType == STAGGERED ? R.layout.item_story_staggered : R.layout.item_story;
         mCtx = activity.getApplicationContext();
@@ -93,7 +93,7 @@ public class HomeListAdapter extends FirebaseListAdapter<Story> {
                 public void onClick(View v) {
                     Bundle args = new Bundle();
                     args.putString("key", key);
-                    args.putString("author", iholder.mItem.getAuthor());
+                    args.putSerializable("story",iholder.mItem);
                     mOnFragmentInteractionListener.onFragmentInteraction(MainActivity.CHAT_IDX, args);
                 }
             });

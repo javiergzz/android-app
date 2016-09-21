@@ -4,8 +4,8 @@
     android:id="@+id/fragmentChat"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/transparent_gray"
-    tools:context="com.jgon.javier.sessions.fragments.FragmentChatClass">
+    android:background="@android:color/white"
+    tools:context="com.grahm.livepost.fragments.FragmentChatClass">
 
     <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
         xmlns:tools="http://schemas.android.com/tools"
@@ -22,7 +22,7 @@
             android:layout_alignParentTop="true"
             android:layout_marginLeft="5dp"
             android:layout_marginRight="5dp"
-            android:background="@color/light_grey" />
+            android:background="@android:color/white" />
 
         <LinearLayout
             android:id="@+id/listFooter"

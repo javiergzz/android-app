@@ -38,6 +38,8 @@ import com.grahm.livepost.utils.Config;
 
 import java.io.File;
 
+import butterknife.BindView;
+import butterknife.ButterKnife;
 import pl.aprilapps.easyphotopicker.DefaultCallback;
 import pl.aprilapps.easyphotopicker.EasyImage;
 
@@ -52,7 +54,7 @@ public class Login extends AppCompatActivity implements OnFragmentInteractionLis
     public static final int SIGNUP_FRAGMENT_IDX = 3;
     public static final int LOGIN_LP_FRAGMENT_IDX = 4;
     private static final int NUM_PAGES = 5;
-    private ViewPager mPager;
+    @BindView(R.id.pager_signup) public  ViewPager mPager;
     private PagerAdapter mPagerAdapter;
     private OnFragmentInteractionListener mListener;
     private static final int TAKE_PICTURE = 1;
@@ -81,8 +83,8 @@ public class Login extends AppCompatActivity implements OnFragmentInteractionLis
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_signup);
+        ButterKnife.bind(this);
         mAuth = FirebaseAuth.getInstance();
-        mPager = (ViewPager) findViewById(R.id.pager);
         mFirebaseRef = FirebaseDatabase.getInstance().getReference();
         mUser = Utilities.getUser(mFirebaseRef, this, savedInstanceState);
         mUser = mUser == null ? new User() : mUser;

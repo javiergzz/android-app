@@ -37,7 +37,7 @@ public class SplashScreen extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         TwitterAuthConfig authConfig = new TwitterAuthConfig(TWITTER_KEY, TWITTER_SECRET);
         Fabric.with(SplashScreen.this, new Twitter(authConfig));
-        SharedPreferences settings = getSharedPreferences(PREFS_NAME, 0);
+        SharedPreferences settings = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
         final boolean onboarding = settings.getBoolean(PREFS_ONBOARDING, false);
         final boolean isLogin = settings.getBoolean(PREFS_LOGIN, false);
         setContentView(R.layout.activity_splash_screen);

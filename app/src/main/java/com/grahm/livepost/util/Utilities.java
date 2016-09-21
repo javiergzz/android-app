@@ -5,6 +5,7 @@ import android.content.SharedPreferences;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Bundle;
+import android.text.TextUtils;
 import android.util.Log;
 
 import com.google.firebase.auth.FirebaseAuth;
@@ -25,6 +26,10 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class Utilities {
+    public static final int MSG_TYPE_TEXT = 0;
+    public static final int MSG_TYPE_IMAGE = 1;
+    public static final int MSG_TYPE_VIDEO = 2;
+    public static String [] userLettersPalette = {"300009","e50019","c5c4b6","645f69","2a3a59"};
     public static User mUser;
 
     public static boolean isOnline(Context ctx) {
@@ -37,6 +42,28 @@ public class Utilities {
     public static boolean isNullOrEmpty(String str) {
         return (str == null || str.trim().length() == 0);
     }
+
+    public static String trimProfilePic(User user){
+        if(user == null) return "";
+        String input = user.getProfile_picture();
+        if(TextUtils.isEmpty(input)){
+            return null;
+        }
+        String[] parts = input.split("\\?");
+        return parts[0];
+    }
+    public static String getProfilePic(User user){
+        String input = user.getProfile_picture();
+        if(TextUtils.isEmpty(input)){
+            String username = user.getName();
+            int index = username.charAt(0);
+            String url = "http://dummyimage.com/100x100/"+userLettersPalette[index%5]+"/ffffff.png&text="+username.charAt(0);
+            return url;
+        }
+        String[] parts = input.split("\\?");
+        return parts[0];
+    }
+
 
     public static void saveUserOnFirebase(String uid, User _user){
         Long tsLong = System.currentTimeMillis()/1000;
@@ -61,9 +88,8 @@ public class Utilities {
         final Gson gson = new Gson();
 //        final SharedPreferences SP = ctx.getSharedPreferences(ctx.getString(R.string.preference_file_key), Context.MODE_PRIVATE);
         final SharedPreferences SP = ctx.getSharedPreferences(SplashScreen.PREFS_NAME, Context.MODE_PRIVATE);
-        if (savedInstanceState == null) {
-//            mUser = new Gson().fromJson(ctx.getSharedPreferences(ctx.getString(R.string.preference_file_key), Context.MODE_PRIVATE).getString("user", null), User.class);
-            mUser = new Gson().fromJson(ctx.getSharedPreferences(SplashScreen.PREFS_NAME, Context.MODE_PRIVATE).getString("user", null), User.class);
+        if(savedInstanceState==null || !savedInstanceState.containsKey("user")){
+            mUser = gson.fromJson(SP.getString("user", null), User.class);
             mFirebaseRef = mFirebaseRef == null ? FirebaseDatabase.getInstance().getReference() : mFirebaseRef;
             String uid = ctx.getSharedPreferences(SplashScreen.PREFS_NAME, Context.MODE_PRIVATE).getString("uid", "");
             mFirebaseRef.getRoot().child("users/" + uid).addValueEventListener(new ValueEventListener() {
@@ -86,7 +112,13 @@ public class Utilities {
     }
 
     public static String getTimeMsg(Timestamp t) {
-        return new SimpleDateFormat("MM/dd/yyyy").format(t);
+        return new SimpleDateFormat("hh:mma MM/dd/yyyy").format(t);
+    }
+
+    public static int deduceMessageType(String messageString){
+        if(messageString.contains(".png")||messageString.contains(".jpg"))return MSG_TYPE_IMAGE;
+        if(messageString.contains(".mp4")) return MSG_TYPE_VIDEO;
+        return MSG_TYPE_TEXT;
     }
 
     public static User readUser(Context ctx) {

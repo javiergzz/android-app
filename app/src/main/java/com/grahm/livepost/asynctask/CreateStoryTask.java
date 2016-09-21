@@ -13,26 +13,24 @@ import android.util.DisplayMetrics;
 import android.util.Log;
 import android.util.TypedValue;
 
-import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.ServerValue;
-import com.google.gson.Gson;
 import com.amazonaws.services.s3.AmazonS3Client;
 import com.amazonaws.services.s3.model.CannedAccessControlList;
 import com.amazonaws.services.s3.model.GeneratePresignedUrlRequest;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.PutObjectRequest;
 import com.amazonaws.services.s3.model.ResponseHeaderOverrides;
-import com.grahm.livepost.interfaces.OnPutImageListener;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.ServerValue;
+import com.google.gson.Gson;
 import com.grahm.livepost.R;
-import com.grahm.livepost.objects.Update;
+import com.grahm.livepost.interfaces.OnPutImageListener;
 import com.grahm.livepost.objects.Story;
+import com.grahm.livepost.objects.Update;
 import com.grahm.livepost.objects.User;
 import com.grahm.livepost.util.GV;
 import com.nostra13.universalimageloader.core.ImageLoader;
 import com.nostra13.universalimageloader.core.assist.ImageSize;
-
-import org.w3c.dom.Text;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -131,7 +129,7 @@ public class CreateStoryTask extends AsyncTask<Uri, String, String> {
 
         int maxLargeWidth = Math.round(TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, r.getDimension(R.dimen.max_large_width), d));
         int maxLargeHeight = Math.round(TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, r.getDimension(R.dimen.max_large_height), d));
-        mPictureName = mUser.getName().trim().toLowerCase()+"_"+mStory.getTitle().toLowerCase()+"_"+System.currentTimeMillis()/1000L;
+        mPictureName = mUser.getName().trim().toLowerCase() + "_" + mStory.getTitle().toLowerCase() + "_" + System.currentTimeMillis() / 1000L;
         uploadImage(mPictureName + "_thumb.jpg", srcUri, thumbSize, thumbSize);
         uploadImage(mPictureName + "_l_thumb.jpg", srcUri, largeThumbWidth, largeThumbMaxHeight);
         uploadImage(mPictureName + "_md.jpg", srcUri, maxMediumWidth, maxMediumHeight);
@@ -166,15 +164,15 @@ public class CreateStoryTask extends AsyncTask<Uri, String, String> {
             //Set Timestamps
             ref.child("last_time").setValue(ServerValue.TIMESTAMP);
             //(int count_likes, Map<String, Integer> likes, String message, String profile_picture, String sender, String sender_key, long timestamp)
-            mFirebaseRef.getRoot().child("updates/"+key).push()
-                    .setValue(new Update(0,null,mStory.getPosts_picture(),mUser.getProfile_picture(),mStory.getAuthor_name(),mStory.getAuthor(),mStory.getTimestamp()));
 
-
+            DatabaseReference r = mFirebaseRef.getRoot().child("updates/" + key).push();
+            r.setValue(new Update(0, null, mStory.getPosts_picture(), mUser.getProfile_picture(), mStory.getAuthor_name(), mStory.getAuthor()));
+            r.child(Story.TIMESTAMP_FIELD_STR).setValue(ServerValue.TIMESTAMP);
 
             //Add post to "posts created"
             Map<String, Object> posts = new HashMap<String, Object>();
             posts.put(key, mStory);
-            mFirebaseRef.getRoot().child("users/"+FirebaseAuth.getInstance().getCurrentUser().getEmail().replace(".","<dot>")).child("/posts_created").updateChildren(posts);
+            mFirebaseRef.getRoot().child("users/"+mUser.getAuthorString()).child("/posts_created").updateChildren(posts);
 
         } catch (Exception e) {
             Log.e(TAG, e.getMessage().toString());
@@ -191,7 +189,6 @@ public class CreateStoryTask extends AsyncTask<Uri, String, String> {
         metadata.setContentType(resolver.getType(srcUri));
         /* Get byte stream */
         ByteArrayOutputStream bos = new ByteArrayOutputStream();
-        //scaledBitmap.compress(Bitmap.CompressFormat.PNG, 0 /*ignored for PNG*/, bos);
         scaledBitmap.compress(Bitmap.CompressFormat.JPEG, 80, bos);
         byte[] bitmapdata = bos.toByteArray();
         ByteArrayInputStream bs = new ByteArrayInputStream(bitmapdata);
