@@ -48,31 +48,21 @@ public class ChatAdapter extends FirebaseListAdapter<Update> {
     private FragmentActivity mActivity;
     protected String mUsername;
     private ImageLoader mImageLoader;
-    private FirebaseDatabase mFirebaseDB;
-    private DatabaseReference mFirebaseRef;
-    private DatabaseReference mUserFirebaseRef;
     private User mUser;
-    private String mUid;
 
 
-    public ChatAdapter(Query ref, FragmentActivity activity, String chatKey) {
+    public ChatAdapter(Query ref, FragmentActivity activity, String chatKey,User user) {
         super(ref, Update.class, false);
         this.mActivity = activity;
         this.mChatKey = chatKey;
-
+        mUser = user;
         //Init imageloader if necessary
         mImageLoader = ImageLoader.getInstance();
         if(!mImageLoader.isInited()){
             ImageLoaderConfiguration config  =  new ImageLoaderConfiguration.Builder(activity).build();
             mImageLoader.init(config);
         }
-        mFirebaseDB=FirebaseDatabase.getInstance();
-        FirebaseUser mFirebaseUser = FirebaseAuth.getInstance().getCurrentUser();
-        if(mFirebaseUser!=null){
-            mUid = mFirebaseUser.getUid();
-            mUser= Utilities.getUser(mFirebaseDB.getReference(),activity,null);
-            mUsername = mUser.getEmail();
-        }
+        mUsername = user.getAuthorString();
     }
 
     public void showDialog(ChatTag tag) {
@@ -139,7 +129,7 @@ public class ChatAdapter extends FirebaseListAdapter<Update> {
                 public boolean onLongClick(View v) {
                     Log.d(TAG,"Longclick");
                     ChatTag u = (ChatTag)v.getTag();
-                    String sender  = u.update.getSender_key().replace("<dot>",".");
+                    String sender  = u.update.getSender_key();
                     if(mUsername!=null && mUsername.equals(sender)){
                         //Edition dialog
                         showDialog((ChatTag) v.getTag());

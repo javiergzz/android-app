@@ -158,7 +158,7 @@ public class Login extends AppCompatActivity implements OnFragmentInteractionLis
     }
 
     public void uploadPhoto(){
-        String userId = mUser.getEmail().replace("." , "_dot_");
+        String userId = mUser.getUid();
         Long tsLong = System.currentTimeMillis()/1000;
         String ts = tsLong.toString();
         String pictureName = userId + "_" + ts;

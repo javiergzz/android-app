@@ -67,21 +67,37 @@ public class Utilities {
     }
 
     public static User getUser(DatabaseReference mFirebaseRef, Context ctx, Bundle savedInstanceState){
-        FirebaseUser mFirebaseUser = FirebaseAuth.getInstance().getCurrentUser();
-        if(mFirebaseUser==null){
-            return null;
-        }
         final Gson gson = new Gson();
         final SharedPreferences SP = ctx.getSharedPreferences(ctx.getString(R.string.preference_file_key), Context.MODE_PRIVATE);
-        if(savedInstanceState==null || !savedInstanceState.containsKey("user")){
+        if(savedInstanceState==null || !savedInstanceState.containsKey("user")) {
             mUser = gson.fromJson(SP.getString("user", null), User.class);
-            mFirebaseRef=mFirebaseRef==null? FirebaseDatabase.getInstance().getReference():mFirebaseRef;
-
-            mFirebaseRef.getRoot().child("users/"+mFirebaseUser.getEmail().replace(".","<dot>")).addValueEventListener(new ValueEventListener() {
+        }else{
+            mUser = (User) savedInstanceState.getSerializable("user");
+        }
+        mFirebaseRef = mFirebaseRef == null ? FirebaseDatabase.getInstance().getReference() : mFirebaseRef;
+        FirebaseUser mFirebaseUser = FirebaseAuth.getInstance().getCurrentUser();
+        if(mFirebaseUser==null){
+            if(mUser==null){return null;}//Nonexisting User
+            mFirebaseRef.getRoot().child("users/" + mUser.getAuthorString()).addValueEventListener(new ValueEventListener() {
                 @Override
                 public void onDataChange(DataSnapshot dataSnapshot) {
-                    mUser =dataSnapshot.getValue(User.class);
-                    SP.edit().putString("user",gson.toJson(mUser,User.class)).commit();
+                    mUser = dataSnapshot.getValue(User.class);
+                    SP.edit().putString("user", gson.toJson(mUser, User.class)).commit();
+                }
+                @Override
+                public void onCancelled(DatabaseError databaseError) {
+                    mUser = gson.fromJson(SP.getString("user", null), User.class);
+                }
+            });
+            //Twitter auth
+
+        }else {
+            //Firebase auth
+            mFirebaseRef.getRoot().child("users/" + mFirebaseUser.getUid()).addValueEventListener(new ValueEventListener() {
+                @Override
+                public void onDataChange(DataSnapshot dataSnapshot) {
+                    mUser = dataSnapshot.getValue(User.class);
+                    SP.edit().putString("user", gson.toJson(mUser, User.class)).commit();
                 }
 
                 @Override
@@ -90,9 +106,7 @@ public class Utilities {
                 }
             });
 
-        }
-        else{
-            mUser = (User) savedInstanceState.getSerializable("user");
+
         }
         return mUser;
     }

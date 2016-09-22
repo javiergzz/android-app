@@ -1,0 +1,5 @@
+function black_magic(){
+	var filename = "developer-livepost-export.json";
+	var jayson = $.getJson(filename);
+	window.alert("Swag "+ jayson);
+}

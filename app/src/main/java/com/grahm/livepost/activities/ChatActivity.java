@@ -101,9 +101,9 @@ public class ChatActivity extends FirebaseActivity implements AbsListView.OnItem
         Bundle args = savedInstanceState==null?getIntent().getExtras():savedInstanceState;
         if(args!=null){
             mId = args.getString(TAG_ID);
-            mUser = Utilities.getUser(mFirebaseRef,this,args);
             mStory = (Story) args.getSerializable(TAG_STORY);
         }
+        mUser = Utilities.getUser(mFirebaseRef,this,args);
     }
 
     @Override
@@ -116,14 +116,15 @@ public class ChatActivity extends FirebaseActivity implements AbsListView.OnItem
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_chat);
+        ButterKnife.bind(this);
         setSupportActionBar(mToolbar);
         restoreState(savedInstanceState);
         EasyImage.configuration(this)
                 .setImagesFolderName("images")
                 .saveInAppExternalFilesDir()
                 .setCopyExistingPicturesToPublicLocation(true);
-        mFirebaseRef = FirebaseDatabase.getInstance().getReference("updates").child(mId);
-        ButterKnife.bind(this);
+        mFirebaseRef = FirebaseDatabase.getInstance().getReference("updates/"+mId);
+
         setupViews();
     }
 
@@ -152,12 +153,12 @@ public class ChatActivity extends FirebaseActivity implements AbsListView.OnItem
     @Override
     public void onStart() {
         super.onStart();
-
+        ButterKnife.bind(this);
         try {
             LinearLayoutManager llm = new LinearLayoutManager(this);
             llm.setOrientation(LinearLayoutManager.VERTICAL);
             mListView.setLayoutManager(llm);
-            mMessagesListAdapter = new ChatAdapter(mFirebaseRef.limitToLast(50), this, mId);
+            mMessagesListAdapter = new ChatAdapter(mFirebaseRef.limitToLast(50), this, mId, mUser);
             mListView.setAdapter(mMessagesListAdapter);
             mMessagesListAdapter.registerAdapterDataObserver(new RecyclerView.AdapterDataObserver() {
                 @Override
@@ -250,10 +251,16 @@ public class ChatActivity extends FirebaseActivity implements AbsListView.OnItem
                         intent.putExtra(TAG_STORY,mStory);
                         intent.putExtra(TAG_ID,mId);
                         startActivityForResult(intent, 1);
+                        ChatActivity.this.finish();
                         return true;
                 };
                 return true;
             }
         });
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
     }
 }

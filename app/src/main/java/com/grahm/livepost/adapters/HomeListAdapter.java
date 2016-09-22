@@ -51,10 +51,10 @@ public class HomeListAdapter extends FirebaseListAdapter<Story> {
         mListType = listType;
         mVItemLayout = listType == STAGGERED ? R.layout.item_story_staggered : R.layout.item_story;
         mCtx = activity.getApplicationContext();
-
         mActivity = activity;
         mOnFragmentInteractionListener = (OnFragmentInteractionListener) mActivity;
         mImageLoader = ImageLoader.getInstance();
+        if(!mImageLoader.isInited())mImageLoader.init(new ImageLoaderConfiguration.Builder(activity).build());
     }
 
     @Override

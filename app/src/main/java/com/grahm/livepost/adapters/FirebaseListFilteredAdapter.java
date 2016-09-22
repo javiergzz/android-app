@@ -49,11 +49,10 @@ public abstract class FirebaseListFilteredAdapter<T> extends  RecyclerView.Adapt
      * @param mModelClass Firebase will marshall the data at a location into an instance of a class that you provide
      * @param activity    The activity containing the ListView
      */
-    public FirebaseListFilteredAdapter(DatabaseReference mRef, Class<T> mModelClass, Activity activity, final Map<String,Object> filter) {
+    public FirebaseListFilteredAdapter(DatabaseReference mRef, Class<T> mModelClass, final Map<String,Object> filter) {
         this.mFilter=filter;
         this.mRef = mRef;
         this.mModelClass = mModelClass;
-        mInflater = activity.getLayoutInflater();
         mModels = new ArrayList<T>();
         mModelKeys = new HashMap<String, T>();
         mKeys = new ArrayList<String>();

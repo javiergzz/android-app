@@ -4,26 +4,39 @@ import android.app.Activity;
 import android.support.v4.text.TextUtilsCompat;
 import android.support.v7.widget.RecyclerView;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
+import com.google.firebase.database.ValueEventListener;
 import com.grahm.livepost.R;
+import com.grahm.livepost.objects.FirebaseActivity;
 import com.grahm.livepost.objects.User;
 import com.nostra13.universalimageloader.core.ImageLoader;
+
+import java.util.Map;
 
 /**
  * Created by Vyz on 2016-09-09.
  */
-public class UsersAdapter extends FirebaseListAdapter<User> {
-    private ImageLoader mImageLoader;
-    public UsersAdapter(Query query, Activity activity){
-        super(query,User.class);
-        mImageLoader = ImageLoader.getInstance();
+public class UsersAdapter extends FirebaseListFilteredAdapter<User> {
+    private static final String TAG = "UsersAdapter";
+    DatabaseReference mFirebaseRef;
+    String mStoryId;
+    public UsersAdapter(Query query, String storyId, Map<String,Object> filter){
+        super(query.getRef(),User.class,filter);
+        //(DatabaseReference mRef, Class<T> mModelClass, Activity activity, final Map<String,Object> filter)
+        mFirebaseRef = FirebaseDatabase.getInstance().getReference();
+        mStoryId = storyId;
     }
     @Override
     public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
@@ -32,23 +45,31 @@ public class UsersAdapter extends FirebaseListAdapter<User> {
 
     @Override
     public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
-        User user = getItem(position);
+        final User user = getItem(position);
         UserViewHolder h  = (UserViewHolder)holder;
         h.mTextView.setText(user.getName());
-        String imageUrl = user.getProfile_picture();
-        if(!TextUtils.isEmpty(imageUrl)){
-            mImageLoader.displayImage(imageUrl,h.mImageView);
-        }
+        h.mButtonView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                deleteContributor(user.getAuthorString());
+            }
+        });
+    }
+    private void deleteContributor(String id){
+        //Remove contributors entry
+        mFirebaseRef.child("members/"+mStoryId+"/"+id).removeValue();
+        //Remove user entry
+        mFirebaseRef.child("users/" +id + "/posts_contributed_to/").child(mStoryId).removeValue();
     }
     class UserViewHolder extends RecyclerView.ViewHolder{
         public final View mView;
-        public final ImageView mImageView;
         public final TextView mTextView;
+        public final Button mButtonView;
         public UserViewHolder(View view){
             super(view);
             mView = view;
-            mImageView = (ImageView)view.findViewById(R.id.imgProfile);
-            mTextView = (TextView)view.findViewById(R.id.title);
+            mTextView = (TextView)view.findViewById(R.id.contributor_text);
+            mButtonView = (Button)view.findViewById(R.id.remove_contributor_button);
         }
     }
 }

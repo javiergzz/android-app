@@ -58,7 +58,7 @@ public class StoryContributedLinearListAdapter extends FirebaseListFilteredAdapt
 
 
     public StoryContributedLinearListAdapter(DatabaseReference ref, AppCompatActivity activity, int listType, Map<String,Object> filter) {
-        super(ref, Story.class,activity,filter);
+        super(ref, Story.class,filter);
         mListType = listType;
         mVItemLayout = listType == STAGGERED?R.layout.item_session_staggered:R.layout.item_session;
         mCtx = activity.getApplicationContext();

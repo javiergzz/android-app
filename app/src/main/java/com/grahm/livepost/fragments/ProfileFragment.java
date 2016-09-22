@@ -48,8 +48,8 @@ import butterknife.OnClick;
 public class ProfileFragment extends Fragment {
     @BindView(R.id.profile_pic) public ImageView mImageView;
     @BindView(R.id.pager) public ViewPager mViewPager;
-    @BindView(R.id.profile_name) TextView mTitleView;
-    @BindView(R.id.profile_email) TextView mEmailView;
+    @BindView(R.id.profile_name) public TextView mTitleView;
+    @BindView(R.id.profile_email) public TextView mEmailView;
     private User mUser;
     private ProfileViewsManager mProfileViewsManager;
     private DatabaseReference mFirebaseRef;
@@ -81,9 +81,10 @@ public class ProfileFragment extends Fragment {
 
         ImageLoader imageLoader = ImageLoader.getInstance();
         imageLoader.displayImage(Utilities.trimProfilePic(mUser), mImageView);
-
-        mTitleView.setText(mUser.getName());
-        mEmailView.setText(mUser.getEmail());
+        if(mUser!=null) {
+            mTitleView.setText(mUser.getName());
+            mEmailView.setText(mUser.getEmail());
+        }
         setupNavigation(view,inflater);
         return view;
 
@@ -160,6 +161,7 @@ public class ProfileFragment extends Fragment {
                             mUser = dataSnapshot.getValue(User.class);
                             getActivity().getSharedPreferences(getString(R.string.preference_file_key), Context.MODE_PRIVATE).edit().putString("user",new Gson().toJson(mUser,User.class)).commit();
                             StoryContributedLinearListAdapter sessionLinearListAdapter = new StoryContributedLinearListAdapter(f, (AppCompatActivity) getActivity(), 1, mUser.getPosts_contributed());
+                            recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
                             recyclerView.setAdapter(sessionLinearListAdapter);
                             sessionLinearListAdapter.notifyDataSetChanged();
                         }
