@@ -126,8 +126,8 @@ public class StoryListAdapter extends FirebaseListAdapter<Story> {
                 @Override
                 public void onClick(View v) {
                     Bundle args = new Bundle();
-                    args.putString(FragmentChatClass.TAG_ID, key);
-                    args.putString(FragmentChatClass.TAG_AUTHOR, iholder.mItem.getAuthor());
+                    args.putString("key", key);
+                    args.putSerializable("story",iholder.mItem);
                     mOnFragmentInteractionListener.onFragmentInteraction(MainActivity.CHAT_IDX, args);
                 }
             });

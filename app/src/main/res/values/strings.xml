@@ -300,5 +300,8 @@
     <string name="story_settings_contributors_title">Contributors</string>
     <string name="story_settings_contributors_add_btn">Add</string>
     <string name="story_settings_contributors_delete_btn">Delete</string>
+    <string name="story_settings_contributors_delete_post_btn">Delete Post</string>
+
+    <string name="story_settings_invalid_user_error">Sorry! That user does not exist D:</string>
     <string name="story_code">StoryCode</string>
 </resources>

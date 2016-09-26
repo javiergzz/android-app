@@ -55,6 +55,8 @@ public class HomeFragment extends Fragment {
             RecyclerView recyclerView = (RecyclerView) rootView;
             LinearLayoutManager llm = new LinearLayoutManager(mContext);
             llm.setOrientation(LinearLayoutManager.VERTICAL);
+            llm.setReverseLayout(true);
+            llm.setStackFromEnd(true);
             recyclerView.setLayoutManager(llm);
             setupAdapter(recyclerView);
         }
@@ -69,9 +71,10 @@ public class HomeFragment extends Fragment {
             @Override
             public void onChanged() {
                 super.onChanged();
-                recyclerView.scrollToPosition(0);
+                recyclerView.scrollToPosition(mHomeListAdapter.getItemCount()-1);
             }
         });
+        recyclerView.scrollToPosition(mHomeListAdapter.getItemCount()-1);
     }
 
     @Override

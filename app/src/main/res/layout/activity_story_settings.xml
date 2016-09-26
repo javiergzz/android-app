@@ -41,7 +41,7 @@
                     android:lines="2"
                     android:text="@string/story_settings_code_title" />
 
-                <AutoCompleteTextView
+                <EditText
                     android:id="@+id/text_story_code"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -81,11 +81,12 @@
                     android:orientation="horizontal"
                     android:weightSum="1">
 
-                    <EditText
+                    <AutoCompleteTextView
                         android:id="@+id/add_contributor_edit_text"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_weight=".7"
+                        android:lines="1"
                         />
 
                     <Button
@@ -114,7 +115,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:textColor="@android:color/holo_red_light"
-                    android:text="@string/story_settings_contributors_delete_btn" />
+                    android:text="@string/story_settings_contributors_delete_post_btn" />
             </LinearLayout>
         </LinearLayout>
     </LinearLayout>

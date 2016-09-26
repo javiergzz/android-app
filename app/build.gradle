@@ -1,6 +1,7 @@
 apply plugin: 'com.android.application'
 apply plugin: 'com.google.gms.google-services'
 apply plugin: 'android-apt'
+//apply plugin: 'com.tencent.tinker.patch'
 android {
     compileSdkVersion 23
     buildToolsVersion "23.0.3"
@@ -23,6 +24,7 @@ android {
         exclude 'META-INF/LICENSE-FIREBASE.txt'
         exclude 'META-INF/NOTICE'
     }
+
 }
 repositories {
     maven { url "https://jitpack.io" }
@@ -67,4 +69,11 @@ dependencies {
     compile 'com.firebaseui:firebase-ui-database:0.5.1'
     compile 'com.firebaseui:firebase-ui-auth:0.5.1'
     compile 'com.android.volley:volley:1.0.0'
+    compile('com.amazonaws:aws-android-sdk-cognito:2.2.2') {
+        exclude group: 'commons-logging', module: 'commons-logging'
+    }
+    //optional, help to generate the final application
+    //compile('com.tencent.tinker:tinker-android-anno:1.6.0')
+    //tinker's main Android lib
+    //compile('com.tencent.tinker:tinker-android-lib:1.6.0')
 }

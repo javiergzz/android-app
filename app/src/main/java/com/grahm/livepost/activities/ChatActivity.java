@@ -3,6 +3,8 @@ package com.grahm.livepost.activities;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.PersistableBundle;
+import android.support.design.widget.AppBarLayout;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
@@ -64,6 +66,10 @@ public class ChatActivity extends FirebaseActivity implements AbsListView.OnItem
     public Toolbar mToolbar;
     @BindView(R.id.main_backdrop)
     public ImageView mBackdropImageView;
+    @BindView(R.id.toolbar_title)
+    public TextView mTitle;
+
+
     public static MainActivity.FragmentsEnum page = MainActivity.FragmentsEnum.CHAT;
     private DatabaseReference mFirebaseRef;
     private PostImageTask mPostTask;
@@ -93,9 +99,10 @@ public class ChatActivity extends FirebaseActivity implements AbsListView.OnItem
         outState.putString(TAG_ID, mId);
         outState.putSerializable(TAG_STORY,mStory);
         outState.putSerializable(TAG_USER, mUser);
-        getIntent().putExtra(TAG_USER,mUser);
+        getIntent().putExtras(outState);
         super.onSaveInstanceState(outState);
     }
+
 
     private void restoreState(Bundle savedInstanceState){
         Bundle args = savedInstanceState==null?getIntent().getExtras():savedInstanceState;
@@ -104,12 +111,6 @@ public class ChatActivity extends FirebaseActivity implements AbsListView.OnItem
             mStory = (Story) args.getSerializable(TAG_STORY);
         }
         mUser = Utilities.getUser(mFirebaseRef,this,args);
-    }
-
-    @Override
-    protected void onRestoreInstanceState(Bundle savedInstanceState) {
-        super.onRestoreInstanceState(savedInstanceState);
-        restoreState(savedInstanceState);
     }
 
     @Override
@@ -235,12 +236,18 @@ public class ChatActivity extends FirebaseActivity implements AbsListView.OnItem
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.menu_chat, menu);
-        setTitle(mStory.getTitle());
+        if(mStory.getTitle()!=null) {
+            setTitle(mStory.getTitle());
+            mTitle.setText(mStory.getTitle());
+        }
         return super.onCreateOptionsMenu(menu);
     }
 
     private void setupMenu(){
-        mToolbar.setTitle(mStory.getTitle());
+        if(mStory.getTitle()!=null) {
+            mToolbar.setTitle(mStory.getTitle());
+            mTitle.setText(mStory.getTitle());
+        }
         mToolbar.inflateMenu(R.menu.menu_chat);
         mToolbar.setOnMenuItemClickListener(new Toolbar.OnMenuItemClickListener() {
             @Override public boolean onMenuItemClick(MenuItem item) {
@@ -250,8 +257,7 @@ public class ChatActivity extends FirebaseActivity implements AbsListView.OnItem
                         Intent intent = new Intent(ChatActivity.this, StorySettingsActivity.class);
                         intent.putExtra(TAG_STORY,mStory);
                         intent.putExtra(TAG_ID,mId);
-                        startActivityForResult(intent, 1);
-                        ChatActivity.this.finish();
+                        startActivity(intent);
                         return true;
                 };
                 return true;

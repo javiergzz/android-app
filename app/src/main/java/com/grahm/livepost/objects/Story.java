@@ -81,7 +81,7 @@ public class Story implements Serializable {
         this.last_time = last_time;
     }
 
-    public double getLat() {
+    public Double getLat() {
         return lat;
     }
 
@@ -89,7 +89,7 @@ public class Story implements Serializable {
         this.lat = lat;
     }
 
-    public double getLng() {
+    public Double getLng() {
         return lng;
     }
 

@@ -8,4 +8,5 @@ public class GV {
     public static final String OAUTH_TOKEN = "264927564-76v4QsuckvhEyA2bIr9FcwSSJrXRexau1UkUwLUw";
     public static final String OAUTH_SECRET = "QjhruikDzKZrUl4EG0zk8Wjl8ZVyJLp4sHTA3jCKgS4UD";
     public static final String OAUTH_ID = "264927564";
+    public static final String COGNITO_POOL_ID="";
 }

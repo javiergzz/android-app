@@ -8,6 +8,7 @@ import android.os.Bundle;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.RecyclerView;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -100,20 +101,23 @@ public class StoryContributedLinearListAdapter extends FirebaseListFilteredAdapt
             iholder.mTitleView.setText(s.getTitle());
             String authorStr = s.getAuthor_name()==null?s.getAuthor(): s.getAuthor_name();
             iholder.mCategoryView.setText("By " + authorStr + " in " + s.getCategory());
-
-            String lastTime= new SimpleDateFormat("dd/MM/yyyy").format(s.getLast_time());
-            String timestamp =  new SimpleDateFormat("dd/MM/yyyy").format(s.getTimestamp());
-            if(lastTime==null){
-                lastTime = timestamp;
+            String lastTime = null;
+            if(s.getLast_time()==null){
+                if(s.getTimestamp()!=null)
+                    lastTime =  new SimpleDateFormat("dd/MM/yyyy").format(s.getTimestamp());
+            }else{
+                lastTime = new SimpleDateFormat("dd/MM/yyyy").format(s.getLast_time());
             }
-            iholder.mDateTimeView.setText(lastTime);
+            if(!TextUtils.isEmpty(lastTime))
+                iholder.mDateTimeView.setText(lastTime);
+
             loadBitmap(s.getPosts_picture(), iholder.mIconView, iholder.mProgressImgView, false);
             iholder.mSelArea.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
                     Bundle args = new Bundle();
-                    args.putString(FragmentChatClass.TAG_ID, key);
-                    args.putString(FragmentChatClass.TAG_AUTHOR, iholder.mItem.getAuthor());
+                    args.putString("key", key);
+                    args.putSerializable("story",iholder.mItem);
                     mOnFragmentInteractionListener.onFragmentInteraction(MainActivity.CHAT_IDX, args);
                 }
             });
@@ -191,6 +195,8 @@ public class StoryContributedLinearListAdapter extends FirebaseListFilteredAdapt
     public void loadBitmap(final String resUrl, final ImageView imageView, final ProgressBar progressBar,final boolean retry) {
 
         String rawName;
+        if(resUrl==null) return;
+
         if(resUrl.contains("/")) {
             List<String> tempList = Arrays.asList(resUrl.split("/"));
             rawName=tempList.get(tempList.size() - 1);

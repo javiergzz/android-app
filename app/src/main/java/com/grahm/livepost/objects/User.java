@@ -115,4 +115,9 @@ public class User implements Serializable {
         this.profile_picture = profile_picture;
         this.uid = uid;
     }
+
+    @Override
+    public String toString() {
+        return name==null?username:name;
+    }
 }

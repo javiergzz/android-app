@@ -4,21 +4,19 @@ package com.grahm.livepost.adapters;
  * Created by javiergonzalez on 6/21/16.
  */
 
-import android.app.Activity;
+import android.content.Context;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
-import android.view.LayoutInflater;
+import android.widget.ArrayAdapter;
+import android.widget.ListAdapter;
 
 import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.GenericTypeIndicator;
 import com.google.firebase.database.Query;
-import com.grahm.livepost.objects.Story;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -34,7 +32,7 @@ import java.util.Map;
  *
  * @param <T> The class type to use as a model for the data contained in the children of the given Firebase location
  */
-public abstract class FirebaseListAdapter<T> extends  RecyclerView.Adapter<RecyclerView.ViewHolder> {
+public abstract class FirebaseArrayAdapter<T> extends ArrayAdapter {
 
     private Query mRef;
     private Class<T> mModelClass;
@@ -42,7 +40,6 @@ public abstract class FirebaseListAdapter<T> extends  RecyclerView.Adapter<Recyc
     private Map<String, T> mModelKeys;
     private List<String> mKeys;
     private ChildEventListener mListener;
-    private boolean mSearchingFlag ;
 
 
     /**
@@ -50,11 +47,8 @@ public abstract class FirebaseListAdapter<T> extends  RecyclerView.Adapter<Recyc
      *                    combination of <code>limit()</code>, <code>startAt()</code>, and <code>endAt()</code>,
      * @param mModelClass Firebase will marshall the data at a location into an instance of a class that you provide
      */
-    public FirebaseListAdapter(Query mRef, final Class<T> mModelClass) {
-        this(mRef, mModelClass,false);
-    }
-    public FirebaseListAdapter(Query mRef, final Class<T> mModelClass,final boolean keepsynced) {
-        this.mSearchingFlag=mSearchingFlag;
+    public FirebaseArrayAdapter(Query mRef, Context context, final Class<T> mModelClass,int resId) {
+        super(context,resId);
         this.mRef = mRef;
         this.mModelClass = mModelClass;
         mModels = new ArrayList<T>();
@@ -68,15 +62,11 @@ public abstract class FirebaseListAdapter<T> extends  RecyclerView.Adapter<Recyc
                 T model;
                 String key;
                 try {
-                    if(dataSnapshot.hasChild("_source")){
-                        model = dataSnapshot.child("_source").getValue(FirebaseListAdapter.this.mModelClass);
-                        Log.d("Snapshot:",dataSnapshot.toString());
-                    }else {
-                        model = dataSnapshot.getValue(FirebaseListAdapter.this.mModelClass);
-                    }
-                    key = dataSnapshot.hasChild("_id")? dataSnapshot.child("_id").getValue().toString():dataSnapshot.getKey();
+                    model = dataSnapshot.getValue(FirebaseArrayAdapter.this.mModelClass);
+                    key = dataSnapshot.getKey();
                     mModelKeys.put(key, model);
                     // Insert into the correct location, based on previousChildName
+                    add(model);
                     if (previousChildName == null) {
                         mModels.add(0, model);
                         mKeys.add(0, key);
@@ -104,13 +94,13 @@ public abstract class FirebaseListAdapter<T> extends  RecyclerView.Adapter<Recyc
             public void onChildChanged(DataSnapshot dataSnapshot, String s) {
                 // One of the mModels changed. Replace it in our list and name mapping
                 String modelName = dataSnapshot.hasChild("_id")? dataSnapshot.child("_id").getValue().toString():dataSnapshot.getKey();
-                Log.d("change",s+dataSnapshot.getKey());
+                Log.e("change",s+dataSnapshot.getKey());
                 T oldModel = mModelKeys.get(modelName);
                 T newModel;
                 if(dataSnapshot.hasChild("_source")){
-                    newModel = dataSnapshot.child("_source").getValue(FirebaseListAdapter.this.mModelClass);
+                    newModel = dataSnapshot.child("_source").getValue(FirebaseArrayAdapter.this.mModelClass);
                 }else {
-                    newModel = dataSnapshot.getValue(FirebaseListAdapter.this.mModelClass);
+                    newModel = dataSnapshot.getValue(FirebaseArrayAdapter.this.mModelClass);
                 }
 
                 int index = mModels.indexOf(oldModel);
@@ -149,9 +139,9 @@ public abstract class FirebaseListAdapter<T> extends  RecyclerView.Adapter<Recyc
 
                 T newModel;
                 if(dataSnapshot.hasChild("_source")){
-                    newModel = dataSnapshot.child("_source").getValue(FirebaseListAdapter.this.mModelClass);
+                    newModel = dataSnapshot.child("_source").getValue(FirebaseArrayAdapter.this.mModelClass);
                 }else {
-                    newModel = dataSnapshot.getValue(FirebaseListAdapter.this.mModelClass);
+                    newModel = dataSnapshot.getValue(FirebaseArrayAdapter.this.mModelClass);
                 }
                 int index = mModels.indexOf(oldModel);
                 //Return if old model is no longer found
@@ -192,20 +182,24 @@ public abstract class FirebaseListAdapter<T> extends  RecyclerView.Adapter<Recyc
         mModelKeys.clear();
     }
 
+
+
     @Override
-    public int getItemCount() {
+    public int getCount() {
         return mModels.size();
     }
-
 
     @Override
     public long getItemId(int i) {
         return i;
     }
 
-    public T getItem(int i){
-        return mModels.get(i);
+    @Override
+    public Object getItem(int position) {
+        return mModels.get(position);
     }
+
+
     public String getItemKey(int i){
         return mKeys.get(i);
     }
