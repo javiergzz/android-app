@@ -1,44 +1,21 @@
 <?xml version="1.0" encoding="utf-8"?>
-
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
-    android:orientation="horizontal"
-    android:padding="6dp">
+    android:layout_marginTop="10dp"
+    android:orientation="horizontal">
 
     <RelativeLayout
-        android:layout_width="0dp"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginLeft="5dp"
-        android:layout_weight=".7"
         android:background="@android:color/white">
-
-        <LinearLayout
-            android:id="@+id/author_area"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:padding="5dp">
-
-            <TextView
-                android:id="@+id/author"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:textColor="#333"
-                android:textSize="14dp" />
-
-            <TextView
-                android:id="@+id/date"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginLeft="5dp" />
-        </LinearLayout>
 
         <RelativeLayout
             android:id="@+id/msgArea"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_below="@id/author_area">
+            android:layout_marginBottom="10dp"
+            android:layout_marginLeft="10dp">
 
             <TextView
                 android:id="@+id/message"
@@ -54,12 +31,48 @@
                 android:maxHeight="300dp"
                 android:scaleType="fitCenter"
                 android:src="@drawable/ic_session"
+                android:layout_marginLeft="10dp"
+                android:layout_marginRight="10dp"
                 android:visibility="gone" />
         </RelativeLayout>
 
+        <LinearLayout
+            android:id="@+id/author_area"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:layout_marginRight="10dp"
+            android:layout_below="@+id/msgArea"
+            android:orientation="horizontal"
+            android:padding="5dp">
+
+            <TextView
+                android:id="@+id/author"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="@color/sub_labels"
+                android:textSize="12dp" />
+
+            <TextView
+                android:id="@+id/date"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="@color/sub_labels"
+                android:textSize="12dp"
+                android:layout_marginLeft="5dp" />
+        </LinearLayout>
+
         <View
-            android:layout_width="fill_parent"
-            android:layout_height="2dip"
+            android:layout_width="40dp"
+            android:layout_height="1dp"
+            android:layout_alignParentBottom="true"
+            android:layout_alignParentLeft="true"
+            android:background="@color/transparent_gray"></View>
+
+        <View
+            android:layout_width="40dp"
+            android:layout_height="1dp"
+            android:layout_alignParentRight="true"
             android:layout_alignParentBottom="true"
             android:background="@color/transparent_gray"></View>
     </RelativeLayout>

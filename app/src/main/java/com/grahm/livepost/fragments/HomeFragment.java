@@ -56,6 +56,8 @@ public class HomeFragment extends Fragment {
             RecyclerView recyclerView = (RecyclerView) rootView;
             LinearLayoutManager llm = new LinearLayoutManager(mContext);
             llm.setOrientation(LinearLayoutManager.VERTICAL);
+            llm.setReverseLayout(true);
+            llm.setStackFromEnd(true);
             recyclerView.setLayoutManager(llm);
             setupAdapter(recyclerView);
         }
@@ -64,15 +66,16 @@ public class HomeFragment extends Fragment {
 
     private void setupAdapter(final RecyclerView recyclerView){
         Log.d(TAG,mFirebaseRef.toString());
-        mHomeListAdapter = new HomeListAdapter(mFirebaseRef.orderByChild("last_time").limitToLast(20), (AppCompatActivity)getActivity(),  1 ,false);
+        mHomeListAdapter = new HomeListAdapter(mFirebaseRef.orderByChild("last_time").limitToLast(50), (AppCompatActivity)getActivity(),  1 ,false);
         recyclerView.setAdapter(mHomeListAdapter);
         mHomeListAdapter.registerAdapterDataObserver(new RecyclerView.AdapterDataObserver() {
             @Override
             public void onChanged() {
                 super.onChanged();
-                recyclerView.scrollToPosition(0);
+                recyclerView.scrollToPosition(mHomeListAdapter.getItemCount()-1);
             }
         });
+        recyclerView.scrollToPosition(mHomeListAdapter.getItemCount()-1);
     }
 
     @Override

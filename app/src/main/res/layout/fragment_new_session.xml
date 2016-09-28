@@ -33,7 +33,7 @@
                 <com.grahm.livepost.specialViews.NonSwipeableViewPager
                     android:id="@+id/new_story_pager"
                     android:layout_width="match_parent"
-                    android:layout_height="30dp"
+                    android:layout_height="match_parent"
                     android:layout_centerVertical="true"
                     android:layout_centerHorizontal="true"
                     android:paddingLeft="@dimen/activity_horizontal_margin"

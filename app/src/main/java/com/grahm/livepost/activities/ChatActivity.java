@@ -3,6 +3,7 @@ package com.grahm.livepost.activities;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
@@ -45,6 +46,7 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 import butterknife.OnEditorAction;
+import butterknife.OnTextChanged;
 import pl.aprilapps.easyphotopicker.DefaultCallback;
 import pl.aprilapps.easyphotopicker.EasyImage;
 
@@ -64,6 +66,9 @@ public class ChatActivity extends FirebaseActivity implements AbsListView.OnItem
     public Toolbar mToolbar;
     @BindView(R.id.main_backdrop)
     public ImageView mBackdropImageView;
+    @BindView(R.id.btnSend)
+    public FloatingActionButton mBtnSend;
+    
     public static MainActivity.FragmentsEnum page = MainActivity.FragmentsEnum.CHAT;
     private DatabaseReference mFirebaseRef;
     private PostImageTask mPostTask;
@@ -71,7 +76,7 @@ public class ChatActivity extends FirebaseActivity implements AbsListView.OnItem
     private Story mStory;
     private Uri mIimageUri;
     private AmazonS3Client s3Client = new AmazonS3Client(new BasicAWSCredentials(GV.ACCESS_KEY_ID, GV.SECRET_KEY));
-    private ImageLoader mImageLoader= ImageLoader.getInstance();
+    private ImageLoader mImageLoader = ImageLoader.getInstance();
 
     private ChatAdapter mMessagesListAdapter;
     private User mUser;
@@ -79,7 +84,7 @@ public class ChatActivity extends FirebaseActivity implements AbsListView.OnItem
         @Override
         public void onSuccess(String url) {
             mFirebaseRef.getRoot().child("posts/" + mId + "/last_message").setValue(url);
-            Update m = new Update(0,null,url,mUser.getProfile_picture(), mUser.getName(), mUser.getEmail());
+            Update m = new Update(0, null, url, mUser.getProfile_picture(), mUser.getName(), mUser.getEmail());
             // Create a new, auto-generated child of that chat location, and save our chat data there
             DatabaseReference r = mFirebaseRef.push();
             r.setValue(m);
@@ -87,23 +92,22 @@ public class ChatActivity extends FirebaseActivity implements AbsListView.OnItem
         }
     };
 
-
     @Override
     public void onSaveInstanceState(Bundle outState) {
         outState.putString(TAG_ID, mId);
-        outState.putSerializable(TAG_STORY,mStory);
+        outState.putSerializable(TAG_STORY, mStory);
         outState.putSerializable(TAG_USER, mUser);
-        getIntent().putExtra(TAG_USER,mUser);
+        getIntent().putExtra(TAG_USER, mUser);
         super.onSaveInstanceState(outState);
     }
 
-    private void restoreState(Bundle savedInstanceState){
-        Bundle args = savedInstanceState==null?getIntent().getExtras():savedInstanceState;
-        if(args!=null){
+    private void restoreState(Bundle savedInstanceState) {
+        Bundle args = savedInstanceState == null ? getIntent().getExtras() : savedInstanceState;
+        if (args != null) {
             mId = args.getString(TAG_ID);
-            mUser = Utilities.getUser(mFirebaseRef,this,args);
             mStory = (Story) args.getSerializable(TAG_STORY);
         }
+        mUser = Utilities.getUser(mFirebaseRef, this, args);
     }
 
     @Override
@@ -116,6 +120,7 @@ public class ChatActivity extends FirebaseActivity implements AbsListView.OnItem
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_chat);
+        ButterKnife.bind(this);
         setSupportActionBar(mToolbar);
         restoreState(savedInstanceState);
         EasyImage.configuration(this)
@@ -123,15 +128,19 @@ public class ChatActivity extends FirebaseActivity implements AbsListView.OnItem
                 .saveInAppExternalFilesDir()
                 .setCopyExistingPicturesToPublicLocation(true);
         mFirebaseRef = FirebaseDatabase.getInstance().getReference("updates").child(mId);
-        ButterKnife.bind(this);
         setupViews();
     }
 
-    private void setupViews(){
+    private void setupViews() {
         setupMenu();
-        mImageLoader.displayImage(mStory.getPosts_picture(),mBackdropImageView);
+        mImageLoader.displayImage(mStory.getPosts_picture(), mBackdropImageView);
     }
 
+
+    @OnTextChanged(R.id.messageInput)
+    void onTextChanged(CharSequence text) {
+        mBtnSend.setImageResource(TextUtils.isEmpty(text) ? android.R.drawable.ic_menu_camera : android.R.drawable.ic_menu_send);
+    }
 
     @OnEditorAction(R.id.messageInput)
     public boolean editorAction(TextView textView, int actionId, KeyEvent keyEvent) {
@@ -141,23 +150,16 @@ public class ChatActivity extends FirebaseActivity implements AbsListView.OnItem
         return true;
     }
 
-    @OnClick(R.id.btnAddPicture)
-    public void addPictureCallback() {
-        Log.d(TAG_CLASS,"Choosing Image");
-        Long l = System.currentTimeMillis()/1000L;
-        EasyImage.openChooserWithDocuments(this, mId+"_"+l, 1);
-    }
-
-
     @Override
     public void onStart() {
         super.onStart();
 
+        ButterKnife.bind(this);
         try {
             LinearLayoutManager llm = new LinearLayoutManager(this);
             llm.setOrientation(LinearLayoutManager.VERTICAL);
             mListView.setLayoutManager(llm);
-            mMessagesListAdapter = new ChatAdapter(mFirebaseRef.limitToLast(50), this, mId);
+            mMessagesListAdapter = new ChatAdapter(mFirebaseRef.limitToLast(50), this, mId, mUser);
             mListView.setAdapter(mMessagesListAdapter);
             mMessagesListAdapter.registerAdapterDataObserver(new RecyclerView.AdapterDataObserver() {
                 @Override
@@ -188,11 +190,11 @@ public class ChatActivity extends FirebaseActivity implements AbsListView.OnItem
         });
     }
 
-    private void onPhotoReturned(File imageFile){
+    private void onPhotoReturned(File imageFile) {
         Uri uri = Uri.fromFile(imageFile);
 
-        mPostTask = new PostImageTask(this,s3Client,putImageListener,true);
-        if(uri!= null) mPostTask.execute(uri);
+        mPostTask = new PostImageTask(this, s3Client, putImageListener, true);
+        if (uri != null) mPostTask.execute(uri);
     }
 
     @Override
@@ -203,23 +205,28 @@ public class ChatActivity extends FirebaseActivity implements AbsListView.OnItem
     @OnClick(R.id.btnSend)
     public void sendMessage() {
         String input = mInputText.getText().toString();
-        mUser = Utilities.getUser(mFirebaseRef,getBaseContext(),getIntent().getExtras());
-        if (!TextUtils.isEmpty(input)) {
+        mUser = Utilities.getUser(mFirebaseRef, getBaseContext(), getIntent().getExtras());
+        if (TextUtils.isEmpty(input)) {
+            Log.d(TAG_CLASS, "Choosing Image");
+            Long l = System.currentTimeMillis() / 1000L;
+            EasyImage.openChooserWithDocuments(this, mId + "_" + l, 1);
+        } else {
             mFirebaseRef.getRoot().child("posts/" + mId + "/last_message").setValue(input);
-            Update m = new Update(0,null,input,Utilities.trimProfilePic(mUser), mUser.getName(), mUser.getEmail());
+            Update m = new Update(0, null, input, Utilities.trimProfilePic(mUser), mUser.getName(), mUser.getEmail());
             // Create a new, auto-generated child of that chat location, and save our chat data there
             DatabaseReference r = mFirebaseRef.push();
             r.setValue(m);
             r.child(Update.TIMESTAMP_FIELD_STR).setValue(ServerValue.TIMESTAMP);
             //Update Shared Preferences
-            Map<String,Object> map = mUser.getPosts_contributed()==null?new HashMap<String,Object>():mUser.getPosts_contributed();
+            Map<String, Object> map = mUser.getPosts_contributed() == null ? new HashMap<String, Object>() : mUser.getPosts_contributed();
             map.put(mId, true);
             mUser.setPosts_contributed(map);
-            mFirebaseRef.getRoot().child("users/"+mUser.getUid()+"/posts_contributed").updateChildren(mUser.getPosts_contributed());
+            mFirebaseRef.getRoot().child("users/" + mUser.getUid() + "/posts_contributed").updateChildren(mUser.getPosts_contributed());
             mInputText.setText("");
         }
 
     }
+
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
@@ -227,7 +234,8 @@ public class ChatActivity extends FirebaseActivity implements AbsListView.OnItem
             case R.id.action_settings_chat:
                 startActivityForResult(new Intent(this, StorySettingsActivity.class), 1);
                 return true;
-        };
+        }
+        ;
         return super.onOptionsItemSelected(item);
     }
 
@@ -238,22 +246,26 @@ public class ChatActivity extends FirebaseActivity implements AbsListView.OnItem
         return super.onCreateOptionsMenu(menu);
     }
 
-    private void setupMenu(){
+    private void setupMenu() {
         mToolbar.setTitle(mStory.getTitle());
         mToolbar.inflateMenu(R.menu.menu_chat);
         mToolbar.setOnMenuItemClickListener(new Toolbar.OnMenuItemClickListener() {
-            @Override public boolean onMenuItemClick(MenuItem item) {
+            @Override
+            public boolean onMenuItemClick(MenuItem item) {
                 int id = item.getItemId();
                 switch (id) {
                     case R.id.action_settings_chat:
                         Intent intent = new Intent(ChatActivity.this, StorySettingsActivity.class);
-                        intent.putExtra(TAG_STORY,mStory);
-                        intent.putExtra(TAG_ID,mId);
+                        intent.putExtra(TAG_STORY, mStory);
+                        intent.putExtra(TAG_ID, mId);
                         startActivityForResult(intent, 1);
+                        ChatActivity.this.finish();
                         return true;
-                };
+                }
+                ;
                 return true;
             }
         });
     }
+
 }

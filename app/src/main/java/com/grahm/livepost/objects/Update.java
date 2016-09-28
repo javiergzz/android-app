@@ -20,7 +20,7 @@ public class Update implements Serializable{
     private String sender;
     private String profile_picture;
     private Map<String,Integer> likes;
-    private int count_likes;
+    private Integer count_likes;
     //Empty constructor mandatory for Firebase
     public Update(){}
     public Update(int count_likes, Map<String, Integer> likes, String message, String profile_picture, String sender, String sender_key) {
@@ -32,11 +32,11 @@ public class Update implements Serializable{
         this.sender_key = sender_key;
     }
     //Getters & setters
-    public int getCount_likes() {
+    public Integer getCount_likes() {
         return count_likes;
     }
 
-    public void setCount_likes(int count_likes) {
+    public void setCount_likes(Integer count_likes) {
         this.count_likes = count_likes;
     }
 

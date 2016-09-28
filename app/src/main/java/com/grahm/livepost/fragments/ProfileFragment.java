@@ -49,10 +49,14 @@ import butterknife.OnClick;
  */
 public class ProfileFragment extends Fragment {
     private static final String TAG_CLASS = "PROFILEFRAGMENT";
-    @BindView(R.id.profile_pic) public ImageView mImageView;
-    @BindView(R.id.pager) public ViewPager mViewPager;
-    @BindView(R.id.profile_name) TextView mTitleView;
-    @BindView(R.id.profile_email) TextView mEmailView;
+    @BindView(R.id.profile_pic)
+    public ImageView mImageView;
+    @BindView(R.id.pager)
+    public ViewPager mViewPager;
+    @BindView(R.id.profile_name)
+    public TextView mTitleView;
+    @BindView(R.id.profile_email)
+    public TextView mEmailView;
     private User mUser;
     private ProfileViewsManager mProfileViewsManager;
     private DatabaseReference mFirebaseRef;
@@ -65,6 +69,7 @@ public class ProfileFragment extends Fragment {
         fragment.setArguments(args);
         return fragment;
     }
+
     public ProfileFragment() {
         // Required empty public constructor
     }
@@ -73,7 +78,7 @@ public class ProfileFragment extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         mFirebaseRef = FirebaseDatabase.getInstance().getReference();
-        mUser = Utilities.getUser(mFirebaseRef,getActivity(),savedInstanceState);
+        mUser = Utilities.getUser(mFirebaseRef, getActivity(), savedInstanceState);
     }
 
     @Override
@@ -85,14 +90,16 @@ public class ProfileFragment extends Fragment {
         ImageLoader imageLoader = ImageLoader.getInstance();
         imageLoader.displayImage(Utilities.trimProfilePic(mUser), mImageView);
 
-        mTitleView.setText(mUser.getName());
-        mEmailView.setText(mUser.getEmail());
-        setupNavigation(view,inflater);
+        if(mUser!=null) {
+            mTitleView.setText(mUser.getName());
+            mEmailView.setText(mUser.getEmail());
+        }
+        setupNavigation(view, inflater);
         return view;
 
     }
 
-    private void setupNavigation(View view,LayoutInflater inflater){
+    private void setupNavigation(View view, LayoutInflater inflater) {
         // Create the adapter that will return a fragment for each of the three
         // primary sections of the activity.
         mProfileViewsManager = new ProfileViewsManager();
@@ -101,12 +108,14 @@ public class ProfileFragment extends Fragment {
         // Set up the ViewPager with the sections adapter.
         mViewPager.setAdapter(mSectionsPagerAdapter);
     }
+
     //Background callback to avoid callbacks from other fragments.
     @OnClick(R.id.background)
-    public void doNothing(View v){}
+    public void doNothing(View v) {
+    }
 
-    @OnClick({R.id.created_posts,R.id.contributed_posts})
-    public void pagerClick(View view){
+    @OnClick({R.id.created_posts, R.id.contributed_posts})
+    public void pagerClick(View view) {
         int idx = Integer.parseInt((String) view.getTag());
         mViewPager.setCurrentItem(idx, true);
     }
@@ -114,7 +123,7 @@ public class ProfileFragment extends Fragment {
     @Override
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
-        outState.putSerializable("user",mUser);
+        outState.putSerializable("user", mUser);
     }
 
     @Override
@@ -146,8 +155,8 @@ public class ProfileFragment extends Fragment {
             }
 
             public void onSetup(ViewGroup layout) {
-                Map<String,Object> m = mUser.getPosts_contributed();
-                if(m!=null) {
+                Map<String, Object> m = mUser.getPosts_contributed();
+                if (m != null) {
                     final RecyclerView recyclerView = ButterKnife.findById(layout, R.id.profile_list);
                     final DatabaseReference f = mFirebaseRef.child("posts");
                     recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
@@ -155,13 +164,14 @@ public class ProfileFragment extends Fragment {
                     final StoryContributedLinearListAdapter storyLinearListAdapter = new StoryContributedLinearListAdapter(f, (AppCompatActivity) getActivity(), 1, mUser.getPosts_contributed());
                     recyclerView.setAdapter(storyLinearListAdapter);
 
-                    mFirebaseRef.child("users/"+uid).addValueEventListener(new ValueEventListener() {
+                    mFirebaseRef.child("users/" + uid).addValueEventListener(new ValueEventListener() {
                         @Override
                         public void onDataChange(DataSnapshot dataSnapshot) {
                             //mUser = new Gson().fromJson(getActivity().getSharedPreferences(getString(R.string.preference_file_key), Context.MODE_PRIVATE).getString("user", null), User.class);
                             mUser = dataSnapshot.getValue(User.class);
-                            getActivity().getSharedPreferences(getString(R.string.preference_file_key), Context.MODE_PRIVATE).edit().putString("user",new Gson().toJson(mUser,User.class)).commit();
+                            getActivity().getSharedPreferences(getString(R.string.preference_file_key), Context.MODE_PRIVATE).edit().putString("user", new Gson().toJson(mUser, User.class)).commit();
                             StoryContributedLinearListAdapter sessionLinearListAdapter = new StoryContributedLinearListAdapter(f, (AppCompatActivity) getActivity(), 1, mUser.getPosts_contributed());
+                            recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
                             recyclerView.setAdapter(sessionLinearListAdapter);
                             sessionLinearListAdapter.notifyDataSetChanged();
                         }
@@ -191,17 +201,18 @@ public class ProfileFragment extends Fragment {
             public void onSetup(ViewGroup layout) {
                 mUser.getEmail();
                 Query q = mFirebaseRef.child("posts").orderByChild("author").equalTo(mUser.getAuthorString());
-                    RecyclerView recyclerView = ButterKnife.findById(layout, R.id.profile_list);
-                    recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
-                    recyclerView.setAdapter(new StoryListAdapter(q, (AppCompatActivity) getActivity(), 0, false));
+                RecyclerView recyclerView = ButterKnife.findById(layout, R.id.profile_list);
+                recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
+                recyclerView.setAdapter(new StoryListAdapter(q, (AppCompatActivity) getActivity(), 0, false));
             }
         }
     }
+
     public class ProfileSectionsPagerAdapter extends PagerAdapter {
         LayoutInflater mInflater;
         MultipartFormField mCurrentPage;
 
-        public ProfileSectionsPagerAdapter(LayoutInflater inflater){
+        public ProfileSectionsPagerAdapter(LayoutInflater inflater) {
             mInflater = inflater;
         }
 

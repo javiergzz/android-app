@@ -6,71 +6,115 @@
     android:background="@android:color/background_light"
     android:fitsSystemWindows="true">
 
-    <android.support.v7.widget.Toolbar
-        android:id="@+id/settings_toolbar"
-        android:layout_width="match_parent"
-        android:layout_height="?attr/actionBarSize"
-        app:popupTheme="@style/ThemeOverlay.AppCompat.Light" />
-
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:gravity="center"
+        android:layout_height="match_parent"
         android:orientation="vertical"
-        android:textAlignment="center">
+        android:padding="8dp">
+
+        <android.support.v7.widget.Toolbar
+            android:id="@+id/settings_toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="?attr/actionBarSize"
+            app:popupTheme="@style/ThemeOverlay.AppCompat.Light" />
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:gravity="center"
             android:orientation="vertical"
+            android:padding="5dp"
             android:textAlignment="center">
 
-            <EditText
-                android:id="@+id/text_story_code"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:inputType="none"
-                android:text="@string/story_settings_code_title" />
-
-            <Button
-                android:id="@+id/btn_story_code"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/story_settings_code_btn" />
-        </LinearLayout>
-
-        <LinearLayout
-            android:id="@+id/edit_story_layout"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:gravity="center"
-            android:orientation="vertical"
-            android:textAlignment="center"
-            android:visibility="gone">
-
-            <TextView
-                android:id="@+id/text_story_contributors"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/story_settings_contributors_title" />
-
-            <android.support.v7.widget.RecyclerView
-                android:id="@+id/list_contributors"
+            <LinearLayout
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:layout_above="@+id/listFooter"
-                android:layout_marginLeft="5dp"
-                android:layout_marginRight="5dp"
-                android:background="@android:color/white"
-                android:elevation="1dp"
-                app:layout_behavior="@string/appbar_scrolling_view_behavior" />
-
-            <Button
-                android:id="@+id/btn_story_delete"
-                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="@string/story_settings_code_btn" />
+                android:gravity="center"
+                android:orientation="vertical"
+                android:padding="10dp"
+                android:textAlignment="center">
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:gravity="center"
+                    android:lines="2"
+                    android:text="@string/story_settings_code_title" />
+
+                <EditText
+                    android:id="@+id/text_story_code"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:backgroundTint="@android:color/darker_gray"
+                    android:inputType="textUri"
+                    android:lines="3"
+                    android:padding="10dp"
+                    android:text="@string/story_settings_code_title" />
+
+                <Button
+                    android:id="@+id/btn_story_code"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/story_settings_code_btn" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/edit_story_layout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:orientation="vertical"
+                android:padding="10dp"
+                android:textAlignment="center">
+
+                <TextView
+                    android:id="@+id/text_story_contributors"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="10dp"
+                    android:text="@string/story_settings_contributors_title" />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:weightSum="1">
+
+                    <AutoCompleteTextView
+                        android:id="@+id/add_contributor_edit_text"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_weight=".7"
+                        android:lines="1" />
+
+                    <Button
+                        android:id="@+id/add_contributor_button"
+                        style="@style/Widget.AppCompat.Button.Borderless"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_weight=".3"
+                        android:text="@string/story_settings_contributors_add_btn"
+                        android:textColor="@android:color/holo_blue_light" />
+                </LinearLayout>
+
+                <android.support.v7.widget.RecyclerView
+                    android:id="@+id/list_contributors"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_above="@+id/listFooter"
+                    android:layout_marginLeft="5dp"
+                    android:layout_marginRight="5dp"
+                    android:background="@android:color/white"
+                    android:elevation="1dp"
+                    app:layout_behavior="@string/appbar_scrolling_view_behavior" />
+
+                <Button
+                    android:id="@+id/btn_story_delete"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/story_settings_contributors_delete_post_btn"
+                    android:textColor="@android:color/holo_red_light" />
+            </LinearLayout>
         </LinearLayout>
     </LinearLayout>
 </android.support.design.widget.CoordinatorLayout>

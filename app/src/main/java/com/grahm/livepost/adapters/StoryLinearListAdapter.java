@@ -117,8 +117,8 @@ public class StoryLinearListAdapter extends FirebaseListAdapter<Story> {
                 @Override
                 public void onClick(View v) {
                     Bundle args = new Bundle();
-                    args.putString(FragmentChatClass.TAG_ID, key);
-                    args.putString(FragmentChatClass.TAG_AUTHOR, iholder.mItem.getAuthor());
+                    args.putString("key", key);
+                    args.putSerializable("story",iholder.mItem);
                     mOnFragmentInteractionListener.onFragmentInteraction(MainActivity.CHAT_IDX, args);
                 }
             });
@@ -259,17 +259,17 @@ public class StoryLinearListAdapter extends FirebaseListAdapter<Story> {
         public ViewHolderI(View view) {
             super(view);
             mView = view;
-            mSwipeLayout = (SwipeLayout)view.findViewById(R.id.swipeSurface);
-            mDelButton = mSwipeLayout.findViewById(R.id.delete);
-            mEditButton = mSwipeLayout.findViewById(R.id.edit);
+            mSwipeLayout = (SwipeLayout)view.findViewById(R.id.i_swipeSurface);
+            mDelButton = mSwipeLayout.findViewById(R.id.i_delete);
+            mEditButton = mSwipeLayout.findViewById(R.id.i_edit);
             mSelArea = view.findViewById(R.id.sel_area);
-            mTitleView = (TextView)view.findViewById(R.id.title);
-            mCategoryView = (TextView)view.findViewById(R.id.category);
-            mDateTimeView = (TextView)view.findViewById(R.id.datetime);
-            mFollowersView = (TextView)view.findViewById(R.id.followers);
-            mLastMsgView = (TextView)view.findViewById(R.id.lastMessage);
-            mIconView = (ImageView) view.findViewById(R.id.imgProfile);
-            mProgressImgView =(ProgressBar) view.findViewById(R.id.progress_img);
+            mTitleView = (TextView)view.findViewById(R.id.i_title);
+            mCategoryView = (TextView)view.findViewById(R.id.i_category);
+            mDateTimeView = (TextView)view.findViewById(R.id.i_datetime);
+            mFollowersView = (TextView)view.findViewById(R.id.i_followers);
+            mLastMsgView = (TextView)view.findViewById(R.id.i_lastMessage);
+            mIconView = (ImageView) view.findViewById(R.id.i_imgProfile);
+            mProgressImgView =(ProgressBar) view.findViewById(R.id.i_progress_img);
         }
     }
     public class ViewHolderH extends RecyclerView.ViewHolder {

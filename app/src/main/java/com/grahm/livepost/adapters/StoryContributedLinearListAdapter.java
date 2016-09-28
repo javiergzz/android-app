@@ -8,6 +8,7 @@ import android.os.Bundle;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.RecyclerView;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -57,17 +58,17 @@ public class StoryContributedLinearListAdapter extends FirebaseListFilteredAdapt
     private OnFragmentInteractionListener mOnFragmentInteractionListener;
 
 
-    public StoryContributedLinearListAdapter(DatabaseReference ref, AppCompatActivity activity, int listType, Map<String,Object> filter) {
-        super(ref, Story.class,activity,filter);
+    public StoryContributedLinearListAdapter(DatabaseReference ref, AppCompatActivity activity, int listType, Map<String, Object> filter) {
+        super(ref, Story.class, filter);
         mListType = listType;
-        mVItemLayout = listType == STAGGERED?R.layout.item_session_staggered:R.layout.item_session;
+        mVItemLayout = listType == STAGGERED ? R.layout.item_session_staggered : R.layout.item_session;
         mCtx = activity.getApplicationContext();
 
         mActivity = activity;
-        mOnFragmentInteractionListener =(OnFragmentInteractionListener) mActivity;
-        ImageLoaderConfiguration config  =  new ImageLoaderConfiguration.Builder(mCtx).build();
+        mOnFragmentInteractionListener = (OnFragmentInteractionListener) mActivity;
+        ImageLoaderConfiguration config = new ImageLoaderConfiguration.Builder(mCtx).build();
         mImageLoader = ImageLoader.getInstance();
-        if(!mImageLoader.isInited())mImageLoader.init(config);
+        if (!mImageLoader.isInited()) mImageLoader.init(config);
     }
 
     @Override
@@ -82,15 +83,15 @@ public class StoryContributedLinearListAdapter extends FirebaseListFilteredAdapt
     public void onBindViewHolder(final RecyclerView.ViewHolder holder, int position) {
         final Story s = getItem(position);
         final String key = getItemKey(position);
-        if(holder instanceof ViewHolderH){//Header View
-            ViewHolderH hholder = (ViewHolderH)holder;
+        if (holder instanceof ViewHolderH) {//Header View
+            ViewHolderH hholder = (ViewHolderH) holder;
             hholder.mIdView.setText(s.getTitle());
-        }else {//Item view
-            final ViewHolderI iholder = (ViewHolderI)holder;
+        } else {//Item view
+            final ViewHolderI iholder = (ViewHolderI) holder;
             iholder.mItem = s;
             final String lastMessage = s.getLast_message();
-            if(lastMessage!=null && lastMessage!="") {
-                if (lastMessage.contains(".png")||lastMessage.contains(".jpg")) {
+            if (lastMessage != null && lastMessage != "") {
+                if (lastMessage.contains(".png") || lastMessage.contains(".jpg")) {
                     iholder.mLastMsgView.setVisibility(View.GONE);
                 } else {
                     iholder.mLastMsgView.setText(lastMessage);
@@ -98,32 +99,35 @@ public class StoryContributedLinearListAdapter extends FirebaseListFilteredAdapt
             }
             //iholder.mFollowersView.setText(String.valueOf(s.get()));
             iholder.mTitleView.setText(s.getTitle());
-            String authorStr = s.getAuthor_name()==null?s.getAuthor(): s.getAuthor_name();
+            String authorStr = s.getAuthor_name() == null ? s.getAuthor() : s.getAuthor_name();
             iholder.mCategoryView.setText("By " + authorStr + " in " + s.getCategory());
 
-            String lastTime= new SimpleDateFormat("dd/MM/yyyy").format(s.getLast_time());
-            String timestamp =  new SimpleDateFormat("dd/MM/yyyy").format(s.getTimestamp());
-            if(lastTime==null){
-                lastTime = timestamp;
+            String lastTime = null;
+            if(s.getLast_time()==null){
+                if(s.getTimestamp()!=null)
+                    lastTime =  new SimpleDateFormat("dd/MM/yyyy").format(s.getTimestamp());
+            }else{
+                lastTime = new SimpleDateFormat("dd/MM/yyyy").format(s.getLast_time());
             }
-            iholder.mDateTimeView.setText(lastTime);
+            if(!TextUtils.isEmpty(lastTime))
+                iholder.mDateTimeView.setText(lastTime);
             loadBitmap(s.getPosts_picture(), iholder.mIconView, iholder.mProgressImgView, false);
             iholder.mSelArea.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
                     Bundle args = new Bundle();
-                    args.putString(FragmentChatClass.TAG_ID, key);
-                    args.putString(FragmentChatClass.TAG_AUTHOR, iholder.mItem.getAuthor());
+                    args.putString("key", key);
+                    args.putSerializable("story",iholder.mItem);
                     mOnFragmentInteractionListener.onFragmentInteraction(MainActivity.CHAT_IDX, args);
                 }
             });
-            if(mListType==LIST)
+            if (mListType == LIST)
                 swipeLayout(iholder, key);
         }
     }
 
 
-    private void swipeLayout(ViewHolderI iholder, final String key){
+    private void swipeLayout(ViewHolderI iholder, final String key) {
         iholder.mSwipeLayout.setClickToClose(true);
         //swipeLayout.setDragDistance();
         iholder.mSwipeLayout.setLeftSwipeEnabled(false);
@@ -149,7 +153,8 @@ public class StoryContributedLinearListAdapter extends FirebaseListFilteredAdapt
         });
 
     }
-    public void promptDeletion(final String key){
+
+    public void promptDeletion(final String key) {
         AlertDialog.Builder builder = new AlertDialog.Builder(mActivity);
         builder.setTitle(R.string.delete_text);
         // Add the buttons
@@ -158,7 +163,7 @@ public class StoryContributedLinearListAdapter extends FirebaseListFilteredAdapt
                 //TODO Security
                 DatabaseReference ref = FirebaseDatabase.getInstance().getReference("posts/").child(key);
                 ref.removeValue();
-                ref =  FirebaseDatabase.getInstance().getReference("updates/").child(key);
+                ref = FirebaseDatabase.getInstance().getReference("updates/").child(key);
                 ref.removeValue();
                 Log.d(TAG, "Deleted Session " + key);
             }
@@ -175,7 +180,7 @@ public class StoryContributedLinearListAdapter extends FirebaseListFilteredAdapt
         dialog.show();
     }
 
-    void reupload(final String resUrl, final ImageView imageView, final ProgressBar progressBar){
+    void reupload(final String resUrl, final ImageView imageView, final ProgressBar progressBar) {
         /** Image Compression and re-upload ran once **/
         AmazonS3Client s3Client = new AmazonS3Client(new BasicAWSCredentials(GV.ACCESS_KEY_ID, GV.SECRET_KEY));
         List<String> tempList = Arrays.asList(resUrl.split("/"));
@@ -188,24 +193,25 @@ public class StoryContributedLinearListAdapter extends FirebaseListFilteredAdapt
         new S3PutObjectTask(mCtx, s3Client, null, pictureName, false).execute(uri);
     }
 
-    public void loadBitmap(final String resUrl, final ImageView imageView, final ProgressBar progressBar,final boolean retry) {
+    public void loadBitmap(final String resUrl, final ImageView imageView, final ProgressBar progressBar, final boolean retry) {
 
         String rawName;
-        if(resUrl.contains("/")) {
+        if(resUrl==null) return;
+        if (resUrl.contains("/")) {
             List<String> tempList = Arrays.asList(resUrl.split("/"));
-            rawName=tempList.get(tempList.size() - 1);
-        }else{
+            rawName = tempList.get(tempList.size() - 1);
+        } else {
             rawName = resUrl;
         }
-        String extLess =  FilenameUtils.removeExtension(rawName);
+        String extLess = FilenameUtils.removeExtension(rawName);
         String resString;
         /*We first try to load a thumbnail or medium sized image for List and staggered versions respectively, if we fail we load the original image*/
-        if(retry)
+        if (retry)
             resString = extLess;
         else
-            resString = mListType==LIST?extLess + "_thumb":extLess+"_l_thumb";
+            resString = mListType == LIST ? extLess + "_thumb" : extLess + "_l_thumb";
 
-        resString=mCtx.getString(R.string.amazon_image_path)+resString+".jpg";
+        resString = mCtx.getString(R.string.amazon_image_path) + resString + ".jpg";
 
         mImageLoader.displayImage(resString, imageView, new ImageLoadingListener() {
             @Override
@@ -254,19 +260,20 @@ public class StoryContributedLinearListAdapter extends FirebaseListFilteredAdapt
         public ViewHolderI(View view) {
             super(view);
             mView = view;
-            mSwipeLayout = (SwipeLayout)view.findViewById(R.id.swipeSurface);
-            mDelButton = mSwipeLayout.findViewById(R.id.delete);
-            mEditButton = mSwipeLayout.findViewById(R.id.edit);
+            mSwipeLayout = (SwipeLayout) view.findViewById(R.id.i_swipeSurface);
+            mDelButton = mSwipeLayout.findViewById(R.id.i_delete);
+            mEditButton = mSwipeLayout.findViewById(R.id.i_edit);
             mSelArea = view.findViewById(R.id.sel_area);
-            mTitleView = (TextView)view.findViewById(R.id.title);
-            mCategoryView = (TextView)view.findViewById(R.id.category);
-            mDateTimeView = (TextView)view.findViewById(R.id.datetime);
-            mFollowersView = (TextView)view.findViewById(R.id.followers);
-            mLastMsgView = (TextView)view.findViewById(R.id.lastMessage);
-            mIconView = (ImageView) view.findViewById(R.id.imgProfile);
-            mProgressImgView =(ProgressBar) view.findViewById(R.id.progress_img);
+            mTitleView = (TextView) view.findViewById(R.id.i_title);
+            mCategoryView = (TextView) view.findViewById(R.id.i_category);
+            mDateTimeView = (TextView) view.findViewById(R.id.i_datetime);
+            mFollowersView = (TextView) view.findViewById(R.id.i_followers);
+            mLastMsgView = (TextView) view.findViewById(R.id.i_lastMessage);
+            mIconView = (ImageView) view.findViewById(R.id.i_imgProfile);
+            mProgressImgView = (ProgressBar) view.findViewById(R.id.i_progress_img);
         }
     }
+
     public class ViewHolderH extends RecyclerView.ViewHolder {
         public final View mView;
         public final TextView mIdView;

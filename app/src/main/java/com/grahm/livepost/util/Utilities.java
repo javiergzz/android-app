@@ -29,7 +29,7 @@ public class Utilities {
     public static final int MSG_TYPE_TEXT = 0;
     public static final int MSG_TYPE_IMAGE = 1;
     public static final int MSG_TYPE_VIDEO = 2;
-    public static String [] userLettersPalette = {"300009","e50019","c5c4b6","645f69","2a3a59"};
+    public static String[] userLettersPalette = {"300009", "e50019", "c5c4b6", "645f69", "2a3a59"};
     public static User mUser;
 
     public static boolean isOnline(Context ctx) {
@@ -43,21 +43,22 @@ public class Utilities {
         return (str == null || str.trim().length() == 0);
     }
 
-    public static String trimProfilePic(User user){
-        if(user == null) return "";
+    public static String trimProfilePic(User user) {
+        if (user == null) return "";
         String input = user.getProfile_picture();
-        if(TextUtils.isEmpty(input)){
+        if (TextUtils.isEmpty(input)) {
             return null;
         }
         String[] parts = input.split("\\?");
         return parts[0];
     }
-    public static String getProfilePic(User user){
+
+    public static String getProfilePic(User user) {
         String input = user.getProfile_picture();
-        if(TextUtils.isEmpty(input)){
+        if (TextUtils.isEmpty(input)) {
             String username = user.getName();
             int index = username.charAt(0);
-            String url = "http://dummyimage.com/100x100/"+userLettersPalette[index%5]+"/ffffff.png&text="+username.charAt(0);
+            String url = "http://dummyimage.com/100x100/" + userLettersPalette[index % 5] + "/ffffff.png&text=" + username.charAt(0);
             return url;
         }
         String[] parts = input.split("\\?");
@@ -65,8 +66,8 @@ public class Utilities {
     }
 
 
-    public static void saveUserOnFirebase(String uid, User _user){
-        Long tsLong = System.currentTimeMillis()/1000;
+    public static void saveUserOnFirebase(String uid, User _user) {
+        Long tsLong = System.currentTimeMillis() / 1000;
         String ts = tsLong.toString();
         final FirebaseDatabase database = FirebaseDatabase.getInstance();
         DatabaseReference ref = database.getReference("users");
@@ -81,18 +82,20 @@ public class Utilities {
     }
 
     public static User getUser(DatabaseReference mFirebaseRef, Context ctx, Bundle savedInstanceState) {
+        final Gson gson = new Gson();
+        final SharedPreferences SP = ctx.getSharedPreferences(ctx.getString(R.string.preference_file_key), Context.MODE_PRIVATE);
+        if (savedInstanceState == null || !savedInstanceState.containsKey("user")) {
+            mUser = gson.fromJson(SP.getString("user", null), User.class);
+        } else {
+            mUser = (User) savedInstanceState.getSerializable("user");
+        }
+        mFirebaseRef = mFirebaseRef == null ? FirebaseDatabase.getInstance().getReference() : mFirebaseRef;
         FirebaseUser mFirebaseUser = FirebaseAuth.getInstance().getCurrentUser();
         if (mFirebaseUser == null) {
-            return null;
-        }
-        final Gson gson = new Gson();
-//        final SharedPreferences SP = ctx.getSharedPreferences(ctx.getString(R.string.preference_file_key), Context.MODE_PRIVATE);
-        final SharedPreferences SP = ctx.getSharedPreferences(SplashScreen.PREFS_NAME, Context.MODE_PRIVATE);
-        if(savedInstanceState==null || !savedInstanceState.containsKey("user")){
-            mUser = gson.fromJson(SP.getString("user", null), User.class);
-            mFirebaseRef = mFirebaseRef == null ? FirebaseDatabase.getInstance().getReference() : mFirebaseRef;
-            String uid = ctx.getSharedPreferences(SplashScreen.PREFS_NAME, Context.MODE_PRIVATE).getString("uid", "");
-            mFirebaseRef.getRoot().child("users/" + uid).addValueEventListener(new ValueEventListener() {
+            if (mUser == null) {
+                return null;
+            }//Nonexisting User
+            mFirebaseRef.getRoot().child("users/" + mUser.getAuthorString()).addValueEventListener(new ValueEventListener() {
                 @Override
                 public void onDataChange(DataSnapshot dataSnapshot) {
                     mUser = dataSnapshot.getValue(User.class);
@@ -104,20 +107,35 @@ public class Utilities {
                     mUser = gson.fromJson(SP.getString("user", null), User.class);
                 }
             });
+            //Twitter auth
 
         } else {
-            mUser = (User) savedInstanceState.getSerializable("user");
+            //Firebase auth
+            mFirebaseRef.getRoot().child("users/" + mFirebaseUser.getUid()).addValueEventListener(new ValueEventListener() {
+                @Override
+                public void onDataChange(DataSnapshot dataSnapshot) {
+                    mUser = dataSnapshot.getValue(User.class);
+                    SP.edit().putString("user", gson.toJson(mUser, User.class)).commit();
+                }
+
+                @Override
+                public void onCancelled(DatabaseError databaseError) {
+                    mUser = gson.fromJson(SP.getString("user", null), User.class);
+                }
+            });
         }
         return mUser;
     }
 
     public static String getTimeMsg(Timestamp t) {
-        return new SimpleDateFormat("hh:mma MM/dd/yyyy").format(t);
+        // TODO validate date
+        // return new SimpleDateFormat("hh:mma MM/dd/yyyy").format(t);
+        return new SimpleDateFormat("hh:mma").format(t);
     }
 
-    public static int deduceMessageType(String messageString){
-        if(messageString.contains(".png")||messageString.contains(".jpg"))return MSG_TYPE_IMAGE;
-        if(messageString.contains(".mp4")) return MSG_TYPE_VIDEO;
+    public static int deduceMessageType(String messageString) {
+        if (messageString.contains(".png") || messageString.contains(".jpg")) return MSG_TYPE_IMAGE;
+        if (messageString.contains(".mp4")) return MSG_TYPE_VIDEO;
         return MSG_TYPE_TEXT;
     }
 

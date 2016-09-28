@@ -188,7 +188,7 @@ public class FragmentChatClass extends Fragment implements AbsListView.OnItemCli
             LinearLayoutManager llm = new LinearLayoutManager(getActivity());
             llm.setOrientation(LinearLayoutManager.VERTICAL);
             mListView.setLayoutManager(llm);
-            mMessagesListAdapter = new ChatAdapter(mFirebaseRef.limitToLast(50), getActivity(), mId);
+            mMessagesListAdapter = new ChatAdapter(mFirebaseRef.limitToLast(50), getActivity(), mId, mUser);
             mListView.setAdapter(mMessagesListAdapter);
             mMessagesListAdapter.registerAdapterDataObserver(new RecyclerView.AdapterDataObserver() {
                 @Override

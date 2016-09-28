@@ -22,8 +22,8 @@ public class User implements Serializable {
     //Variables
     private String email;
     private String name;
-    private  Map<String, Object> posts_contributed;
-    private  Map<String, Object> posts_created;
+    private Map<String, Object> posts_contributed;
+    private Map<String, Object> posts_created;
     private String profile_picture;
     private Long timestamp;
     private String username;
@@ -31,8 +31,8 @@ public class User implements Serializable {
     private String uid;
     //Getters & setters
 
-    public String getAuthorString(){
-        return TextUtils.isEmpty(uid)?twitter:uid;
+    public String getAuthorString() {
+        return TextUtils.isEmpty(uid) ? twitter : uid;
     }
 
     public String getUsername() {
@@ -98,11 +98,13 @@ public class User implements Serializable {
     public void setUid(String uid) {
         this.uid = uid;
     }
+
     //Dual setter with some logic
-    public void merge(User user){
+    public void merge(User user) {
         this.name = TextUtils.isEmpty(user.getName()) ? this.name : user.getName();
         this.email = TextUtils.isEmpty(user.getEmail()) ? this.email : user.getEmail();
     }
+
     //Empty constructor mandatory for Firebase
     public User() {
     }
@@ -114,5 +116,10 @@ public class User implements Serializable {
         this.posts_created = posts_created;
         this.profile_picture = profile_picture;
         this.uid = uid;
+    }
+
+    @Override
+    public String toString() {
+        return name == null ? username : name;
     }
 }

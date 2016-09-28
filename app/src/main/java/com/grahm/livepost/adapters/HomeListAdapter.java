@@ -47,15 +47,16 @@ public class HomeListAdapter extends FirebaseListAdapter<Story> {
     private OnFragmentInteractionListener mOnFragmentInteractionListener;
 
 
-    public HomeListAdapter(Query ref, AppCompatActivity activity,  int listType, boolean searchingFlag) {
+    public HomeListAdapter(Query ref, AppCompatActivity activity, int listType, boolean searchingFlag) {
         super(ref, Story.class, searchingFlag);
         mListType = listType;
         mVItemLayout = listType == STAGGERED ? R.layout.item_story_staggered : R.layout.item_story;
         mCtx = activity.getApplicationContext();
-
         mActivity = activity;
         mOnFragmentInteractionListener = (OnFragmentInteractionListener) mActivity;
         mImageLoader = ImageLoader.getInstance();
+        if (!mImageLoader.isInited())
+            mImageLoader.init(new ImageLoaderConfiguration.Builder(activity).build());
     }
 
     @Override
@@ -78,7 +79,7 @@ public class HomeListAdapter extends FirebaseListAdapter<Story> {
             if (lastMessage != null && lastMessage != "") {
                 if (lastMessage.contains(".png") || lastMessage.contains(".jpg")) {
                     iholder.mLastMsgView.setText("Image");
-                } else if(lastMessage.contains(".mp4") || lastMessage.contains(".MOV")) {
+                } else if (lastMessage.contains(".mp4") || lastMessage.contains(".MOV")) {
                     iholder.mLastMsgView.setText("Video");
                 } else {
                     iholder.mLastMsgView.setText(lastMessage);
@@ -93,7 +94,7 @@ public class HomeListAdapter extends FirebaseListAdapter<Story> {
                 public void onClick(View v) {
                     Bundle args = new Bundle();
                     args.putString("key", key);
-                    args.putSerializable("story",iholder.mItem);
+                    args.putSerializable("story", iholder.mItem);
                     mOnFragmentInteractionListener.onFragmentInteraction(MainActivity.CHAT_IDX, args);
                 }
             });

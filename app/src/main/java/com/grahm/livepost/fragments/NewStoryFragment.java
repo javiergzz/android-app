@@ -210,7 +210,7 @@ public class NewStoryFragment extends Fragment implements OnPutImageListener {
     public void attemptSessionCreation() {
         if (mStoryTask != null) return;
 
-        mStory.setAuthor(mUser.getEmail().replace(".", "<dot>"));
+        mStory.setAuthor(mUser.getAuthorString());
         mStory.setAuthor_name(mUser.getName());
         mStoryTask = new CreateStoryTask(mStory, mFirebaseRef.child("posts"), getActivity(), s3Client, this, true);
         if (mUri != null) mStoryTask.execute(mUri);
@@ -296,7 +296,7 @@ public class NewStoryFragment extends Fragment implements OnPutImageListener {
             public void onSetup(ViewGroup layout) {
 
                 ArrayAdapter adapter = new ArrayAdapter(getActivity().getApplicationContext(), R.layout.item_category,
-                         R.id.txt_category, getActivity().getResources().getStringArray(R.array.categories));
+                        R.id.txt_category, getActivity().getResources().getStringArray(R.array.categories));
                 mList = ButterKnife.findById(layout, R.id.list_categories);
                 mList.setAdapter(adapter);
                 mList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
@@ -304,7 +304,7 @@ public class NewStoryFragment extends Fragment implements OnPutImageListener {
                     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                         Object listItem = mList.getItemAtPosition(position);
                         mStory.setCategory(listItem.toString());
-                        view.setBackgroundColor(Color.rgb(234,234,234));
+                        view.setBackgroundColor(Color.rgb(234, 234, 234));
                     }
                 });
             }

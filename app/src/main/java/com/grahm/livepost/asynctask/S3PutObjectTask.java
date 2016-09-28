@@ -117,18 +117,20 @@ public class S3PutObjectTask extends AsyncTask<Uri, String, String> {
 
     private Bitmap getScaledBitmap(Uri srcUri,int mDstWidth, int mDstHeight){
         Bitmap unscaledBitmap =  mImageLoader.loadImageSync(srcUri.toString());
-        Bitmap scaledBitmap;
-        ImageSize srcSize = new ImageSize(unscaledBitmap.getWidth(),unscaledBitmap.getHeight());
-        ImageSize boundarySize = new ImageSize(mDstWidth,mDstHeight);
+        if(unscaledBitmap != null){
+            ImageSize srcSize = new ImageSize(unscaledBitmap.getWidth(),unscaledBitmap.getHeight());
+            ImageSize boundarySize = new ImageSize(mDstWidth,mDstHeight);
 
-        //Use Height -1 for width-dependent images to be used on staggered list
-        if(unscaledBitmap.getWidth()<=mDstWidth && unscaledBitmap.getHeight()<=mDstHeight)
-            return unscaledBitmap;
-        else {
-            unscaledBitmap.recycle();
-            return  mImageLoader.loadImageSync(srcUri.toString(),getScaledDimension(srcSize,boundarySize));
+            //Use Height -1 for width-dependent images to be used on staggered list
+            if(unscaledBitmap.getWidth()<=mDstWidth && unscaledBitmap.getHeight()<=mDstHeight)
+                return unscaledBitmap;
+            else {
+                unscaledBitmap.recycle();
+                return  mImageLoader.loadImageSync(srcUri.toString(),getScaledDimension(srcSize,boundarySize));
 
+            }
         }
+        return unscaledBitmap;
     }
     private String uploadImage(String pictureName,Uri srcUri,int mDstWidth, int mDstHeight){
         String url = "";
