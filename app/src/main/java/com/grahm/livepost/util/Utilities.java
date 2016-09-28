@@ -66,18 +66,33 @@ public class Utilities {
     }
 
 
-    public static void saveUserOnFirebase(String uid, User _user) {
+    public static void saveUserOnFirebase(User _user) {
         Long tsLong = System.currentTimeMillis() / 1000;
         String ts = tsLong.toString();
         final FirebaseDatabase database = FirebaseDatabase.getInstance();
         DatabaseReference ref = database.getReference("users");
-        DatabaseReference usersRef = ref.child(uid);
+        DatabaseReference usersRef = ref.child(_user.getUid());
         Map<String, Object> user = new HashMap<String, Object>();
         user.put("email", _user.getEmail());
         user.put("name", _user.getName());
         user.put("profile_picture", _user.getProfile_picture());
         user.put("timestamp", ts);
-        user.put("uid", uid);
+        user.put("uid", _user.getUid());
+        usersRef.updateChildren(user);
+    }
+
+    public static void saveTwitterOnFirebase(User _user) {
+        Long tsLong = System.currentTimeMillis() / 1000;
+        String ts = tsLong.toString();
+        final FirebaseDatabase database = FirebaseDatabase.getInstance();
+        DatabaseReference ref = database.getReference("users");
+        DatabaseReference usersRef = ref.child(_user.getUid());
+        Map<String, Object> user = new HashMap<String, Object>();
+        user.put("name", _user.getEmail());
+        user.put("profile_picture", _user.getProfile_picture());
+        user.put("timestamp", ts);
+        user.put("uid", _user.getUid());
+        user.put("twitter", _user.getTwitter());
         usersRef.updateChildren(user);
     }
 

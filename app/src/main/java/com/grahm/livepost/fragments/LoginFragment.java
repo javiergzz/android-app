@@ -19,12 +19,10 @@ import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.TwitterAuthProvider;
+import com.google.gson.Gson;
 import com.grahm.livepost.R;
-import com.grahm.livepost.activities.Login;
-import com.grahm.livepost.activities.LoginActivity;
 import com.grahm.livepost.activities.MainActivity;
 import com.grahm.livepost.activities.SplashScreen;
-import com.twitter.sdk.android.Twitter;
 import com.twitter.sdk.android.core.Callback;
 import com.twitter.sdk.android.core.Result;
 import com.twitter.sdk.android.core.TwitterApiClient;
@@ -34,7 +32,8 @@ import com.twitter.sdk.android.core.TwitterSession;
 import com.twitter.sdk.android.core.identity.TwitterLoginButton;
 import com.twitter.sdk.android.core.models.User;
 
-import butterknife.OnClick;
+import static com.facebook.FacebookSdk.getApplicationContext;
+import static com.grahm.livepost.util.Utilities.saveTwitterOnFirebase;
 
 public class LoginFragment extends Fragment {
 
@@ -141,32 +140,28 @@ public class LoginFragment extends Fragment {
                             Toast.makeText(getActivity(), "Authentication failed.",
                                     Toast.LENGTH_SHORT).show();
                         }else{
-                            getProfilePicture(session);
+                            getProfilePicture(session, task);
                         }
                     }
                 });
     }
 
-    private void getProfilePicture(TwitterSession session){
+    private void getProfilePicture(final TwitterSession session, final Task<AuthResult> task){
         Callback<User> callbackUser = new Callback<User>() {
             @Override
             public void success(Result<User> userResult) {
                 String name = userResult.data.name;
                 String email = userResult.data.email;
                 String photoUrlNormalSize   = userResult.data.profileImageUrl;
-                String photoUrlBiggerSize   = userResult.data.profileImageUrl.replace("_normal", "_bigger");
-                String photoUrlMiniSize     = userResult.data.profileImageUrl.replace("_normal", "_mini");
-                String photoUrlOriginalSize = userResult.data.profileImageUrl.replace("_normal", "");
-                Log.i("name", name);
-                Log.i("photoUrlNormalSize", photoUrlNormalSize);
-                Log.i("photoUrlBiggerSize", photoUrlBiggerSize);
-                Log.i("photoUrlMiniSize", photoUrlMiniSize);
-                Log.i("photoUrlOriginalSize", photoUrlOriginalSize);
+                com.grahm.livepost.objects.User _user = new com.grahm.livepost.objects.User();
+                _user.setEmail(email);
+                _user.setName(name);
+                _user.setProfile_picture(photoUrlNormalSize);
+                _user.setUid(task.getResult().getUser().getUid());
+                _user.setTwitter(session.getUserName());
+                saveTwitterOnFirebase(_user);
 
-                SharedPreferences.Editor editor = sharedPref.edit();
-                editor.putString("tw_picture", photoUrlNormalSize);
-                editor.putString("tw_name", name);
-                editor.commit();
+                saveOnProperties(_user);
 
                 Intent mainIntent = new Intent(getActivity(), MainActivity.class);
                 startActivity(mainIntent);
@@ -182,4 +177,15 @@ public class LoginFragment extends Fragment {
         twitterApiClient.getAccountService().verifyCredentials(true, false, callbackUser);
     }
 
+    private void saveOnProperties(com.grahm.livepost.objects.User user){
+        SharedPreferences.Editor editor = getApplicationContext().getSharedPreferences(SplashScreen.PREFS_NAME, Context.MODE_PRIVATE).edit();
+        Gson gson = new Gson();
+        String json = gson.toJson(user);
+        editor.putString("user", json);
+        editor.putString("uid", user.getUid());
+        editor.putString("username", user.getEmail());
+        editor.putBoolean(SplashScreen.PREFS_LOGIN, true);
+        editor.putString(SplashScreen.PREFS_AUTH, SplashScreen.PREFS_LIVEPOST);
+        editor.commit();
+    }
 }

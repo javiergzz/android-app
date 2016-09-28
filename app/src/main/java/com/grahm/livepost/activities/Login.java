@@ -134,7 +134,8 @@ public class Login extends AppCompatActivity implements OnFragmentInteractionLis
         editor.putBoolean(SplashScreen.PREFS_LOGIN, true);
         editor.putString(SplashScreen.PREFS_AUTH, SplashScreen.PREFS_LIVEPOST);
         editor.commit();
-        Utilities.saveUserOnFirebase(mUid, mUser);
+        mUser.setUid(mUid);
+        Utilities.saveUserOnFirebase(mUser);
         Intent mainIntent = new Intent(Login.this, MainActivity.class);
         startActivity(mainIntent);
         Login.this.finish();
