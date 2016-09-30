@@ -8,6 +8,7 @@ import android.os.Bundle;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.RecyclerView;
+import android.text.Html;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -100,7 +101,8 @@ public class StoryContributedLinearListAdapter extends FirebaseListFilteredAdapt
             //iholder.mFollowersView.setText(String.valueOf(s.get()));
             iholder.mTitleView.setText(s.getTitle());
             String authorStr = s.getAuthor_name() == null ? s.getAuthor() : s.getAuthor_name();
-            iholder.mCategoryView.setText("By " + authorStr + " in " + s.getCategory());
+            String stringFormat = "By <b>" + authorStr + "</b>" + " in " + "<b>" + s.getCategory() + "</b>";
+            iholder.mCategoryView.setText(Html.fromHtml(stringFormat));
 
             String lastTime = null;
             if(s.getLast_time()==null){
@@ -121,38 +123,9 @@ public class StoryContributedLinearListAdapter extends FirebaseListFilteredAdapt
                     mOnFragmentInteractionListener.onFragmentInteraction(MainActivity.CHAT_IDX, args);
                 }
             });
-            if (mListType == LIST)
-                swipeLayout(iholder, key);
         }
     }
 
-
-    private void swipeLayout(ViewHolderI iholder, final String key) {
-        iholder.mSwipeLayout.setClickToClose(true);
-        //swipeLayout.setDragDistance();
-        iholder.mSwipeLayout.setLeftSwipeEnabled(false);
-        //set show mode.
-
-        //add drag edge.(If the BottomView has 'layout_gravity' attribute, this line is unnecessary)
-        iholder.mSwipeLayout.addDrag(SwipeLayout.DragEdge.Right, iholder.mSwipeLayout.findViewById(R.id.bottom_wrapper));
-
-
-        iholder.mDelButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Log.d(TAG, "Delete " + key);
-                promptDeletion(key);
-            }
-        });
-        iholder.mEditButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Log.d(TAG, "Edit " + key);
-                //TODO Edit intent
-            }
-        });
-
-    }
 
     public void promptDeletion(final String key) {
         AlertDialog.Builder builder = new AlertDialog.Builder(mActivity);
@@ -244,13 +217,9 @@ public class StoryContributedLinearListAdapter extends FirebaseListFilteredAdapt
 
     public class ViewHolderI extends RecyclerView.ViewHolder {
         public final View mView;
-        public final View mDelButton;
-        public final View mEditButton;
         public final View mSelArea;
-        public final SwipeLayout mSwipeLayout;
         public final TextView mTitleView;
         public final TextView mCategoryView;
-        public final TextView mFollowersView;
         public final TextView mLastMsgView;
         public final TextView mDateTimeView;
         public final ImageView mIconView;
@@ -260,14 +229,10 @@ public class StoryContributedLinearListAdapter extends FirebaseListFilteredAdapt
         public ViewHolderI(View view) {
             super(view);
             mView = view;
-            mSwipeLayout = (SwipeLayout) view.findViewById(R.id.i_swipeSurface);
-            mDelButton = mSwipeLayout.findViewById(R.id.i_delete);
-            mEditButton = mSwipeLayout.findViewById(R.id.i_edit);
             mSelArea = view.findViewById(R.id.sel_area);
             mTitleView = (TextView) view.findViewById(R.id.i_title);
             mCategoryView = (TextView) view.findViewById(R.id.i_category);
             mDateTimeView = (TextView) view.findViewById(R.id.i_datetime);
-            mFollowersView = (TextView) view.findViewById(R.id.i_followers);
             mLastMsgView = (TextView) view.findViewById(R.id.i_lastMessage);
             mIconView = (ImageView) view.findViewById(R.id.i_imgProfile);
             mProgressImgView = (ProgressBar) view.findViewById(R.id.i_progress_img);

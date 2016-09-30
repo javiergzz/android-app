@@ -87,8 +87,8 @@
     <string name="prompt_story_title">Story Title</string>
 
     <!-- Profile -->
-    <string name="my_posts">Posts I\'ve Created</string>
-    <string name="contributed_posts">Posts I\'ve Contributed To</string>
+    <string name="my_posts">Created</string>
+    <string name="contributed_posts">Contributed</string>
     <!-- Categories -->
     <string-array name="array_categories">
         <item>News</item>

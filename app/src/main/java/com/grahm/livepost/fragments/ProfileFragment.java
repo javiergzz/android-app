@@ -2,13 +2,13 @@ package com.grahm.livepost.fragments;
 
 import android.content.Context;
 import android.os.Bundle;
+import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -25,10 +25,10 @@ import com.google.firebase.database.ValueEventListener;
 import com.google.gson.Gson;
 import com.grahm.livepost.R;
 import com.grahm.livepost.adapters.StoryContributedLinearListAdapter;
-import com.grahm.livepost.adapters.StoryLinearListAdapter;
 import com.grahm.livepost.adapters.StoryListAdapter;
 import com.grahm.livepost.objects.MultipartFormField;
 import com.grahm.livepost.objects.User;
+import com.grahm.livepost.specialViews.RoundedImageView;
 import com.grahm.livepost.util.Utilities;
 import com.nostra13.universalimageloader.core.ImageLoader;
 
@@ -50,13 +50,13 @@ import butterknife.OnClick;
 public class ProfileFragment extends Fragment {
     private static final String TAG_CLASS = "PROFILEFRAGMENT";
     @BindView(R.id.profile_pic)
-    public ImageView mImageView;
+    public RoundedImageView mImageView;
+    @BindView(R.id.tabs_profile)
+    public TabLayout mTabs;
     @BindView(R.id.pager)
     public ViewPager mViewPager;
     @BindView(R.id.profile_name)
     public TextView mTitleView;
-    @BindView(R.id.profile_email)
-    public TextView mEmailView;
     private User mUser;
     private ProfileViewsManager mProfileViewsManager;
     private DatabaseReference mFirebaseRef;
@@ -92,9 +92,10 @@ public class ProfileFragment extends Fragment {
 
         if(mUser!=null) {
             mTitleView.setText(mUser.getName());
-            mEmailView.setText(mUser.getEmail());
         }
+
         setupNavigation(view, inflater);
+
         return view;
 
     }
@@ -107,17 +108,14 @@ public class ProfileFragment extends Fragment {
 
         // Set up the ViewPager with the sections adapter.
         mViewPager.setAdapter(mSectionsPagerAdapter);
+        mTabs.setupWithViewPager(mViewPager);
+        mTabs.getTabAt(0).setText(getString(R.string.my_posts));
+        mTabs.getTabAt(1).setText(getString(R.string.contributed_posts));
     }
 
     //Background callback to avoid callbacks from other fragments.
     @OnClick(R.id.background)
     public void doNothing(View v) {
-    }
-
-    @OnClick({R.id.created_posts, R.id.contributed_posts})
-    public void pagerClick(View view) {
-        int idx = Integer.parseInt((String) view.getTag());
-        mViewPager.setCurrentItem(idx, true);
     }
 
     @Override
@@ -143,7 +141,7 @@ public class ProfileFragment extends Fragment {
 
         public class ContributedPostsField extends MultipartFormField {
             public int getTitle() {
-                return 0;
+                return R.string.contributed_posts;
             }
 
             public int getLayout() {
@@ -155,39 +153,16 @@ public class ProfileFragment extends Fragment {
             }
 
             public void onSetup(ViewGroup layout) {
-                Map<String, Object> m = mUser.getPosts_contributed();
-                if (m != null) {
-                    final RecyclerView recyclerView = ButterKnife.findById(layout, R.id.profile_list);
-                    final DatabaseReference f = mFirebaseRef.child("posts");
-                    recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
-                    String uid = FirebaseAuth.getInstance().getCurrentUser().getUid();
-                    final StoryContributedLinearListAdapter storyLinearListAdapter = new StoryContributedLinearListAdapter(f, (AppCompatActivity) getActivity(), 1, mUser.getPosts_contributed());
-                    recyclerView.setAdapter(storyLinearListAdapter);
-
-                    mFirebaseRef.child("users/" + uid).addValueEventListener(new ValueEventListener() {
-                        @Override
-                        public void onDataChange(DataSnapshot dataSnapshot) {
-                            //mUser = new Gson().fromJson(getActivity().getSharedPreferences(getString(R.string.preference_file_key), Context.MODE_PRIVATE).getString("user", null), User.class);
-                            mUser = dataSnapshot.getValue(User.class);
-                            getActivity().getSharedPreferences(getString(R.string.preference_file_key), Context.MODE_PRIVATE).edit().putString("user", new Gson().toJson(mUser, User.class)).commit();
-                            StoryContributedLinearListAdapter sessionLinearListAdapter = new StoryContributedLinearListAdapter(f, (AppCompatActivity) getActivity(), 1, mUser.getPosts_contributed());
-                            recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
-                            recyclerView.setAdapter(sessionLinearListAdapter);
-                            sessionLinearListAdapter.notifyDataSetChanged();
-                        }
-
-                        @Override
-                        public void onCancelled(DatabaseError firebaseError) {
-
-                        }
-                    });
-                }
+                Query q = mFirebaseRef.child("users").child(mUser.getAuthorString()).child("posts_contributed_to");
+                RecyclerView recyclerView = ButterKnife.findById(layout, R.id.profile_list);
+                recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
+                recyclerView.setAdapter(new StoryListAdapter(q, (AppCompatActivity) getActivity(), 0, false));
             }
         }
 
         public class CreatedPostsField extends MultipartFormField {
             public int getTitle() {
-                return 0;
+                return R.string.my_posts;
             }
 
             public int getLayout() {
@@ -199,7 +174,6 @@ public class ProfileFragment extends Fragment {
             }
 
             public void onSetup(ViewGroup layout) {
-                mUser.getEmail();
                 Query q = mFirebaseRef.child("posts").orderByChild("author").equalTo(mUser.getAuthorString());
                 RecyclerView recyclerView = ButterKnife.findById(layout, R.id.profile_list);
                 recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
@@ -242,7 +216,10 @@ public class ProfileFragment extends Fragment {
 
         @Override
         public CharSequence getPageTitle(int position) {
-            return getString(mCurrentPage.getTitle());
+            if(mCurrentPage != null){
+                return getString(mCurrentPage.getTitle());
+            }
+            return getString(R.string.my_posts);
         }
     }
 }

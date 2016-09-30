@@ -69,6 +69,7 @@ public class CreateStoryTask extends AsyncTask<Uri, String, String> {
         String s = mSharedPref.getString("user", null);
         if (!TextUtils.isEmpty(s)) {
             mUser = new Gson().fromJson(s, User.class);
+            mStory.setAuthor(mUser.getAuthorString());
         }
     }
 

@@ -16,13 +16,16 @@
 
         <android.support.v7.widget.CardView
             android:id="@+id/profile_card"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_margin="5dp"
+            android:layout_marginTop="0dp"
+            android:layout_marginLeft="0dp"
+            android:layout_marginRight="0dp"
+            android:layout_marginBottom="10dp"
             android:layout_gravity="center_horizontal"
             android:layout_centerHorizontal="true"
-            app:cardCornerRadius="5dp"
-            app:cardElevation="5dp">
+            app:cardCornerRadius="2dp"
+            app:cardElevation="2dp">
             <LinearLayout
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -30,11 +33,11 @@
                 android:textAlignment="center"
                 android:padding="14dp"
                 android:orientation="vertical">
-                <ImageView
+                <com.grahm.livepost.specialViews.RoundedImageView
                     android:id="@+id/profile_pic"
                     android:layout_width="100dp"
                     android:layout_height="100dp"
-                    android:layout_margin="8dp"
+                    android:layout_gravity="center_horizontal"
                     android:scaleType="centerCrop" />
 
                     <TextView
@@ -44,27 +47,24 @@
                         android:gravity="center"
                         android:textSize="@dimen/profile_card_title_size"
                         android:layout_gravity="center" />
-                    <TextView
-                        android:id="@+id/profile_email"
-                        android:layout_width="wrap_content"
-                        android:gravity="center"
-                        android:layout_height="wrap_content"
-                        android:layout_gravity="center" />
                 </LinearLayout>
         </android.support.v7.widget.CardView>
 
-        <include
-            layout="@layout/profile_menu"
+        <android.support.design.widget.TabLayout
+            android:id="@+id/tabs_profile"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginLeft="10dp"
+            android:layout_marginRight="10dp"
             android:layout_below="@id/profile_card" />
 
         <android.support.v4.view.ViewPager
             android:id="@+id/pager"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_below="@+id/prof_menu"
+            android:layout_marginLeft="5dp"
+            android:layout_marginRight="5dp"
+            android:layout_below="@+id/tabs_profile"
             app:layout_behavior="@string/appbar_scrolling_view_behavior" />
-
     </RelativeLayout>
 </FrameLayout>
