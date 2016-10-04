@@ -304,4 +304,9 @@
 
     <string name="story_settings_invalid_user_error">Sorry! That user does not exist D:</string>
     <string name="story_code">StoryCode</string>
+
+    <string name="error_video_uploader_busy">Please wait! Another video is still being uploaded</string>
+    <string name="error_picker">Unrecognized or corrupted file.</string>
+
+    <string name="title_activity_player">PlayerActivity</string>
 </resources>

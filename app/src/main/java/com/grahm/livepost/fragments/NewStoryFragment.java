@@ -1,9 +1,7 @@
 package com.grahm.livepost.fragments;
 
 import android.app.Activity;
-import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.design.widget.TextInputLayout;
@@ -28,7 +26,6 @@ import android.widget.TextView;
 import com.amazonaws.auth.BasicAWSCredentials;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
-import com.google.gson.Gson;
 import com.amazonaws.services.s3.AmazonS3Client;
 import com.grahm.livepost.activities.MainActivity;
 import com.grahm.livepost.asynctask.CreateStoryTask;
@@ -42,9 +39,7 @@ import com.grahm.livepost.util.GV;
 import com.grahm.livepost.util.Utilities;
 
 import java.io.File;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.List;
 
 import butterknife.*;
@@ -215,7 +210,7 @@ public class NewStoryFragment extends Fragment implements OnPutImageListener {
     public void attemptSessionCreation(){
         if (mStoryTask != null) return;
 
-        mStory.setAuthor(mUser.getAuthorString());
+        mStory.setAuthor(mUser.getUserKey());
         mStory.setAuthor_name(mUser.getName());
         mStoryTask = new CreateStoryTask(mStory,mFirebaseRef.child("posts"),getActivity(),s3Client,this,true);
         if(mUri!= null) mStoryTask.execute(mUri);

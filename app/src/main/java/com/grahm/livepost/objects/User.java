@@ -31,7 +31,7 @@ public class User implements Serializable {
     private String uid;
     //Getters & setters
 
-    public String getAuthorString(){
+    public String getUserKey(){
         return TextUtils.isEmpty(uid)?twitter:uid;
     }
 

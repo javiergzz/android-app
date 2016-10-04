@@ -15,8 +15,6 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.google.firebase.auth.api.model.StringList;
-import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -31,7 +29,6 @@ import com.grahm.livepost.objects.User;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Objects;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -70,7 +67,7 @@ public class StorySettingsActivity extends FirebaseActivity {
         mTextStoryCode.setText(url);
         mTextStoryCode.setEnabled(false);
         //TODO Uncomment this
-        //if(mStory.getAuthor()==mUser.getAuthorString())
+        //if(mStory.getAuthor()==mUser.getUserKey())
         mEditStoryLayout.setVisibility(View.VISIBLE);
 
 
@@ -96,7 +93,7 @@ public class StorySettingsActivity extends FirebaseActivity {
         setSupportActionBar(mToolbar);
         restoreState(savedInstanceState);
         mToolbar.setTitle(getString(R.string.story_settings_title));
-        //if(mStory.getAuthor()==mUser.getAuthorString())
+        //if(mStory.getAuthor()==mUser.getUserKey())
 
         setupContributors();
         setupAddButton();
@@ -178,8 +175,8 @@ public class StorySettingsActivity extends FirebaseActivity {
                     for (Map.Entry<String, User> entry : m.entrySet()) {
                         try {
                             //Remove from each user's contributed posts field
-                            mFirebaseRef.child("users/" + entry.getKey() + "/posts_contributed_to/").child(mId).removeValue();
-                            System.out.println(entry.getKey() + "/" + entry.getValue());
+                            mFirebaseRef.child("users/" + entry.getValue().getUserKey() + "/posts_contributed_to/").child(mId).removeValue();
+                            Log.d(TAG,entry.getKey() + "/" + entry.getValue());
                         } catch (Exception e) {
                             Log.e(TAG, e.getMessage());
                         }
@@ -196,6 +193,9 @@ public class StorySettingsActivity extends FirebaseActivity {
 
         //Delete entry from creator
         mFirebaseRef.child("users/" + mStory.getAuthor() + "/posts_created/" + mId).removeValue();
+        //Delete all updates
+        mFirebaseRef.child("updates/" + mId).removeValue();
+        
         onBackPressed();
     }
 
@@ -232,13 +232,13 @@ public class StorySettingsActivity extends FirebaseActivity {
         Map<String, Object> map = new HashMap<String, Object>();
         Map<String, Object> k = new HashMap<String, Object>();
         k.put("role", "contributor");
-        k.put("uid", mContributor.getAuthorString());
-        map.put(mContributor.getAuthorString(), k);
+        k.put("uid", mContributor.getUserKey());
+        map.put(mContributor.getUserKey(), k);
         mFirebaseRef.child("members/" + mId).updateChildren(map);
 
 
-        Log.d(TAG,"users/" + mContributor.getAuthorString() + "/posts_contributed_to/"+map.toString());
-        mFirebaseRef.child("users/" + mContributor.getAuthorString() + "/posts_contributed_to/"+mId).setValue(mStory);
+        Log.d(TAG,"users/" + mContributor.getUserKey() + "/posts_contributed_to/"+map.toString());
+        mFirebaseRef.child("users/" + mContributor.getUserKey() + "/posts_contributed_to/"+mId).setValue(mStory);
 
         mTextContributor.setText("");
         mTextContributor.clearListSelection();

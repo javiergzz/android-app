@@ -35,6 +35,7 @@ import android.widget.TextView;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
@@ -63,10 +64,7 @@ import butterknife.ButterKnife;
 public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<Cursor> {
     private FirebaseDatabase mFirebaseDB;
     private DatabaseReference mFirebaseRef;
-    protected FirebaseException mFirebaseError;
     private static final String TAG = "LoginActivity";
-    protected static boolean registrationCheck = false;
-    protected static boolean authSuccessful = false;
     /**
      * Keep track of the login task to ensure we can cancel it if requested.
      */
@@ -118,8 +116,9 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
 
     @OnClick(R.id.email_sign_in_button)
     public void attemptLogin() {
-        Log.e(TAG,"sign in action");
+        Log.d(TAG,"sign in action");
         if (mAuthTask != null) {
+            Log.e(TAG,"sign in actional ready running");
             return;
         }
 
@@ -159,7 +158,13 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
             // perform the user login attempt.
             showProgress(true);
             mAuthTask = new UserLoginTask(email, password);
-            mAuthTask.execute((Void) null);
+            try {
+                mAuthTask.execute((Void)null);
+            }catch (Exception e){
+                if(e!=null && e.getMessage()!=null)
+                Log.e(TAG,e.getMessage());
+                mAuthTask = null;
+            }
         }
     }
 
@@ -308,7 +313,6 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
 
         @Override
         protected Boolean doInBackground(Void... params) {
-            try {
                 mAuth.signInWithEmailAndPassword(mEmail, mPassword).addOnCompleteListener(new OnCompleteListener<AuthResult>() {
                     @Override
                     public void onComplete(@NonNull Task<AuthResult> task) {
@@ -320,9 +324,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
                         loginAction();
                     }
                 });
-            } catch (Exception e) {
-                return false;
-            }
+
             return true;
         }
 

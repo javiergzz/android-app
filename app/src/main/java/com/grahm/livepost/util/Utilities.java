@@ -1,18 +1,18 @@
 package com.grahm.livepost.util;
 
-import android.app.Activity;
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.graphics.Bitmap;
+import android.media.MediaMetadataRetriever;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.os.Build;
 import android.os.Bundle;
-import android.support.v7.app.AppCompatActivity;
 import android.text.TextUtils;
 import android.util.Log;
 
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.ServerValue;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 
@@ -23,11 +23,9 @@ import com.google.gson.Gson;
 import com.grahm.livepost.R;
 import com.grahm.livepost.objects.User;
 
-import java.security.MessageDigest;
-import java.security.SecureRandom;
-import java.math.BigInteger;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
+import java.util.HashMap;
 
 public class Utilities {
     public static final int MSG_TYPE_TEXT = 0;
@@ -78,7 +76,7 @@ public class Utilities {
         FirebaseUser mFirebaseUser = FirebaseAuth.getInstance().getCurrentUser();
         if(mFirebaseUser==null){
             if(mUser==null){return null;}//Nonexisting User
-            mFirebaseRef.getRoot().child("users/" + mUser.getAuthorString()).addValueEventListener(new ValueEventListener() {
+            mFirebaseRef.getRoot().child("users/" + mUser.getUserKey()).addValueEventListener(new ValueEventListener() {
                 @Override
                 public void onDataChange(DataSnapshot dataSnapshot) {
                     mUser = dataSnapshot.getValue(User.class);
@@ -156,5 +154,47 @@ public class Utilities {
         String [] parts = url.split("\\?");
         return parts[0];
     }
+    public static String cleanVideoUrl(String url){
+        String [] parts = url.split("\\?");
+        //https://s3.amazonaws.com/livepostrocks/videos/Art%20Swagger1475559024.mp4_800x399
+        String noargs =  parts[0];
+        int dimindex = noargs.lastIndexOf("_");
+        return dimindex>0?noargs.substring(0,dimindex-1):noargs;
+    }
+
+    public static Bitmap retriveVideoFrameFromVideo(String videoPath)
+            throws Throwable
+    {
+        Bitmap bitmap = null;
+        MediaMetadataRetriever mediaMetadataRetriever = null;
+        try
+        {
+            mediaMetadataRetriever = new MediaMetadataRetriever();
+            if (Build.VERSION.SDK_INT >= 14)
+                mediaMetadataRetriever.setDataSource(videoPath, new HashMap<String, String>());
+            else
+                mediaMetadataRetriever.setDataSource(videoPath);
+            //   mediaMetadataRetriever.setDataSource(videoPath);
+            bitmap = mediaMetadataRetriever.getFrameAtTime();
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+            throw new Throwable(
+                    "Exception in retriveVideoFrameFromVideo(String videoPath)"
+                            + e.getMessage());
+
+        }
+        finally
+        {
+            if (mediaMetadataRetriever != null)
+            {
+                mediaMetadataRetriever.release();
+            }
+        }
+        return bitmap;
+    }
+
+
 
 }

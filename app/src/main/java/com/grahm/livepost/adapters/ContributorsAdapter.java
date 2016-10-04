@@ -1,15 +1,10 @@
 package com.grahm.livepost.adapters;
 
-import android.app.Activity;
-import android.support.v4.text.TextUtilsCompat;
 import android.support.v7.widget.RecyclerView;
-import android.text.TextUtils;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
-import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.google.firebase.database.ChildEventListener;
@@ -18,11 +13,8 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
-import com.google.firebase.database.ValueEventListener;
 import com.grahm.livepost.R;
-import com.grahm.livepost.objects.FirebaseActivity;
 import com.grahm.livepost.objects.User;
-import com.nostra13.universalimageloader.core.ImageLoader;
 
 import java.util.Map;
 
@@ -78,7 +70,7 @@ public class ContributorsAdapter extends FirebaseListFilteredAdapter<User> {
         h.mButtonView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                deleteContributor(user.getAuthorString());
+                deleteContributor(user.getUserKey());
             }
         });
     }

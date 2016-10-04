@@ -5,11 +5,8 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
-import android.support.annotation.Nullable;
 import android.support.v4.app.DialogFragment;
-import android.support.v4.text.TextUtilsCompat;
 import android.support.v7.app.AlertDialog;
-import android.text.TextUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -19,14 +16,13 @@ import android.widget.Toast;
 
 import com.amazonaws.auth.BasicAWSCredentials;
 import com.amazonaws.services.s3.AmazonS3Client;
-import com.amazonaws.services.s3.model.DeleteObjectRequest;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.ServerValue;
 import com.google.gson.Gson;
 import com.grahm.livepost.R;
 import com.grahm.livepost.adapters.ChatAdapter;
 import com.grahm.livepost.asynctask.DeleteImageTask;
+import com.grahm.livepost.asynctask.DeleteVideoTask;
 import com.grahm.livepost.asynctask.PostImageTask;
 import com.grahm.livepost.interfaces.OnPutImageListener;
 import com.grahm.livepost.objects.Update;
@@ -122,22 +118,38 @@ public class EditPostDialogFragment extends DialogFragment {
     }
     private void chooseViewElements(){
         final String message = mMsg != null ? mMsg.getMessage() : null;
-        if (message != null && mChatType == Utilities.MSG_TYPE_IMAGE) {
-            mTextEdit.setVisibility(View.GONE);
-            mImageEdit.setVisibility(View.VISIBLE);
-            mImageLoader.displayImage(Utilities.cleanUrl(message), mImageEdit);
-            mImageEdit.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    Log.i(TAG,"Add picture callback");
-                    addPictureCallback();
-                }
-            });
-        } else {
-            mImageEdit.setVisibility(View.GONE);
-            mTextEdit.setVisibility(View.VISIBLE);
-            mTextEdit.setText(message);
-            mTextEdit.setSelection(mTextEdit.length());
+        if (message == null) return;
+
+        switch (mChatType) {
+            case Utilities.MSG_TYPE_IMAGE:
+                mTextEdit.setVisibility(View.GONE);
+                mImageEdit.setVisibility(View.VISIBLE);
+                mImageLoader.displayImage(Utilities.cleanUrl(message), mImageEdit);
+                mImageEdit.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        Log.i(TAG,"Add picture callback");
+                        addPictureCallback();
+                    }
+                });
+                break;
+            case Utilities.MSG_TYPE_VIDEO://TODO
+                mTextEdit.setVisibility(View.GONE);
+                mImageEdit.setVisibility(View.VISIBLE);
+                mImageLoader.displayImage(Utilities.cleanVideoUrl(message).replace(".mp4",".png"), mImageEdit);
+                mImageEdit.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {//Do nothing
+                    }
+                });
+                mImageEdit.setVisibility(View.GONE);
+                break;
+            default:
+                mImageEdit.setVisibility(View.GONE);
+                mTextEdit.setVisibility(View.VISIBLE);
+                mTextEdit.setText(message);
+                mTextEdit.setSelection(mTextEdit.length());
+                break;
         }
     }
     private void editAction() {
@@ -147,6 +159,7 @@ public class EditPostDialogFragment extends DialogFragment {
                 if(mLoadedUri!= null) mPostTask.execute(mLoadedUri);
                 break;
             case Utilities.MSG_TYPE_VIDEO://TODO
+
                 break;
             case Utilities.MSG_TYPE_TEXT:
                 String input = mTextEdit.getText().toString();
@@ -167,6 +180,8 @@ public class EditPostDialogFragment extends DialogFragment {
             case Utilities.MSG_TYPE_VIDEO://TODO
                 break;
             default:
+                String deleteVideoUrl = Utilities.cleanVideoUrl(mMsg.getMessage());
+                new DeleteVideoTask(getActivity(),mS3client,deleteVideoUrl);
                 break;
         }
         mFirebaseRef.removeValue();

@@ -40,14 +40,6 @@
                 android:layout_height="?attr/actionBarSize"
                 app:layout_collapseMode="pin"
                 app:popupTheme="@style/ThemeOverlay.AppCompat.Dark" >
-                <TextView
-                    android:id="@+id/toolbar_title"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:gravity="center"
-                    android:textColor="@android:color/white"
-                    android:textSize="20sp"
-                    android:fontFamily="sans-serif-medium" />
                 </android.support.v7.widget.Toolbar>
 
         </android.support.design.widget.CollapsingToolbarLayout>
@@ -68,23 +60,6 @@
             android:layout_marginRight="5dp"
             android:background="@android:color/white"
             android:elevation="1dp" />
-
-        <LinearLayout
-            android:id="@+id/listFooter"
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            android:layout_alignParentBottom="true"
-            android:orientation="horizontal">
-
-
-            <!--<ImageButton
-                android:id="@+id/btnSend"
-                android:layout_width="50dp"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center_vertical"
-                android:background="@color/transparent_gray"
-                android:src="@android:drawable/ic_menu_send" />-->
-        </LinearLayout>
     </RelativeLayout>
 
     <LinearLayout
