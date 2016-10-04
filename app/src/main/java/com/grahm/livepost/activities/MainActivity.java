@@ -45,18 +45,18 @@ public class MainActivity extends FirebaseActivity implements OnFragmentInteract
      */
     public static final String TAG = "MainActivity";
     public static final int HOME_IDX = 0;
-    public static final int FAVORITES_IDX=3;
-    public static final int NEW_STORY_IDX=1;
+    public static final int FAVORITES_IDX = 3;
+    public static final int NEW_STORY_IDX = 1;
     public static final int PROFILE_IDX = 2;
     public static final int CHAT_IDX = 4;
     public static final String REBOOT_REQ = "reboot_req";
 
     /*Fragment tags*/
-    public static final String HOME_TAG="home";
-    public static final String FAVORITES_TAG="favorites";
-    public static final String NEW_STORY_TAG="new";
-    public static  final String PROFILE_TAG="profile";
-    public static final String CHAT_TAG="notifications";
+    public static final String HOME_TAG = "home";
+    public static final String FAVORITES_TAG = "favorites";
+    public static final String NEW_STORY_TAG = "new";
+    public static final String PROFILE_TAG = "profile";
+    public static final String CHAT_TAG = "notifications";
     /*Bundle Keys*/
     public static final String PAGE_KEY = "page";
     public static final String FRAG_ARGS = "frag_args";
@@ -64,7 +64,6 @@ public class MainActivity extends FirebaseActivity implements OnFragmentInteract
 
     private FragmentsEnum mCurrentPage;
     private SectionsFragmentManager mSectionsFragmentManager;
-    protected Menu mMenu;
 
 
     @Override
@@ -76,8 +75,9 @@ public class MainActivity extends FirebaseActivity implements OnFragmentInteract
         setupNavigation(savedInstanceState);
         setupTabs();
     }
-    private void setupTabs(){
-        TabLayout tabLayout= (TabLayout)findViewById(R.id.tabs);
+
+    private void setupTabs() {
+        TabLayout tabLayout = (TabLayout) findViewById(R.id.tabs);
         tabLayout.setOnTabSelectedListener(this);
     }
 
@@ -85,7 +85,7 @@ public class MainActivity extends FirebaseActivity implements OnFragmentInteract
         mCurrentPage = savedInstanceState != null && savedInstanceState.containsKey(PAGE_KEY) ? (FragmentsEnum) savedInstanceState.getSerializable(PAGE_KEY) : FragmentsEnum.HOME;
         // Create the adapter that will return a fragment for each of the three
         // primary sections of the activity.
-        mSectionsFragmentManager = new SectionsFragmentManager(this.getBaseContext(),getSupportFragmentManager(), R.id.container);
+        mSectionsFragmentManager = new SectionsFragmentManager(this.getBaseContext(), getSupportFragmentManager(), R.id.container);
         if (savedInstanceState == null) {
             mSectionsFragmentManager.setPage(mCurrentPage, savedInstanceState);
         } else {
@@ -98,24 +98,10 @@ public class MainActivity extends FirebaseActivity implements OnFragmentInteract
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.menu_main, menu);
-        mMenu = menu;
-        updateMenu();
         return super.onCreateOptionsMenu(menu);
     }
 
-    void updateMenu() {
-        if(mMenu==null)return;
-        MenuItem loginActionView = mMenu.findItem(R.id.action_login);
-        MenuItem logoutActionView = mMenu.findItem(R.id.action_logout);
-        mAuth = FirebaseAuth.getInstance();
-        if (mAuth.getCurrentUser() != null) {
-            loginActionView.setVisible(true);
-            logoutActionView.setVisible(false);
-        } else {
-            loginActionView.setVisible(false);
-            logoutActionView.setVisible(true);
-        }
-    }
+
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
@@ -123,41 +109,26 @@ public class MainActivity extends FirebaseActivity implements OnFragmentInteract
             case R.id.action_settings:
                 startActivityForResult(new Intent(this, SettingsActivity.class), 1);
                 return true;
-            case R.id.action_login:
-                launchLogin();
-                updateMenu();
-                return true;
-            case R.id.action_logout:
-                FirebaseAuth.getInstance().signOut();
-                SharedPreferences.Editor e = getSharedPreferences(getString(R.string.preference_file_key), MODE_PRIVATE).edit();
-                e.remove("username");
-                e.remove("user");
-                e.remove("id");
-                e.commit();
-                updateMenu();
-                Log.i(TAG, "User Logged out.");
-                return true;
-        };
+        }
+        ;
         return super.onOptionsItemSelected(item);
     }
 
 
-
-
     @Override
     public void onFragmentInteraction(int id, Bundle args) {
-        switch (id){
+        switch (id) {
             case HOME_IDX:
-                mSectionsFragmentManager.setPage(FragmentsEnum.HOME,args);
+                mSectionsFragmentManager.setPage(FragmentsEnum.HOME, args);
                 break;
             case FAVORITES_IDX:
-                mSectionsFragmentManager.setPage(FragmentsEnum.FAVORITES,args);
+                mSectionsFragmentManager.setPage(FragmentsEnum.FAVORITES, args);
                 break;
             case PROFILE_IDX:
-                mSectionsFragmentManager.setPage(FragmentsEnum.PROFILE,args);
+                mSectionsFragmentManager.setPage(FragmentsEnum.PROFILE, args);
                 break;
             case NEW_STORY_IDX:
-                mSectionsFragmentManager.setPage(FragmentsEnum.NEW_STORY,args);
+                mSectionsFragmentManager.setPage(FragmentsEnum.NEW_STORY, args);
                 break;
             case CHAT_IDX:
                 Intent mainIntent = new Intent(this, ChatActivity.class);
@@ -169,16 +140,19 @@ public class MainActivity extends FirebaseActivity implements OnFragmentInteract
 
     @Override
     public void onTabSelected(TabLayout.Tab tab) {
-        switch (tab.getPosition()){
-            case 0: mCurrentPage = FragmentsEnum.HOME;
+        switch (tab.getPosition()) {
+            case 0:
+                mCurrentPage = FragmentsEnum.HOME;
                 break;
-            case 1: mCurrentPage = FragmentsEnum.NEW_STORY;
+            case 1:
+                mCurrentPage = FragmentsEnum.NEW_STORY;
                 break;
-            case 2: mCurrentPage = FragmentsEnum.PROFILE;
+            case 2:
+                mCurrentPage = FragmentsEnum.PROFILE;
                 break;
         }
 
-        mSectionsFragmentManager.setPage(mCurrentPage,null);
+        mSectionsFragmentManager.setPage(mCurrentPage, null);
     }
 
     @Override
@@ -232,12 +206,14 @@ public class MainActivity extends FirebaseActivity implements OnFragmentInteract
             this.titleId = titleId;
         }
 
-        public String getTag(){
+        public String getTag() {
             return tag;
         }
-        public String getTitle(Context ctx){
+
+        public String getTitle(Context ctx) {
             return ctx.getString(titleId);
         }
+
         public abstract Fragment getInstance(Bundle args);
     }
 
@@ -247,7 +223,7 @@ public class MainActivity extends FirebaseActivity implements OnFragmentInteract
         Context mContext;
         int mContainerId;
 
-        public SectionsFragmentManager(Context context,FragmentManager fm, int containerId) {
+        public SectionsFragmentManager(Context context, FragmentManager fm, int containerId) {
             mContext = context;
             mFragmentManager = fm;
             mContainerId = containerId;

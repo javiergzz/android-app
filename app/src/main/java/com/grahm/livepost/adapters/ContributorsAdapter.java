@@ -1,6 +1,7 @@
 package com.grahm.livepost.adapters;
 
 import android.app.Activity;
+import android.os.Handler;
 import android.support.v4.text.TextUtilsCompat;
 import android.support.v7.widget.RecyclerView;
 import android.text.TextUtils;
@@ -33,38 +34,14 @@ public class ContributorsAdapter extends FirebaseListFilteredAdapter<User> {
     private static final String TAG = "ContributorsAdapter";
     DatabaseReference mFirebaseRef;
     String mStoryId;
-    public ContributorsAdapter(Query query, String storyId, Map<String,Object> filter){
-        super(query.getRef(),User.class,filter);
+
+    public ContributorsAdapter(Query query, String storyId, Map<String, Object> filter) {
+        super(query.getRef(), User.class, filter);
         //(DatabaseReference mRef, Class<T> mModelClass, Activity activity, final Map<String,Object> filter)
         mFirebaseRef = FirebaseDatabase.getInstance().getReference();
         mStoryId = storyId;
-        mFirebaseRef.child("members/"+mStoryId).addChildEventListener(new ChildEventListener() {
-            @Override
-            public void onChildAdded(DataSnapshot dataSnapshot, String s) {
-
-            }
-
-            @Override
-            public void onChildChanged(DataSnapshot dataSnapshot, String s) {
-
-            }
-
-            @Override
-            public void onChildRemoved(DataSnapshot dataSnapshot) {
-
-            }
-
-            @Override
-            public void onChildMoved(DataSnapshot dataSnapshot, String s) {
-
-            }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-
-            }
-        });
     }
+
     @Override
     public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         return new UserViewHolder(LayoutInflater.from(parent.getContext()).inflate(R.layout.item_user, parent, false));
@@ -73,7 +50,7 @@ public class ContributorsAdapter extends FirebaseListFilteredAdapter<User> {
     @Override
     public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
         final User user = getItem(position);
-        UserViewHolder h  = (UserViewHolder)holder;
+        UserViewHolder h = (UserViewHolder) holder;
         h.mTextView.setText(user.getName());
         h.mButtonView.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -82,22 +59,24 @@ public class ContributorsAdapter extends FirebaseListFilteredAdapter<User> {
             }
         });
     }
-    private void deleteContributor(String id){
+
+    private void deleteContributor(String id) {
         //Remove contributors entry
-        mFirebaseRef.child("members/"+mStoryId+"/"+id).removeValue();
+        mFirebaseRef.child("members/" + mStoryId + "/" + id).removeValue();
         //Remove user entry
-        mFirebaseRef.child("users/" +id + "/posts_contributed_to/").child(mStoryId).removeValue();
-        notifyDataSetChanged();
+        mFirebaseRef.child("users/" + id + "/posts_contributed_to/").child(mStoryId).removeValue();
     }
-    class UserViewHolder extends RecyclerView.ViewHolder{
+
+    class UserViewHolder extends RecyclerView.ViewHolder {
         public final View mView;
         public final TextView mTextView;
         public final Button mButtonView;
-        public UserViewHolder(View view){
+
+        public UserViewHolder(View view) {
             super(view);
             mView = view;
-            mTextView = (TextView)view.findViewById(R.id.contributor_text);
-            mButtonView = (Button)view.findViewById(R.id.remove_contributor_button);
+            mTextView = (TextView) view.findViewById(R.id.contributor_text);
+            mButtonView = (Button) view.findViewById(R.id.remove_contributor_button);
         }
     }
 }

@@ -15,7 +15,6 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.google.firebase.auth.api.model.StringList;
 import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -31,7 +30,6 @@ import com.grahm.livepost.objects.User;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Objects;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -41,8 +39,8 @@ public class StorySettingsActivity extends FirebaseActivity {
     private static final String TAG = "StorySettingsActivity";
     @BindView(R.id.list_contributors)
     public RecyclerView mListContributors;
-    @BindView(R.id.settings_toolbar)
-    public Toolbar mToolbar;
+//    @BindView(R.id.settings_toolbar)
+//    public Toolbar mToolbar;
 
     @BindView(R.id.text_story_code)
     public TextView mTextStoryCode;
@@ -93,9 +91,10 @@ public class StorySettingsActivity extends FirebaseActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_story_settings);
         ButterKnife.bind(this);
-        setSupportActionBar(mToolbar);
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
         restoreState(savedInstanceState);
-        mToolbar.setTitle(getString(R.string.story_settings_title));
+//        mToolbar.setTitle(getString(R.string.story_settings_title));
         //if(mStory.getAuthor()==mUser.getAuthorString())
 
         setupContributors();
@@ -153,7 +152,6 @@ public class StorySettingsActivity extends FirebaseActivity {
 
             }
         });
-
     }
 
     @OnClick(R.id.btn_story_code)
@@ -237,8 +235,8 @@ public class StorySettingsActivity extends FirebaseActivity {
         mFirebaseRef.child("members/" + mId).updateChildren(map);
 
 
-        Log.d(TAG,"users/" + mContributor.getAuthorString() + "/posts_contributed_to/"+map.toString());
-        mFirebaseRef.child("users/" + mContributor.getAuthorString() + "/posts_contributed_to/"+mId).setValue(mStory);
+        Log.d(TAG, "users/" + mContributor.getAuthorString() + "/posts_contributed_to/" + map.toString());
+        mFirebaseRef.child("users/" + mContributor.getAuthorString() + "/posts_contributed_to/" + mId).setValue(mStory);
 
         mTextContributor.setText("");
         mTextContributor.clearListSelection();

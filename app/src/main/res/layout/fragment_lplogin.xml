@@ -74,7 +74,7 @@
                 android:layout_marginTop="40dp"
                 android:text="Forgot Password?"
                 android:textColor="#364457"
-                android:background="#FFFFFF"
+                android:background="@android:color/transparent"
                 android:textAlignment="center"
                 android:shadowColor="#FFFFFF"
                 android:textAllCaps="false"/>

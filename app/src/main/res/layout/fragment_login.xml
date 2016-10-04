@@ -88,7 +88,7 @@
                 android:layout_marginLeft="5dp"
                 android:text="@string/log_in"
                 android:textColor="#364457"
-                android:background="#FFFFFF"
+                android:background="@android:color/transparent"
                 android:onClick="openLogin"
                 android:tag="login"
                 android:textAllCaps="false"/>

@@ -37,6 +37,10 @@ import com.grahm.livepost.objects.User;
 import com.grahm.livepost.util.GV;
 import com.grahm.livepost.util.Utilities;
 import com.nostra13.universalimageloader.core.ImageLoader;
+import com.twitter.sdk.android.Twitter;
+import com.twitter.sdk.android.core.TwitterAuthConfig;
+import com.twitter.sdk.android.core.TwitterCore;
+import com.twitter.sdk.android.tweetui.TweetUi;
 
 import java.io.File;
 import java.util.HashMap;
@@ -47,6 +51,7 @@ import butterknife.ButterKnife;
 import butterknife.OnClick;
 import butterknife.OnEditorAction;
 import butterknife.OnTextChanged;
+import io.fabric.sdk.android.Fabric;
 import pl.aprilapps.easyphotopicker.DefaultCallback;
 import pl.aprilapps.easyphotopicker.EasyImage;
 
@@ -92,6 +97,9 @@ public class ChatActivity extends FirebaseActivity implements AbsListView.OnItem
         }
     };
 
+    private static final String TWITTER_KEY = "roDB8OWxSlYv3hiKXYnPusPUJ";
+    private static final String TWITTER_SECRET = "hV1sxHw8CcQaFMnKU59F0ze5qFVEcxDrRtQCouf2sXWXoZ300w";
+
     @Override
     public void onSaveInstanceState(Bundle outState) {
         outState.putString(TAG_ID, mId);
@@ -121,6 +129,9 @@ public class ChatActivity extends FirebaseActivity implements AbsListView.OnItem
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_chat);
         ButterKnife.bind(this);
+        TwitterAuthConfig authConfig = new TwitterAuthConfig(TWITTER_KEY, TWITTER_SECRET);
+        Fabric.with(this, new TwitterCore(authConfig), new TweetUi(), new Twitter(authConfig), new TweetUi());
+
         setSupportActionBar(mToolbar);
         restoreState(savedInstanceState);
         EasyImage.configuration(this)

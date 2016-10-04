@@ -6,24 +6,37 @@
     android:background="@android:color/background_light"
     android:fitsSystemWindows="true">
 
+    <android.support.design.widget.AppBarLayout
+        android:id="@+id/appbar_story_setting"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/first_dark"
+        android:paddingTop="@dimen/appbar_padding_top"
+        android:theme="@style/AppTheme.AppBarOverlay">
+
+        <android.support.v7.widget.Toolbar
+            android:id="@+id/toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="?attr/actionBarSize"
+            android:background="@color/first_dark"
+            app:layout_scrollFlags="scroll|enterAlways"
+            app:popupTheme="@style/AppTheme.PopupOverlay">
+
+        </android.support.v7.widget.Toolbar>
+    </android.support.design.widget.AppBarLayout>
+
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:orientation="vertical"
-        android:padding="8dp">
-
-        <android.support.v7.widget.Toolbar
-            android:id="@+id/settings_toolbar"
-            android:layout_width="match_parent"
-            android:layout_height="?attr/actionBarSize"
-            app:popupTheme="@style/ThemeOverlay.AppCompat.Light" />
+        android:layout_marginTop="?attr/actionBarSize"
+        android:orientation="vertical">
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:gravity="center"
+            android:layout_marginTop="8dp"
             android:orientation="vertical"
-            android:padding="5dp"
             android:textAlignment="center">
 
             <LinearLayout
@@ -31,48 +44,65 @@
                 android:layout_height="wrap_content"
                 android:gravity="center"
                 android:orientation="vertical"
-                android:padding="10dp"
                 android:textAlignment="center">
 
                 <TextView
                     android:layout_width="match_parent"
-                    android:layout_height="match_parent"
+                    android:layout_height="35dp"
+                    android:background="#EAEAEA"
                     android:gravity="center"
                     android:lines="2"
-                    android:text="@string/story_settings_code_title" />
+                    android:text="@string/story_settings_code_title"
+                    android:textColor="#333"
+                    android:textSize="16dp"
+                    android:textStyle="bold" />
 
-                <EditText
+                <TextView
                     android:id="@+id/text_story_code"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:backgroundTint="@android:color/darker_gray"
-                    android:inputType="textUri"
-                    android:lines="3"
-                    android:padding="10dp"
-                    android:text="@string/story_settings_code_title" />
+                    android:layout_marginLeft="15dp"
+                    android:layout_marginRight="15dp"
+                    android:paddingTop="10dp"
+                    android:textColor="#818081"
+                    android:inputType="textMultiLine"
+                    android:lines="6"
+                    android:maxLines="6"
+                    android:text="@string/story_settings_code_title"
+                    android:textSize="12dp" />
 
                 <Button
                     android:id="@+id/btn_story_code"
                     android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/story_settings_code_btn" />
+                    android:layout_height="34dp"
+                    android:background="#364457"
+                    android:paddingLeft="15dp"
+                    android:paddingRight="15dp"
+                    android:text="@string/story_settings_code_btn"
+                    android:textAllCaps="false"
+                    android:textColor="#FFF"
+                    android:textSize="16dp" />
             </LinearLayout>
 
             <LinearLayout
                 android:id="@+id/edit_story_layout"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_marginTop="15dp"
                 android:gravity="center"
                 android:orientation="vertical"
-                android:padding="10dp"
                 android:textAlignment="center">
 
                 <TextView
                     android:id="@+id/text_story_contributors"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginBottom="10dp"
-                    android:text="@string/story_settings_contributors_title" />
+                    android:layout_width="match_parent"
+                    android:layout_height="35dp"
+                    android:background="#EAEAEA"
+                    android:gravity="center"
+                    android:textColor="#333"
+                    android:textStyle="bold"
+                    android:textSize="16dp"
+                    android:text="@string/story_settings_add_contributors" />
 
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -84,6 +114,7 @@
                         android:id="@+id/add_contributor_edit_text"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
+                        android:layout_marginLeft="15dp"
                         android:layout_weight=".7"
                         android:lines="1" />
 
@@ -94,6 +125,8 @@
                         android:layout_height="wrap_content"
                         android:layout_weight=".3"
                         android:text="@string/story_settings_contributors_add_btn"
+                        android:textAllCaps="false"
+                        android:layout_marginRight="5dp"
                         android:textColor="@android:color/holo_blue_light" />
                 </LinearLayout>
 
@@ -102,18 +135,22 @@
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:layout_above="@+id/listFooter"
-                    android:layout_marginLeft="5dp"
-                    android:layout_marginRight="5dp"
-                    android:background="@android:color/white"
+                    android:layout_margin="15dp"
+                    android:background="@android:color/transparent"
                     android:elevation="1dp"
                     app:layout_behavior="@string/appbar_scrolling_view_behavior" />
 
                 <Button
                     android:id="@+id/btn_story_delete"
                     android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
+                    android:layout_height="35dp"
                     android:text="@string/story_settings_contributors_delete_post_btn"
-                    android:textColor="@android:color/holo_red_light" />
+                    android:textColor="#FFF"
+                    android:textAllCaps="false"
+                    android:paddingLeft="20dp"
+                    android:paddingRight="20dp"
+                    android:textSize="16dp"
+                    android:background="#D44A3D"/>
             </LinearLayout>
         </LinearLayout>
     </LinearLayout>

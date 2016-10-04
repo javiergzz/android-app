@@ -1,24 +1,33 @@
-<RelativeLayout android:layout_width="match_parent"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:orientation="horizontal"
     android:gravity="center_vertical"
-    android:weightSum="1"
-    xmlns:android="http://schemas.android.com/apk/res/android">
+    android:weightSum="1">
 
     <TextView
         android:id="@+id/contributor_text"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentLeft="true"
-        />
+        android:layout_marginLeft="15dp"
+        android:layout_centerInParent="true"
+        android:text="lala"/>
 
     <Button
         android:id="@+id/remove_contributor_button"
         style="@style/Widget.AppCompat.Button.Borderless"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:lines="1"
         android:layout_alignParentRight="true"
-        android:textColor="@android:color/holo_red_light"
-        android:text="@string/story_settings_contributors_delete_btn"/>
+        android:lines="1"
+        android:text="@string/story_settings_contributors_delete_btn"
+        android:textAllCaps="false"
+        android:layout_centerInParent="true"
+        android:textAlignment="textEnd"
+        android:textColor="@android:color/holo_red_light" />
+    <View
+        android:layout_width="match_parent"
+        android:layout_height=".5dp"
+        android:background="#EAEAEA"
+        android:layout_alignParentBottom="true"/>
 </RelativeLayout>

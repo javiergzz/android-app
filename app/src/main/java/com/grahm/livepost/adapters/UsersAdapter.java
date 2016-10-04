@@ -28,8 +28,9 @@ public class UsersAdapter extends ArrayAdapter<User> {
     private LayoutInflater lInflater;
 
     String mStoryId;
-    public UsersAdapter(DatabaseReference ref, Context context, String storyId){
-        super(context,android.R.layout.simple_dropdown_item_1line);
+
+    public UsersAdapter(DatabaseReference ref, Context context, String storyId) {
+        super(context, android.R.layout.simple_dropdown_item_1line);
         lInflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         //(DatabaseReference mRef, Class<T> mModelClass, Activity activity, final Map<String,Object> filter)
         mStoryId = storyId;
@@ -42,12 +43,12 @@ public class UsersAdapter extends ArrayAdapter<User> {
                     if (u.getName() != null) {
                         add(u);
                         mUsers.add(u);
-                        mIdMap.put(key,u);
+                        mIdMap.put(key, u);
                         notifyDataSetChanged();
                         Log.e(TAG, u.getName());
                     }
-                }catch (Exception e){
-                    Log.e(TAG,e.getMessage());
+                } catch (Exception e) {
+                    Log.e(TAG, e.getMessage());
                 }
 
             }
@@ -59,10 +60,10 @@ public class UsersAdapter extends ArrayAdapter<User> {
                 User newUser = dataSnapshot.getValue(User.class);
                 int index = mUsers.indexOf(oldUser);
                 //Return if model is no longer found
-                if(index == -1) return;
+                if (index == -1) return;
                 mUsers.set(index, newUser);
                 mIdMap.put(userKey, newUser);
-                insert(newUser,index);
+                insert(newUser, index);
 
                 notifyDataSetChanged();
             }
@@ -85,13 +86,13 @@ public class UsersAdapter extends ArrayAdapter<User> {
                 User newUser = dataSnapshot.getValue(User.class);
                 int index = mUsers.indexOf(oldUser);
                 //Return if model is no longer found
-                if(index == -1) return;
+                if (index == -1) return;
                 mUsers.remove(index);
                 remove(oldUser);
 
                 if (previousChildName == null) {
                     mUsers.add(0, newUser);
-                    insert(newUser,0);
+                    insert(newUser, 0);
                 } else {
                     User previousUser = mIdMap.get(previousChildName);
                     int previousIndex = mUsers.indexOf(previousUser);
@@ -101,7 +102,7 @@ public class UsersAdapter extends ArrayAdapter<User> {
                         add(newUser);
                     } else {
                         mUsers.add(nextIndex, newUser);
-                        insert(newUser,nextIndex);
+                        insert(newUser, nextIndex);
                     }
                 }
                 notifyDataSetChanged();

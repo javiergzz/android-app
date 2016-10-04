@@ -15,6 +15,9 @@ import android.support.v7.widget.Toolbar;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
@@ -113,6 +116,13 @@ public class NewStoryFragment extends Fragment implements OnPutImageListener {
         mStory = mStory == null ? new Story() : mStory;
         mFirebaseRef = FirebaseDatabase.getInstance().getReference();
         mNewSessionViewsManager = new NewSessionViewsManager();
+        setHasOptionsMenu(true);
+    }
+
+    @Override
+    public void onPrepareOptionsMenu(Menu menu) {
+        MenuItem item = menu.findItem(R.id.action_settings);
+        item.setVisible(false);
     }
 
     @Override

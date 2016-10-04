@@ -9,6 +9,9 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 
@@ -33,24 +36,34 @@ public class HomeFragment extends Fragment {
     private Context mContext;
     private HomeListAdapter mHomeListAdapter;
 
-    public HomeFragment() {}
+    public HomeFragment() {
+    }
+
     public static HomeFragment newInstance(Bundle args) {
         HomeFragment fragment = new HomeFragment();
         //args.putInt(ARG_LIST_TYPE, listType);
         fragment.setArguments(args);
         return fragment;
     }
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         mFirebaseRef = FirebaseDatabase.getInstance().getReference("posts");
         mFirebaseRef.keepSynced(true);
+        setHasOptionsMenu(true);
+    }
+
+    @Override
+    public void onPrepareOptionsMenu(Menu menu) {
+        MenuItem item = menu.findItem(R.id.action_settings);
+        item.setVisible(false);
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        RecyclerView rootView = (RecyclerView)inflater.inflate(R.layout.fragment_main, container, false);
+        RecyclerView rootView = (RecyclerView) inflater.inflate(R.layout.fragment_main, container, false);
         mContext = rootView.getContext();
         if (rootView instanceof RecyclerView) {
             RecyclerView recyclerView = (RecyclerView) rootView;
@@ -64,18 +77,18 @@ public class HomeFragment extends Fragment {
         return rootView;
     }
 
-    private void setupAdapter(final RecyclerView recyclerView){
-        Log.d(TAG,mFirebaseRef.toString());
-        mHomeListAdapter = new HomeListAdapter(mFirebaseRef.orderByChild("last_time").limitToLast(50), (AppCompatActivity)getActivity(),  1 ,false);
+    private void setupAdapter(final RecyclerView recyclerView) {
+        Log.d(TAG, mFirebaseRef.toString());
+        mHomeListAdapter = new HomeListAdapter(mFirebaseRef.orderByChild("last_time").limitToLast(50), (AppCompatActivity) getActivity(), 1, false);
         recyclerView.setAdapter(mHomeListAdapter);
         mHomeListAdapter.registerAdapterDataObserver(new RecyclerView.AdapterDataObserver() {
             @Override
             public void onChanged() {
                 super.onChanged();
-                recyclerView.scrollToPosition(mHomeListAdapter.getItemCount()-1);
+                recyclerView.scrollToPosition(mHomeListAdapter.getItemCount() - 1);
             }
         });
-        recyclerView.scrollToPosition(mHomeListAdapter.getItemCount()-1);
+        recyclerView.scrollToPosition(mHomeListAdapter.getItemCount() - 1);
     }
 
     @Override

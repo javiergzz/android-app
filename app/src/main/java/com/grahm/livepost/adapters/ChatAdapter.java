@@ -9,16 +9,25 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.google.firebase.database.Query;
 import com.grahm.livepost.R;
+import com.grahm.livepost.activities.ChatActivity;
 import com.grahm.livepost.fragments.EditPostDialogFragment;
 import com.grahm.livepost.objects.Update;
 import com.grahm.livepost.objects.User;
 import com.grahm.livepost.util.Utilities;
 import com.nostra13.universalimageloader.core.ImageLoader;
 import com.nostra13.universalimageloader.core.ImageLoaderConfiguration;
+import com.twitter.sdk.android.core.Callback;
+import com.twitter.sdk.android.core.Result;
+import com.twitter.sdk.android.core.TwitterException;
+import com.twitter.sdk.android.core.models.Tweet;
+import com.twitter.sdk.android.tweetui.TweetUi;
+import com.twitter.sdk.android.tweetui.TweetUtils;
+import com.twitter.sdk.android.tweetui.TweetView;
 
 import java.io.Serializable;
 import java.sql.Timestamp;
@@ -69,7 +78,7 @@ public class ChatAdapter extends FirebaseListAdapter<Update> {
 
     @Override
     public void onBindViewHolder(final RecyclerView.ViewHolder holder, int position) {
-        ChatViewHolder h = (ChatViewHolder) holder;
+        final ChatViewHolder h = (ChatViewHolder) holder;
         final Update m = getItem(position);
         if (m == null) {
             Log.e(TAG, "Error: Empty Item at position " + position);
@@ -84,7 +93,20 @@ public class ChatAdapter extends FirebaseListAdapter<Update> {
             h.mMessageView.setVisibility(View.GONE);
             h.mImgChatView.setVisibility(View.VISIBLE);
             loadBitmap(Utilities.cleanUrl(msg), h.mImgChatView);
-        } else {
+            // TODO do smart tweet
+//        } else if(TextUtils.isDigitsOnly(msg)){
+//            TweetUtils.loadTweet(Long.parseLong(msg), new Callback<Tweet>() {
+//                @Override
+//                public void success(Result<Tweet> result) {
+//                    h.mRelativeMsg.addView(new TweetView(mActivity, result.data));
+//                }
+//
+//                @Override
+//                public void failure(TwitterException exception) {
+//                    // Toast.makeText(...).show();
+//                }
+//            });
+        }else{
             h.mMessageView.setVisibility(View.VISIBLE);
             h.mImgChatView.setVisibility(View.GONE);
             h.mMessageView.setText(m.getMessage());
@@ -110,6 +132,7 @@ public class ChatAdapter extends FirebaseListAdapter<Update> {
         public final TextView mAuthorView;
         public final TextView mDateView;
         public final ImageView mImgChatView;
+        public final RelativeLayout mRelativeMsg;
 
         public Update mItem;
 
@@ -133,6 +156,7 @@ public class ChatAdapter extends FirebaseListAdapter<Update> {
             mAuthorView = (TextView) view.findViewById(R.id.author);
             mDateView = (TextView) view.findViewById(R.id.date);
             mImgChatView = (ImageView) view.findViewById(R.id.imgChat);
+            mRelativeMsg = (RelativeLayout) view.findViewById(R.id.msgArea);
         }
     }
 

@@ -288,17 +288,33 @@
     <string name="hello_blank_fragment">Hello blank fragment</string>
     <item name="chat_key" type="id" />
     <item name="chat_item" type="id" />
-    <string name="title_activity_contributors">ContributorsActivity</string>
+    <string name="title_activity_contributors">Story Settings</string>
 
     <!-- Story Settings -->
     <string name="story_settings_title">Details</string>
     <string name="story_settings_code_title">Story code</string>
     <string name="story_settings_code_btn">Copy code</string>
     <string name="story_settings_contributors_title">Contributors</string>
+    <string name="story_settings_add_contributors">Add Contributors</string>
     <string name="story_settings_contributors_add_btn">Add</string>
     <string name="story_settings_contributors_delete_btn">Delete</string>
-    <string name="story_settings_contributors_delete_post_btn">Delete Post</string>
+    <string name="story_settings_contributors_delete_post_btn">Delete Story</string>
 
     <string name="story_settings_invalid_user_error">Sorry! That user does not exist D:</string>
     <string name="story_code">StoryCode</string>
+    <!-- Story Settings -->
+    <string name="pref_information">information</string>
+    <string name="pref_content">Content Guidelines</string>
+    <string name="pref_privacy">Privacy Policy</string>
+    <string name="pref_terms">Terms and Conditions</string>
+    <string name="pref_help">help</string>
+    <string name="pref_account">account</string>
+    <string name="pref_faq">faq</string>
+    <string name="pref_change_password">Change Password</string>
+    <string name="pref_log_out">Log Out</string>
+
+    <string name="set_url_content">https://livepost.co/html/content_guidelines.html</string>
+    <string name="set_url_privacy">https://livepost.co/html/privacy_policy.html</string>
+    <string name="set_url_terms">https://livepost.co/html/terms_conditions.html</string>
+    <string name="set_url_faq">https://livepost.freshdesk.com/support/home</string>
 </resources>
