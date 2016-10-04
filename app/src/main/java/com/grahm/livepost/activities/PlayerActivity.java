@@ -79,7 +79,7 @@ public class PlayerActivity extends AppCompatActivity {
         Uri videoUri = Uri.parse( Utilities.cleanVideoUrl(mUpdate.getMessage()));
         try {
             videoLayout.setVideoURI(videoUri);
-
+            videoLayout.start();
         } catch (IOException e) {
             e.printStackTrace();
         }

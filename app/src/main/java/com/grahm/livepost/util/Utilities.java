@@ -113,8 +113,9 @@ public class Utilities {
     }
 
     public static int deduceMessageType(String messageString){
-        if(messageString.contains(".png")||messageString.contains(".jpg"))return MSG_TYPE_IMAGE;
-        if(messageString.contains(".mp4")) return MSG_TYPE_VIDEO;
+        String mimeString = Util.getMimeTypeFromUrl(messageString);
+        if(mimeString.contains("image"))return MSG_TYPE_IMAGE;
+        if(mimeString.contains("video")) return MSG_TYPE_VIDEO;
         return MSG_TYPE_TEXT;
     }
 

@@ -195,7 +195,7 @@ public class StorySettingsActivity extends FirebaseActivity {
         mFirebaseRef.child("users/" + mStory.getAuthor() + "/posts_created/" + mId).removeValue();
         //Delete all updates
         mFirebaseRef.child("updates/" + mId).removeValue();
-        
+
         onBackPressed();
     }
 

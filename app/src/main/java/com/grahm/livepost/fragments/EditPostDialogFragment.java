@@ -27,6 +27,7 @@ import com.grahm.livepost.asynctask.PostImageTask;
 import com.grahm.livepost.interfaces.OnPutImageListener;
 import com.grahm.livepost.objects.Update;
 import com.grahm.livepost.util.GV;
+import com.grahm.livepost.util.Util;
 import com.grahm.livepost.util.Utilities;
 import com.nostra13.universalimageloader.core.ImageLoader;
 

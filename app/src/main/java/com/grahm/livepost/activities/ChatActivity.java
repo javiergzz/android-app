@@ -79,7 +79,7 @@ public class ChatActivity extends FirebaseActivity implements AbsListView.OnItem
     private Story mStory;
     private Uri mIimageUri;
     private AmazonS3Client s3Client = new AmazonS3Client(new BasicAWSCredentials(GV.ACCESS_KEY_ID, GV.SECRET_KEY));
-    private ImageLoader mImageLoader= ImageLoader.getInstance();
+    private ImageLoader mImageLoader;
 
     private ChatAdapter mMessagesListAdapter;
     private User mUser;
@@ -124,6 +124,7 @@ public class ChatActivity extends FirebaseActivity implements AbsListView.OnItem
             mStory = (Story) args.getSerializable(TAG_STORY);
         }
         mUser = Utilities.getUser(mFirebaseRef,this,args);
+        mImageLoader= ImageLoader.getInstance();
     }
 
     @Override
