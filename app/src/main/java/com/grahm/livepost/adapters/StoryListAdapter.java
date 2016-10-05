@@ -33,6 +33,11 @@ import android.widget.TextView;
 
 import com.amazonaws.auth.BasicAWSCredentials;
 import com.amazonaws.services.s3.AmazonS3Client;
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.engine.DiskCacheStrategy;
+import com.bumptech.glide.load.resource.drawable.GlideDrawable;
+import com.bumptech.glide.request.RequestListener;
+import com.bumptech.glide.request.target.Target;
 import com.daimajia.swipe.SimpleSwipeListener;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
@@ -47,10 +52,6 @@ import com.grahm.livepost.activities.MainActivity;
 import com.grahm.livepost.objects.Story;
 import com.grahm.livepost.util.GV;
 import com.grahm.livepost.util.Utilities;
-import com.nostra13.universalimageloader.core.ImageLoader;
-import com.nostra13.universalimageloader.core.ImageLoaderConfiguration;
-import com.nostra13.universalimageloader.core.assist.FailReason;
-import com.nostra13.universalimageloader.core.listener.ImageLoadingListener;
 
 
 import org.apache.commons.io.FilenameUtils;
@@ -77,7 +78,6 @@ public class StoryListAdapter extends FirebaseListAdapter<Story> {
     private int mListType;
     private Context mCtx;
     private AppCompatActivity mActivity;
-    private ImageLoader mImageLoader;
     private OnFragmentInteractionListener mOnFragmentInteractionListener;
 
 
@@ -90,9 +90,6 @@ public class StoryListAdapter extends FirebaseListAdapter<Story> {
 
         mActivity = activity;
         mOnFragmentInteractionListener = (OnFragmentInteractionListener) mActivity;
-        ImageLoaderConfiguration config = new ImageLoaderConfiguration.Builder(mCtx).build();
-        mImageLoader = ImageLoader.getInstance();
-        if (!mImageLoader.isInited()) mImageLoader.init(config);
     }
 
     @Override
@@ -196,32 +193,23 @@ public class StoryListAdapter extends FirebaseListAdapter<Story> {
 //
 //        resString = mCtx.getString(R.string.amazon_image_path) + resString + ".jpg";
 
-        mImageLoader.displayImage(resUrl, imageView, new ImageLoadingListener() {
-            @Override
-            public void onLoadingStarted(String imageUri, View view) {
-                ((ImageView) view).setImageResource(R.drawable.default_placeholder);
-                progressBar.setVisibility(View.VISIBLE);
-            }
+        progressBar.setVisibility(View.VISIBLE);
+        Glide.with(mCtx)
+                .load(resUrl)
+                .diskCacheStrategy(DiskCacheStrategy.RESULT)
+                .listener(new RequestListener<String, GlideDrawable>() {
+                    @Override
+                    public boolean onException(Exception e, String model, Target<GlideDrawable> target, boolean isFirstResource) {
+                        return false;
+                    }
 
-            @Override
-            public void onLoadingFailed(String imageUri, View view, FailReason failReason) {
-                Log.e(TAG, "failed to load " + imageUri);
-                if (!retry) {
-                    reupload(resUrl, imageView, progressBar);
-                    //loadBitmap(imageUri, imageView, progressBar, true);
-                }
-            }
-
-            @Override
-            public void onLoadingComplete(String imageUri, View view, Bitmap loadedImage) {
-                progressBar.setVisibility(View.GONE);
-            }
-
-            @Override
-            public void onLoadingCancelled(String imageUri, View view) {
-                progressBar.setVisibility(View.GONE);
-            }
-        });
+                    @Override
+                    public boolean onResourceReady(GlideDrawable resource, String model, Target<GlideDrawable> target, boolean isFromMemoryCache, boolean isFirstResource) {
+                        progressBar.setVisibility(View.GONE);
+                        return false;
+                    }
+                })
+                .into(imageView);
 
     }
 

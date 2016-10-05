@@ -25,12 +25,13 @@ import com.google.firebase.database.ServerValue;
 import com.google.gson.Gson;
 import com.grahm.livepost.R;
 import com.grahm.livepost.interfaces.OnPutImageListener;
+import com.grahm.livepost.objects.ImageSize;
 import com.grahm.livepost.objects.Story;
 import com.grahm.livepost.objects.Update;
 import com.grahm.livepost.objects.User;
 import com.grahm.livepost.util.GV;
-import com.nostra13.universalimageloader.core.ImageLoader;
-import com.nostra13.universalimageloader.core.assist.ImageSize;
+import com.grahm.livepost.util.Util;
+
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -47,7 +48,6 @@ public class CreateStoryTask extends AsyncTask<Uri, String, String> {
     private AmazonS3Client mS3Client;
     private OnPutImageListener mListener;
     private String mPictureName;
-    private ImageLoader mImageLoader;
     private Boolean mShowDialog;
     private Story mStory;
     private String mUid;
@@ -61,7 +61,6 @@ public class CreateStoryTask extends AsyncTask<Uri, String, String> {
         mS3Client = client;
         mListener = listener;
         mShowDialog = showDialog;
-        mImageLoader = ImageLoader.getInstance();
         mStory = story;
         mFirebaseRef = ref;
         mSharedPref = context.getSharedPreferences(context.getString(R.string.preference_file_key), Context.MODE_PRIVATE);
@@ -139,7 +138,8 @@ public class CreateStoryTask extends AsyncTask<Uri, String, String> {
     }
 
     private Bitmap getScaledBitmap(Uri srcUri, int mDstWidth, int mDstHeight) {
-        Bitmap unscaledBitmap = mImageLoader.loadImageSync(srcUri.toString());
+        Bitmap unscaledBitmap = Util.loadBitmapFromUri(mContext,srcUri);
+
         Bitmap scaledBitmap;
         ImageSize srcSize = new ImageSize(unscaledBitmap.getWidth(), unscaledBitmap.getHeight());
         ImageSize boundarySize = new ImageSize(mDstWidth, mDstHeight);
@@ -149,8 +149,8 @@ public class CreateStoryTask extends AsyncTask<Uri, String, String> {
             return unscaledBitmap;
         else {
             unscaledBitmap.recycle();
-            return mImageLoader.loadImageSync(srcUri.toString(), getScaledDimension(srcSize, boundarySize));
-
+            ImageSize s = getScaledDimension(srcSize, boundarySize);
+            return Bitmap.createScaledBitmap(Util.loadBitmapFromUri(mContext,srcUri), s.getWidth(), s.getHeight(), false);
         }
     }
 

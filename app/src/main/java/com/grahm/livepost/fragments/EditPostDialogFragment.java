@@ -16,6 +16,7 @@ import android.widget.Toast;
 
 import com.amazonaws.auth.BasicAWSCredentials;
 import com.amazonaws.services.s3.AmazonS3Client;
+import com.bumptech.glide.Glide;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.gson.Gson;
@@ -28,7 +29,6 @@ import com.grahm.livepost.interfaces.OnPutImageListener;
 import com.grahm.livepost.objects.Update;
 import com.grahm.livepost.util.GV;
 import com.grahm.livepost.util.Utilities;
-import com.nostra13.universalimageloader.core.ImageLoader;
 
 import java.io.File;
 
@@ -42,7 +42,6 @@ public class EditPostDialogFragment extends DialogFragment {
     public static final String TYPE_KEY = "TYPE";
     public static final String IMAGE_URI_KEY = "img_uri";
     private Update mMsg;
-    private ImageLoader mImageLoader;
     private DatabaseReference mFirebaseRef;
     private AmazonS3Client mS3client;
     private PostImageTask mPostTask;
@@ -70,12 +69,6 @@ public class EditPostDialogFragment extends DialogFragment {
         args.putString(ChatAdapter.STORY_KEY, storyKey);
         f.setArguments(args);
         return f;
-    }
-
-    @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        mImageLoader = ImageLoader.getInstance();
     }
 
     private void restoreState(Bundle savedInstanceState) {
@@ -124,7 +117,7 @@ public class EditPostDialogFragment extends DialogFragment {
             case Utilities.MSG_TYPE_IMAGE:
                 mTextEdit.setVisibility(View.GONE);
                 mImageEdit.setVisibility(View.VISIBLE);
-                mImageLoader.displayImage(Utilities.cleanUrl(message), mImageEdit);
+                Glide.with(this).load(Utilities.cleanUrl(message)).into(mImageEdit);
                 mImageEdit.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
@@ -136,7 +129,7 @@ public class EditPostDialogFragment extends DialogFragment {
             case Utilities.MSG_TYPE_VIDEO://TODO
                 mTextEdit.setVisibility(View.GONE);
                 mImageEdit.setVisibility(View.VISIBLE);
-                mImageLoader.displayImage(Utilities.cleanVideoUrl(message).replace(".mp4",".png"), mImageEdit);
+                Glide.with(this).load(Utilities.cleanVideoUrl(message).replace(".mp4",".png")).into(mImageEdit);
                 mImageEdit.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {//Do nothing
@@ -223,7 +216,7 @@ public class EditPostDialogFragment extends DialogFragment {
 
     private void onPhotoReturned(File imageFile){
         mLoadedUri = Uri.fromFile(imageFile);
-        mImageLoader.displayImage(mLoadedUri.toString(),mImageEdit);
+        Glide.with(this).load(mLoadedUri.toString()).into(mImageEdit);
     }
 
 }

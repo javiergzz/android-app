@@ -392,6 +392,16 @@ public class Util {
         }
 
     }
+    public static Bitmap loadBitmapFromUri(Context context,Uri uri){
+        Bitmap bitmap = null;
+        try{
+            bitmap = MediaStore.Images.Media.getBitmap(context.getContentResolver(), uri);
+        }catch (Exception e){
+            if(e!=null)
+                Log.e(TAG,e.getMessage());
+        }
+        return bitmap;
+    }
 
 
 }

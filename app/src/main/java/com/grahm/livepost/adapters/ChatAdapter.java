@@ -14,6 +14,7 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.google.firebase.database.Query;
 import com.grahm.livepost.R;
 import com.grahm.livepost.activities.PlayerActivity;
@@ -22,8 +23,6 @@ import com.grahm.livepost.objects.Update;
 import com.grahm.livepost.objects.User;
 import com.grahm.livepost.util.Util;
 import com.grahm.livepost.util.Utilities;
-import com.nostra13.universalimageloader.core.ImageLoader;
-import com.nostra13.universalimageloader.core.ImageLoaderConfiguration;
 
 import java.io.Serializable;
 import java.sql.Timestamp;
@@ -36,19 +35,12 @@ public class ChatAdapter extends FirebaseListAdapter<Update> {
     private String mChatKey;
     private FragmentActivity mActivity;
     protected String mUsername;
-    private ImageLoader mImageLoader;
 
 
     public ChatAdapter(Query ref, FragmentActivity activity, String chatKey, User user) {
         super(ref, Update.class, false);
         this.mActivity = activity;
         this.mChatKey = chatKey;
-        //Init imageloader if necessary
-        mImageLoader = ImageLoader.getInstance();
-        if (!mImageLoader.isInited()) {
-            ImageLoaderConfiguration config = new ImageLoaderConfiguration.Builder(activity).build();
-            mImageLoader.init(config);
-        }
         mUsername = user.getUserKey();
     }
 
@@ -60,7 +52,7 @@ public class ChatAdapter extends FirebaseListAdapter<Update> {
 
 
     public void loadBitmap(String resUrl, ImageView imageView) {
-        mImageLoader.displayImage(resUrl, imageView);
+        Glide.with(mActivity).load(resUrl).diskCacheStrategy(DiskCacheStrategy.RESULT).placeholder(R.drawable.default_placeholder).into(imageView);
     }
 
     @Override
@@ -93,7 +85,7 @@ public class ChatAdapter extends FirebaseListAdapter<Update> {
                 Log.e(TAG,"video:"+Utilities.cleanVideoUrl(h.mItem.getMessage()));
                 //Bitmap thumb = ThumbnailUtils.createVideoThumbnail(Utilities.cleanVideoUrl(h.mItem.getMessage()), MediaStore.Images.Thumbnails.MINI_KIND);
                 try {
-                    h.mImgChatView.setImageBitmap(Utilities.retriveVideoFrameFromVideo(h.mItem.getMessage()));
+                    Glide.with(mActivity).load(msg.replace(".mp4",".png")).into(h.mImgChatView);
                 }catch (Throwable e){
                     h.mImgChatView.setImageResource(R.drawable.default_placeholder);
                     Log.e(TAG,e.getMessage());

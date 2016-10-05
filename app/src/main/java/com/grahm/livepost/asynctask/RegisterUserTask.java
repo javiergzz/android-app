@@ -32,10 +32,10 @@ import com.amazonaws.services.s3.model.PutObjectRequest;
 import com.amazonaws.services.s3.model.ResponseHeaderOverrides;
 import com.grahm.livepost.interfaces.OnPutImageListener;
 import com.grahm.livepost.R;
+import com.grahm.livepost.objects.ImageSize;
 import com.grahm.livepost.objects.User;
 import com.grahm.livepost.util.GV;
-import com.nostra13.universalimageloader.core.ImageLoader;
-import com.nostra13.universalimageloader.core.assist.ImageSize;
+import com.grahm.livepost.util.Util;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -51,7 +51,6 @@ public class RegisterUserTask extends AsyncTask<Uri, String, String> {
     private AmazonS3Client mS3Client;
     private OnPutImageListener mListener;
     private String mPictureName;
-    private ImageLoader mImageLoader;
     private Boolean mShowDialog;
     private User mUser;
     private String mUid;
@@ -67,7 +66,6 @@ public class RegisterUserTask extends AsyncTask<Uri, String, String> {
         mS3Client = client;
         mListener = listener;
         mShowDialog = showDialog;
-        mImageLoader = ImageLoader.getInstance();
         mUser=user;
         mPassword = password;
         mFirebaseRef = ref;
@@ -117,19 +115,20 @@ public class RegisterUserTask extends AsyncTask<Uri, String, String> {
         return url;
     }
 
-    private Bitmap getScaledBitmap(Uri srcUri,int mDstWidth, int mDstHeight){
-        Bitmap unscaledBitmap =  mImageLoader.loadImageSync(srcUri.toString());
+    private Bitmap getScaledBitmap(Uri srcUri, int mDstWidth, int mDstHeight) {
+        Bitmap unscaledBitmap = Util.loadBitmapFromUri(mContext,srcUri);
+
         Bitmap scaledBitmap;
-        ImageSize srcSize = new ImageSize(unscaledBitmap.getWidth(),unscaledBitmap.getHeight());
-        ImageSize boundarySize = new ImageSize(mDstWidth,mDstHeight);
+        ImageSize srcSize = new ImageSize(unscaledBitmap.getWidth(), unscaledBitmap.getHeight());
+        ImageSize boundarySize = new ImageSize(mDstWidth, mDstHeight);
 
         //Use Height -1 for width-dependent images to be used on staggered list
-        if(unscaledBitmap.getWidth()<=mDstWidth && unscaledBitmap.getHeight()<=mDstHeight)
+        if (unscaledBitmap.getWidth() <= mDstWidth && unscaledBitmap.getHeight() <= mDstHeight)
             return unscaledBitmap;
         else {
             unscaledBitmap.recycle();
-            return  mImageLoader.loadImageSync(srcUri.toString(),getScaledDimension(srcSize,boundarySize));
-
+            ImageSize s = getScaledDimension(srcSize, boundarySize);
+            return Bitmap.createScaledBitmap(Util.loadBitmapFromUri(mContext,srcUri), s.getWidth(), s.getHeight(), false);
         }
     }
 
