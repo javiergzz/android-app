@@ -176,7 +176,7 @@ public class StorySettingsActivity extends FirebaseActivity {
                     for (Map.Entry<String, User> entry : m.entrySet()) {
                         try {
                             //Remove from each user's contributed posts field
-                            mFirebaseRef.child("users/" + entry.getKey() + "/posts_contributed_to/").child(mId).removeValue();
+                            mFirebaseRef.child("users/" + entry.getValue().getUserKey() + "/posts_contributed_to/").child(mId).removeValue();
                             System.out.println(entry.getKey() + "/" + entry.getValue());
                         } catch (Exception e) {
                             Log.e(TAG, e.getMessage());
@@ -194,6 +194,7 @@ public class StorySettingsActivity extends FirebaseActivity {
 
         //Delete entry from creator
         mFirebaseRef.child("users/" + mStory.getAuthor() + "/posts_created/" + mId).removeValue();
+        mFirebaseRef.child("updates/" + mId).removeValue();
         onBackPressed();
     }
 
@@ -230,13 +231,13 @@ public class StorySettingsActivity extends FirebaseActivity {
         Map<String, Object> map = new HashMap<String, Object>();
         Map<String, Object> k = new HashMap<String, Object>();
         k.put("role", "contributor");
-        k.put("uid", mContributor.getAuthorString());
-        map.put(mContributor.getAuthorString(), k);
+        k.put("uid", mContributor.getUserKey());
+        map.put(mContributor.getUserKey(), k);
         mFirebaseRef.child("members/" + mId).updateChildren(map);
 
 
-        Log.d(TAG, "users/" + mContributor.getAuthorString() + "/posts_contributed_to/" + map.toString());
-        mFirebaseRef.child("users/" + mContributor.getAuthorString() + "/posts_contributed_to/" + mId).setValue(mStory);
+        Log.d(TAG, "users/" + mContributor.getUserKey() + "/posts_contributed_to/" + map.toString());
+        mFirebaseRef.child("users/" + mContributor.getUserKey() + "/posts_contributed_to/" + mId).setValue(mStory);
 
         mTextContributor.setText("");
         mTextContributor.clearListSelection();

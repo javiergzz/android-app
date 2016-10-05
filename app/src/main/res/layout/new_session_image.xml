@@ -3,9 +3,9 @@
     android:id="@+id/new_session_avatar_input"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    android:gravity="center"
     android:paddingLeft="@dimen/activity_horizontal_margin"
-    android:paddingRight="@dimen/activity_horizontal_margin"
-    android:gravity="center">
+    android:paddingRight="@dimen/activity_horizontal_margin">
 
     <LinearLayout
         android:id="@+id/new_session_avatar_layout"
@@ -26,8 +26,13 @@
     <ImageView
         android:id="@+id/new_session_selected_img"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:maxHeight="200dp" />
+        android:layout_height="250dp"
+        android:layout_marginBottom="50dp"
+        android:maxHeight="300dp"
+        android:adjustViewBounds="true"
+        android:scaleType="centerInside"
+        android:layout_centerInParent="true"
+        android:visibility="gone" />
 
 </android.support.design.widget.TextInputLayout>
 

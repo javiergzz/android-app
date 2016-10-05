@@ -1,9 +1,11 @@
 package com.grahm.livepost.fragments;
 
 import android.app.Activity;
-import android.content.Context;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Color;
+import android.graphics.drawable.BitmapDrawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.design.widget.TextInputLayout;
@@ -16,12 +18,12 @@ import android.text.TextUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
-import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.ListView;
@@ -70,6 +72,7 @@ public class NewStoryFragment extends Fragment implements OnPutImageListener {
     private CreateStoryTask mStoryTask = null;
     private Story mStory;
     private Uri mUri;
+    private File mFile;
     private int mCurrentItem;
     private User mUser;
     private NewSessionViewsManager mNewSessionViewsManager;
@@ -83,6 +86,8 @@ public class NewStoryFragment extends Fragment implements OnPutImageListener {
     public ProgressBar mProgressBarView;
     @BindView(R.id.new_story_progress_str)
     public TextView mProgressBarTextView;
+    @BindView(R.id.new_story_btn_next)
+    public Button mBtnNext;
 
     private OnFragmentInteractionListener mListener;
 
@@ -204,23 +209,26 @@ public class NewStoryFragment extends Fragment implements OnPutImageListener {
     }
 
     @OnClick(R.id.new_story_btn_next)
-    public void nextButton() {
-        int vCount = mViewPager.getAdapter().getCount();
-        int current = mViewPager.getCurrentItem();
-        MultipartFormField r = mNewSessionViewsManager.list.get(current);
-        if (r.onValidate()) {
-            if (current + 1 == vCount) {//Send Registration Form
-                attemptSessionCreation();
+    public void nextButton(View v) {
+        if(mViewPager != null && mViewPager.getAdapter() != null){
+            int vCount = mViewPager.getAdapter().getCount();
+            int current = mViewPager.getCurrentItem();
+            MultipartFormField r = mNewSessionViewsManager.list.get(current);
+            if (r.onValidate()) {
+                if (current + 1 == vCount) {//Send Registration Form
+                    attemptSessionCreation();
+                }
+                mViewPager.setCurrentItem(current + 1, true);
+                updateProgressViews();
+                v.setVisibility(current == 0 ? View.INVISIBLE : View.VISIBLE);
             }
-            mViewPager.setCurrentItem(current + 1, true);
-            updateProgressViews();
         }
     }
 
     public void attemptSessionCreation() {
         if (mStoryTask != null) return;
 
-        mStory.setAuthor(mUser.getAuthorString());
+        mStory.setAuthor(mUser.getUserKey());
         mStory.setAuthor_name(mUser.getName());
         mStoryTask = new CreateStoryTask(mStory, mFirebaseRef.child("posts"), getActivity(), s3Client, this, true);
         if (mUri != null) mStoryTask.execute(mUri);
@@ -315,6 +323,7 @@ public class NewStoryFragment extends Fragment implements OnPutImageListener {
                         Object listItem = mList.getItemAtPosition(position);
                         mStory.setCategory(listItem.toString());
                         view.setBackgroundColor(Color.rgb(234, 234, 234));
+                        nextButton(mBtnNext);
                     }
                 });
             }
@@ -337,8 +346,12 @@ public class NewStoryFragment extends Fragment implements OnPutImageListener {
                     ButterKnife.findById(layout, R.id.new_session_avatar_layout).setVisibility(View.GONE);
                     ImageView resultView = (ImageView) layout.findViewById(R.id.new_session_selected_img);
                     resultView.setVisibility(View.VISIBLE);
-                    resultView.setImageResource(R.drawable.ic_add_a_photo_black_48dp);
-                    resultView.setImageURI(mUri);
+//                    resultView.setImageResource(R.drawable.ic_add_a_photo_black_48dp);
+                    Bitmap media = BitmapFactory.decodeFile(mFile.getPath());
+                    resultView.setImageBitmap(media);
+//                    resultView.setImageURI(mUri);
+
+
                     resultView.setOnClickListener(new View.OnClickListener() {
                         @Override
                         public void onClick(View v) {
@@ -357,13 +370,14 @@ public class NewStoryFragment extends Fragment implements OnPutImageListener {
             }
 
             public boolean onValidate() {
-                if (mUri == null) {
-                    TextInputLayout t = ButterKnife.findById(mViewPager, R.id.new_session_avatar_input);
-                    if (t != null)
-                        t.setError(mNewSessionErrors.ERROR_NO_IMG);
-                    return false;
-                }
-                return true;
+//                if (mUri == null) {
+//                    TextInputLayout t = ButterKnife.findById(mViewPager, R.id.new_session_avatar_input);
+//                    if (t != null)
+//                        t.setError(mNewSessionErrors.ERROR_NO_IMG);
+//                    return false;
+//                }
+//                return true;
+                return mUri != null;
             }
         }
 
@@ -391,6 +405,7 @@ public class NewStoryFragment extends Fragment implements OnPutImageListener {
     }
 
     private void onPhotoReturned(File imageFile) {
+        mFile = imageFile;
         mUri = Uri.fromFile(imageFile);
         ButterKnife.findById(mViewPager, R.id.new_session_avatar_layout).setVisibility(View.GONE);
         ImageView resultView = ButterKnife.findById(mViewPager, R.id.new_session_selected_img);

@@ -69,7 +69,7 @@ public class CreateStoryTask extends AsyncTask<Uri, String, String> {
         String s = mSharedPref.getString("user", null);
         if (!TextUtils.isEmpty(s)) {
             mUser = new Gson().fromJson(s, User.class);
-            mStory.setAuthor(mUser.getAuthorString());
+            mStory.setAuthor(mUser.getUserKey());
         }
     }
 
@@ -173,7 +173,7 @@ public class CreateStoryTask extends AsyncTask<Uri, String, String> {
             //Add post to "posts created"
             Map<String, Object> posts = new HashMap<String, Object>();
             posts.put(key, mStory);
-            mFirebaseRef.getRoot().child("users/"+mUser.getAuthorString()).child("/posts_created").updateChildren(posts);
+            mFirebaseRef.getRoot().child("users/"+mUser.getUserKey()).child("/posts_created").updateChildren(posts);
 
         } catch (Exception e) {
             Log.e(TAG, e.getMessage().toString());
