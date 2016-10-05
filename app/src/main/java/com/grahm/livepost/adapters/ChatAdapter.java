@@ -51,10 +51,6 @@ public class ChatAdapter extends FirebaseListAdapter<Update> {
     }
 
 
-    public void loadBitmap(String resUrl, ImageView imageView) {
-        Glide.with(mActivity).load(resUrl).diskCacheStrategy(DiskCacheStrategy.RESULT).placeholder(R.drawable.default_placeholder).into(imageView);
-    }
-
     @Override
     public ChatViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         return new ChatViewHolder(LayoutInflater.from(parent.getContext()).inflate(R.layout.chat_message_one, parent, false));
@@ -77,10 +73,10 @@ public class ChatAdapter extends FirebaseListAdapter<Update> {
         if (!TextUtils.isEmpty(mimeString) && (mimeString.contains("image") || mimeString.contains("video"))) {
             h.mMessageView.setVisibility(View.GONE);
             h.mImgChatView.setVisibility(View.VISIBLE);
-            if(mimeString.contains("gif"))
-                Glide.with(mActivity).load(msg).into(h.mImgChatView);
-            else if(mimeString.contains("image")) loadBitmap(msg, h.mImgChatView);
-            if(mimeString.contains("video")){
+            if(mimeString.contains("image")) {
+                h.mPlayIcon.setVisibility(View.GONE);
+                Glide.with(mActivity).load(msg).diskCacheStrategy(DiskCacheStrategy.RESULT).placeholder(R.drawable.default_placeholder).fitCenter().into(h.mImgChatView);
+            } else if(mimeString.contains("video")){
                 h.mPlayIcon.setVisibility(View.VISIBLE);
                 Log.e(TAG,"video:"+Utilities.cleanVideoUrl(h.mItem.getMessage()));
                 //Bitmap thumb = ThumbnailUtils.createVideoThumbnail(Utilities.cleanVideoUrl(h.mItem.getMessage()), MediaStore.Images.Thumbnails.MINI_KIND);
