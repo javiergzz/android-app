@@ -27,12 +27,10 @@ import com.google.gson.Gson;
 import com.grahm.livepost.R;
 import com.grahm.livepost.adapters.ChatAdapter;
 import com.grahm.livepost.asynctask.DeleteImageTask;
-import com.grahm.livepost.asynctask.DeleteVideoTask;
 import com.grahm.livepost.asynctask.PostImageTask;
 import com.grahm.livepost.interfaces.OnPutImageListener;
 import com.grahm.livepost.objects.Update;
 import com.grahm.livepost.util.GV;
-import com.grahm.livepost.util.Util;
 import com.grahm.livepost.util.Utilities;
 import com.nostra13.universalimageloader.core.ImageLoader;
 
@@ -124,38 +122,22 @@ public class EditPostDialogFragment extends DialogFragment {
     }
     private void chooseViewElements(){
         final String message = mMsg != null ? mMsg.getMessage() : null;
-        if (message == null) return;
-
-        switch (mChatType) {
-            case Utilities.MSG_TYPE_IMAGE:
-                mTextEdit.setVisibility(View.GONE);
-                mImageEdit.setVisibility(View.VISIBLE);
-                mImageLoader.displayImage(Utilities.cleanUrl(message), mImageEdit);
-                mImageEdit.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        Log.i(TAG,"Add picture callback");
-                        addPictureCallback();
-                    }
-                });
-                break;
-            case Utilities.MSG_TYPE_VIDEO://TODO
-                mTextEdit.setVisibility(View.GONE);
-                mImageEdit.setVisibility(View.VISIBLE);
-                mImageLoader.displayImage(Utilities.cleanVideoUrl(message).replace(".mp4",".png"), mImageEdit);
-                mImageEdit.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {//Do nothing
-                    }
-                });
-                mImageEdit.setVisibility(View.GONE);
-                break;
-            default:
-                mImageEdit.setVisibility(View.GONE);
-                mTextEdit.setVisibility(View.VISIBLE);
-                mTextEdit.setText(message);
-                mTextEdit.setSelection(mTextEdit.length());
-                break;
+        if (message != null && mChatType == Utilities.MSG_TYPE_IMAGE) {
+            mTextEdit.setVisibility(View.GONE);
+            mImageEdit.setVisibility(View.VISIBLE);
+            mImageLoader.displayImage(Utilities.cleanUrl(message), mImageEdit);
+            mImageEdit.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    Log.i(TAG,"Add picture callback");
+                    addPictureCallback();
+                }
+            });
+        } else {
+            mImageEdit.setVisibility(View.GONE);
+            mTextEdit.setVisibility(View.VISIBLE);
+            mTextEdit.setText(message);
+            mTextEdit.setSelection(mTextEdit.length());
         }
     }
     private void editAction() {
@@ -185,8 +167,6 @@ public class EditPostDialogFragment extends DialogFragment {
             case Utilities.MSG_TYPE_VIDEO://TODO
                 break;
             default:
-                String deleteVideoUrl = Utilities.cleanVideoUrl(mMsg.getMessage());
-                new DeleteVideoTask(getActivity(),mS3client,deleteVideoUrl);
                 break;
         }
         mFirebaseRef.removeValue();

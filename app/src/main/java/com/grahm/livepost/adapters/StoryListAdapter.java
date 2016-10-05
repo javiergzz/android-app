@@ -164,7 +164,7 @@ public class StoryListAdapter extends FirebaseListAdapter<Story> {
         dialog.show();
     }
 
-    void reupload(final String resUrl, final ImageView imageView, final ProgressBar progressBar){
+    void reupload(final String resUrl, final ImageView imageView, final ProgressBar progressBar) {
         /** Image Compression and re-upload ran once **/
         AmazonS3Client s3Client = new AmazonS3Client(new BasicAWSCredentials(GV.ACCESS_KEY_ID, GV.SECRET_KEY));
         List<String> tempList = Arrays.asList(resUrl.split("/"));

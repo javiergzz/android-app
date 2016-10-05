@@ -1,6 +1,5 @@
 package com.grahm.livepost.adapters;
 
-import android.content.Intent;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
 import android.support.v7.widget.RecyclerView;
@@ -13,20 +12,12 @@ import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
-import com.bumptech.glide.Glide;
-import com.bumptech.glide.gifdecoder.GifDecoder;
-import com.bumptech.glide.gifdecoder.GifHeader;
-import com.bumptech.glide.gifdecoder.GifHeaderParser;
-import com.bumptech.glide.load.resource.gif.GifDrawable;
-import com.bumptech.glide.load.resource.gifbitmap.GifBitmapWrapper;
-import com.bumptech.glide.request.target.GlideDrawableImageViewTarget;
 import com.google.firebase.database.Query;
 import com.grahm.livepost.R;
-import com.grahm.livepost.activities.PlayerActivity;
+import com.grahm.livepost.activities.ChatActivity;
 import com.grahm.livepost.fragments.EditPostDialogFragment;
 import com.grahm.livepost.objects.Update;
 import com.grahm.livepost.objects.User;
-import com.grahm.livepost.util.Util;
 import com.grahm.livepost.util.Utilities;
 import com.nostra13.universalimageloader.core.ImageLoader;
 import com.nostra13.universalimageloader.core.ImageLoaderConfiguration;
@@ -66,7 +57,7 @@ public class ChatAdapter extends FirebaseListAdapter<Update> {
             ImageLoaderConfiguration config = new ImageLoaderConfiguration.Builder(activity).build();
             mImageLoader.init(config);
         }
-        mUsername = user.getUserKey();
+        mUsername = user.getAuthorString();
     }
 
     public void showDialog(ChatTag tag) {
@@ -97,39 +88,26 @@ public class ChatAdapter extends FirebaseListAdapter<Update> {
         h.mItem = m;
         h.mView.setTag(new ChatTag(key, m));
         h.mAuthorView.setText(m.getSender() + " ");
-        final String msg = Utilities.cleanUrl(m.getMessage());
-        String mimeString = Util.getMimeTypeFromUrl(msg);
-        if (!TextUtils.isEmpty(mimeString) && (mimeString.contains("image") || mimeString.contains("video"))) {
+        final String msg = m.getMessage();
+        if (msg.contains(".png") || msg.contains(".jpg")) {
             h.mMessageView.setVisibility(View.GONE);
             h.mImgChatView.setVisibility(View.VISIBLE);
-            if (mimeString.contains("image"))
-                loadBitmap(msg, h.mImgChatView);
-            if (mimeString.contains("gif"))
-                Glide.with(mActivity)
-                        .load(msg)
-                        .placeholder(R.drawable.default_placeholder)
-                        .into(h.mImgChatView);
-            GlideDrawableImageViewTarget imageViewTarget = new GlideDrawableImageViewTarget(h.mImgChatView);
-            //GifDrawable
-            //GifDrawable gifDrawable = new GifDrawable(h.mImgChatView)
-
-            if (mimeString.contains("video")) {
-                h.mPlayIcon.setVisibility(View.VISIBLE);
-                Log.e(TAG, "video:" + Utilities.cleanVideoUrl(h.mItem.getMessage()));
-                //Bitmap thumb = ThumbnailUtils.createVideoThumbnail(Utilities.cleanVideoUrl(h.mItem.getMessage()), MediaStore.Images.Thumbnails.MINI_KIND);
-                try {
-                    h.mImgChatView.setImageBitmap(Utilities.retriveVideoFrameFromVideo(h.mItem.getMessage()));
-                } catch (Throwable e) {
-                    h.mImgChatView.setImageResource(R.drawable.default_placeholder);
-                    Log.e(TAG, e.getMessage());
-                }
-            } else {
-                h.mPlayIcon.setVisibility(View.GONE);
-            }
-
-        } else {
+            loadBitmap(Utilities.cleanUrl(msg), h.mImgChatView);
+            // TODO do smart tweet
+//        } else if(TextUtils.isDigitsOnly(msg)){
+//            TweetUtils.loadTweet(Long.parseLong(msg), new Callback<Tweet>() {
+//                @Override
+//                public void success(Result<Tweet> result) {
+//                    h.mRelativeMsg.addView(new TweetView(mActivity, result.data));
+//                }
+//
+//                @Override
+//                public void failure(TwitterException exception) {
+//                    // Toast.makeText(...).show();
+//                }
+//            });
+        }else{
             h.mMessageView.setVisibility(View.VISIBLE);
-            h.mPlayIcon.setVisibility(View.GONE);
             h.mImgChatView.setVisibility(View.GONE);
             h.mMessageView.setText(m.getMessage());
         }
@@ -155,7 +133,6 @@ public class ChatAdapter extends FirebaseListAdapter<Update> {
         public final TextView mDateView;
         public final ImageView mImgChatView;
         public final RelativeLayout mRelativeMsg;
-	public final ImageView mPlayIcon;
 
         public Update mItem;
 
@@ -175,30 +152,6 @@ public class ChatAdapter extends FirebaseListAdapter<Update> {
                     return true;
                 }
             });
-            view.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    Log.d(TAG, "Click");
-
-                    ChatTag u = (ChatTag) v.getTag();
-                    String sender = u.update.getSender_key();
-                    String message = u.update.getMessage();
-                    if (TextUtils.isEmpty(message)) return;
-                    String mimeString = Util.getMimeTypeFromUrl(message);
-                    if (mimeString.contains("video")) {
-                        //Edition dialog
-                        Log.d(TAG, "Play Video");
-                        Intent playIntent = new Intent(mActivity, PlayerActivity.class);
-                        playIntent.putExtra(PlayerActivity.UPDATE_KEY, u.update);
-                        mActivity.startActivity(playIntent);
-                    } else if (mimeString.contains("gif")) {
-
-                    }
-
-                    Log.d(TAG, "uname:" + mUsername + " sender:" + sender);
-                }
-            });
-            mPlayIcon = (ImageView) view.findViewById(R.id.icon_play);
             mMessageView = (TextView) view.findViewById(R.id.message);
             mAuthorView = (TextView) view.findViewById(R.id.author);
             mDateView = (TextView) view.findViewById(R.id.date);

@@ -8,7 +8,6 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.AsyncTask;
-import android.provider.MediaStore;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.util.TypedValue;
@@ -19,7 +18,6 @@ import com.amazonaws.services.s3.model.GeneratePresignedUrlRequest;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.PutObjectRequest;
 import com.amazonaws.services.s3.model.ResponseHeaderOverrides;
-import com.bumptech.glide.Glide;
 import com.grahm.livepost.interfaces.OnPutImageListener;
 import com.grahm.livepost.R;
 import com.grahm.livepost.util.GV;
@@ -37,7 +35,7 @@ import java.util.Date;
 import static com.grahm.livepost.util.GV.BASE_URL_AMAZON;
 
 public class S3PutObjectTask extends AsyncTask<Uri, String, String> {
-    public static final String TAG = "S3PutObjectTask";
+
     public static final int ASPECT_HEIGHT = -1;
     private ProgressDialog dialog;
     private Context mContext;
@@ -81,7 +79,9 @@ public class S3PutObjectTask extends AsyncTask<Uri, String, String> {
             dialog.dismiss();
         }
         if(mListener != null){
-            mListener.onSuccess(mPictureName);
+            // TODO replace bucket.
+            String url = BASE_URL_AMAZON + "dev/" + mPictureName + ".jpg";
+            mListener.onSuccess(url);
         }
     }
 
@@ -116,23 +116,17 @@ public class S3PutObjectTask extends AsyncTask<Uri, String, String> {
     }
 
     private Bitmap getScaledBitmap(Uri srcUri,int mDstWidth, int mDstHeight){
-        Bitmap unscaledBitmap = null;
-        try {
-            unscaledBitmap = MediaStore.Images.Media.getBitmap(mContext.getContentResolver(), srcUri);
-        }catch (Exception e){
-            Log.e(TAG,e.getMessage());
-        }
+        Bitmap unscaledBitmap =  mImageLoader.loadImageSync(srcUri.toString());
         if(unscaledBitmap != null){
-        ImageSize srcSize = new ImageSize(unscaledBitmap.getWidth(),unscaledBitmap.getHeight());
-        ImageSize boundarySize = new ImageSize(mDstWidth,mDstHeight);
+            ImageSize srcSize = new ImageSize(unscaledBitmap.getWidth(),unscaledBitmap.getHeight());
+            ImageSize boundarySize = new ImageSize(mDstWidth,mDstHeight);
 
-        //Use Height -1 for width-dependent images to be used on staggered list
-        if(unscaledBitmap.getWidth()<=mDstWidth && unscaledBitmap.getHeight()<=mDstHeight)
-            return unscaledBitmap;
-        else {
-            unscaledBitmap.recycle();
-
-            return  mImageLoader.loadImageSync(srcUri.toString(),getScaledDimension(srcSize,boundarySize));
+            //Use Height -1 for width-dependent images to be used on staggered list
+            if(unscaledBitmap.getWidth()<=mDstWidth && unscaledBitmap.getHeight()<=mDstHeight)
+                return unscaledBitmap;
+            else {
+                unscaledBitmap.recycle();
+                return  mImageLoader.loadImageSync(srcUri.toString(),getScaledDimension(srcSize,boundarySize));
 
             }
         }
@@ -153,11 +147,11 @@ public class S3PutObjectTask extends AsyncTask<Uri, String, String> {
 
         metadata.setContentLength(bos.size());
         try {
-            PutObjectRequest por = new PutObjectRequest( GV.PICTURE_BUCKET, pictureName, bs, metadata).withCannedAcl(CannedAccessControlList.PublicRead);
+            PutObjectRequest por = new PutObjectRequest( GV.DEV_BUCKET, pictureName, bs, metadata).withCannedAcl(CannedAccessControlList.PublicRead);
             mS3Client.putObject(por);
             ResponseHeaderOverrides override = new ResponseHeaderOverrides();
             override.setContentType("image/jpeg");
-            GeneratePresignedUrlRequest urlRequest = new GeneratePresignedUrlRequest( GV.PICTURE_BUCKET, pictureName );
+            GeneratePresignedUrlRequest urlRequest = new GeneratePresignedUrlRequest( GV.DEV_BUCKET, pictureName );
             urlRequest.setExpiration(new Date( System.currentTimeMillis() + 3600000));
             urlRequest.setResponseHeaders(override);
             URL urlUri = mS3Client.generatePresignedUrl( urlRequest );

@@ -31,8 +31,8 @@ public class User implements Serializable {
     private String uid;
     //Getters & setters
 
-    public String getUserKey(){
-        return TextUtils.isEmpty(uid)?twitter:uid;
+    public String getAuthorString() {
+        return TextUtils.isEmpty(uid) ? twitter : uid;
     }
 
     public String getUsername() {
