@@ -9,6 +9,7 @@ import android.net.NetworkInfo;
 import android.os.Build;
 import android.os.Bundle;
 import android.text.TextUtils;
+import android.text.format.DateUtils;
 import android.util.Log;
 
 import com.google.firebase.auth.FirebaseAuth;
@@ -25,6 +26,7 @@ import com.grahm.livepost.objects.User;
 
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -145,10 +147,11 @@ public class Utilities {
         return mUser;
     }
 
-    public static String getTimeMsg(Timestamp t) {
+    public static String getTimeMsg(Long t) {
         // TODO validate date
         // return new SimpleDateFormat("hh:mma MM/dd/yyyy").format(t);
-        return new SimpleDateFormat("hh:mma").format(t);
+        //return new SimpleDateFormat("hh:mma").format(t);
+        return (String) DateUtils.getRelativeTimeSpanString(t);
     }
 
     public static int deduceMessageType(String messageString) {

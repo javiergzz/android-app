@@ -124,7 +124,7 @@ public class ChatAdapter extends FirebaseListAdapter<Update> {
         Long timelong = m.getTimestamp();
         if (timelong != null) {
             Timestamp t = new Timestamp(timelong);
-            timeMsg = Utilities.getTimeMsg(t);
+            timeMsg = Utilities.getTimeMsg(timelong);
             if (!TextUtils.isEmpty(timeMsg)) {
                 h.mDateView.setText(timeMsg);
             }

@@ -21,12 +21,15 @@ import com.grahm.livepost.R;
 import com.grahm.livepost.activities.MainActivity;
 import com.grahm.livepost.interfaces.OnFragmentInteractionListener;
 import com.grahm.livepost.objects.Story;
+import com.grahm.livepost.util.Utilities;
 import com.nostra13.universalimageloader.cache.memory.impl.WeakMemoryCache;
 import com.nostra13.universalimageloader.core.DisplayImageOptions;
 import com.nostra13.universalimageloader.core.ImageLoader;
 import com.nostra13.universalimageloader.core.ImageLoaderConfiguration;
 import com.nostra13.universalimageloader.core.assist.FailReason;
 import com.nostra13.universalimageloader.core.listener.ImageLoadingListener;
+
+import java.sql.Timestamp;
 
 /**
  * Created by javiergonzalez on 6/21/16.
@@ -104,6 +107,15 @@ public class HomeListAdapter extends FirebaseListAdapter<Story> {
                 String[] parts = story.getPosts_picture().split("\\?");
                 loadBitmap(parts[0], iholder.mIconView, iholder.mProgressImgView, false);
             }
+            String timeMsg = null;
+            Long timelong = story.getLast_time();
+            if (timelong != null) {
+                Timestamp t = new Timestamp(timelong);
+                timeMsg = Utilities.getTimeMsg(timelong);
+                if (!TextUtils.isEmpty(timeMsg)) {
+                    iholder.mTimestamp.setText(timeMsg);
+                }
+            }
         }
     }
 
@@ -145,6 +157,7 @@ public class HomeListAdapter extends FirebaseListAdapter<Story> {
         public final ImageView mIconView;
         public final ProgressBar mProgressImgView;
         public Story mItem;
+        public final TextView mTimestamp;
 
         public ViewHolderI(View view) {
             super(view);
@@ -154,6 +167,7 @@ public class HomeListAdapter extends FirebaseListAdapter<Story> {
             mLastMsgView = (TextView) view.findViewById(R.id.lastMessage);
             mIconView = (ImageView) view.findViewById(R.id.imgProfile);
             mProgressImgView = (ProgressBar) view.findViewById(R.id.progress_img);
+            mTimestamp = (TextView) view.findViewById(R.id.h_datetime);
         }
     }
 

@@ -4,7 +4,7 @@
     tools:context="com.grahm.livepost.activities.MainActivity">
     <item
         android:id="@+id/action_settings"
-        android:icon="@android:drawable/ic_menu_sort_by_size"
+        android:icon="@drawable/ic_menu_white_36dp"
         android:title="@string/action_settings"
         app:showAsAction="ifRoom" />
 
