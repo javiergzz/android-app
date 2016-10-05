@@ -58,6 +58,14 @@ public class Utilities {
         return parts[0];
     }
 
+    public static String trimPicture(String input) {
+        if (TextUtils.isEmpty(input)) {
+            return null;
+        }
+        String[] parts = input.split("\\?");
+        return parts[0];
+    }
+
     public static String getProfilePic(User user) {
         String input = user.getProfile_picture();
         if (TextUtils.isEmpty(input)) {

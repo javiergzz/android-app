@@ -20,7 +20,7 @@
             android:layout_centerHorizontal="true"
             android:textSize="18dp"/>
 
-        <com.grahm.livepost.specialViews.RoundedImageView
+        <ImageView
             android:id="@+id/img_profile"
             android:maxHeight="170dp"
             android:layout_height="140dp"

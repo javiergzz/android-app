@@ -17,6 +17,8 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
+import android.support.v4.graphics.drawable.RoundedBitmapDrawable;
+import android.support.v4.graphics.drawable.RoundedBitmapDrawableFactory;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.RecyclerView;
@@ -37,6 +39,7 @@ import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.load.resource.drawable.GlideDrawable;
 import com.bumptech.glide.request.RequestListener;
+import com.bumptech.glide.request.target.BitmapImageViewTarget;
 import com.bumptech.glide.request.target.Target;
 import com.daimajia.swipe.SimpleSwipeListener;
 import com.google.firebase.database.DatabaseReference;
@@ -121,7 +124,15 @@ public class StoryListAdapter extends FirebaseListAdapter<Story> {
             iholder.mCategoryView.setText(Html.fromHtml(stringFormat));
             String lastTime = Utilities.getTimeMsg(s.getLast_time());
             iholder.mDateTimeView.setText(lastTime);
-            loadBitmap(s.getPosts_picture(), iholder.mIconView, iholder.mProgressImgView, false);
+            Glide.with(mCtx).load(Utilities.trimPicture(s.getPosts_picture())).asBitmap().centerCrop().into(new BitmapImageViewTarget(iholder.mIconView) {
+                @Override
+                protected void setResource(Bitmap resource) {
+                    RoundedBitmapDrawable circularBitmapDrawable =
+                            RoundedBitmapDrawableFactory.create(mCtx.getResources(), resource);
+                    circularBitmapDrawable.setCircular(true);
+                    iholder.mIconView.setImageDrawable(circularBitmapDrawable);
+                }
+            });
             iholder.mSelArea.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
@@ -220,7 +231,7 @@ public class StoryListAdapter extends FirebaseListAdapter<Story> {
         public final TextView mCategoryView;
         public final TextView mLastMsgView;
         public final TextView mDateTimeView;
-        public final RoundedImageView mIconView;
+        public final ImageView mIconView;
         public final ProgressBar mProgressImgView;
         public Story mItem;
 
@@ -232,7 +243,7 @@ public class StoryListAdapter extends FirebaseListAdapter<Story> {
             mCategoryView = (TextView) view.findViewById(R.id.i_category);
             mDateTimeView = (TextView) view.findViewById(R.id.i_datetime);
             mLastMsgView = (TextView) view.findViewById(R.id.i_lastMessage);
-            mIconView = (RoundedImageView) view.findViewById(R.id.i_imgProfile);
+            mIconView = (ImageView) view.findViewById(R.id.i_imgProfile);
             mProgressImgView = (ProgressBar) view.findViewById(R.id.i_progress_img);
         }
     }

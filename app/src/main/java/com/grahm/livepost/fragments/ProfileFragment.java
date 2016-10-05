@@ -1,9 +1,11 @@
 package com.grahm.livepost.fragments;
 
-import android.content.Intent;
+import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
+import android.support.v4.graphics.drawable.RoundedBitmapDrawable;
+import android.support.v4.graphics.drawable.RoundedBitmapDrawableFactory;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
@@ -11,22 +13,21 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.Menu;
-import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.request.target.BitmapImageViewTarget;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
 import com.grahm.livepost.R;
-import com.grahm.livepost.activities.SettingsActivity;
 import com.grahm.livepost.adapters.StoryListAdapter;
 import com.grahm.livepost.objects.MultipartFormField;
 import com.grahm.livepost.objects.User;
-import com.grahm.livepost.specialViews.RoundedImageView;
 import com.grahm.livepost.util.Utilities;
 
 import java.util.ArrayList;
@@ -46,7 +47,7 @@ import butterknife.OnClick;
 public class ProfileFragment extends Fragment {
     private static final String TAG_CLASS = "PROFILEFRAGMENT";
     @BindView(R.id.profile_pic)
-    public RoundedImageView mImageView;
+    public ImageView mImageView;
     @BindView(R.id.tabs_profile)
     public TabLayout mTabs;
     @BindView(R.id.pager)
@@ -90,7 +91,15 @@ public class ProfileFragment extends Fragment {
         View view = inflater.inflate(R.layout.fragment_profile, container, false);
         ButterKnife.bind(this, view);
 
-        Glide.with(this).load(Utilities.trimProfilePic(mUser)).into(mImageView);
+        Glide.with(this).load(Utilities.trimProfilePic(mUser)).asBitmap().centerCrop().into(new BitmapImageViewTarget(mImageView) {
+            @Override
+            protected void setResource(Bitmap resource) {
+                RoundedBitmapDrawable circularBitmapDrawable =
+                        RoundedBitmapDrawableFactory.create(getResources(), resource);
+                circularBitmapDrawable.setCircular(true);
+                mImageView.setImageDrawable(circularBitmapDrawable);
+            }
+        });
 
         if(mUser!=null) {
             mTitleView.setText(mUser.getName());

@@ -4,8 +4,8 @@
     android:id="@+id/background"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@android:color/white"
     android:layout_gravity="center_horizontal"
+    android:background="@android:color/white"
     tools:context="com.grahm.livepost.fragments.ProfileFragment">
 
     <RelativeLayout
@@ -18,53 +18,55 @@
             android:id="@+id/profile_card"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="0dp"
+            android:layout_centerHorizontal="true"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginBottom="10dp"
             android:layout_marginLeft="0dp"
             android:layout_marginRight="0dp"
-            android:layout_marginBottom="10dp"
-            android:layout_gravity="center_horizontal"
-            android:layout_centerHorizontal="true"
+            android:layout_marginTop="0dp"
             app:cardCornerRadius="2dp"
             app:cardElevation="2dp">
+
             <LinearLayout
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_horizontal"
-                android:textAlignment="center"
+                android:orientation="vertical"
                 android:padding="14dp"
-                android:orientation="vertical">
-                <com.grahm.livepost.specialViews.RoundedImageView
+                android:textAlignment="center">
+
+                <ImageView
                     android:id="@+id/profile_pic"
                     android:layout_width="100dp"
                     android:layout_height="100dp"
                     android:layout_gravity="center_horizontal"
                     android:scaleType="centerCrop" />
 
-                    <TextView
-                        android:id="@+id/profile_name"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:gravity="center"
-                        android:textSize="@dimen/profile_card_title_size"
-                        android:layout_gravity="center" />
-                </LinearLayout>
+                <TextView
+                    android:id="@+id/profile_name"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:gravity="center"
+                    android:textSize="@dimen/profile_card_title_size" />
+            </LinearLayout>
         </android.support.v7.widget.CardView>
 
         <android.support.design.widget.TabLayout
             android:id="@+id/tabs_profile"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_below="@id/profile_card"
             android:layout_marginLeft="10dp"
-            android:layout_marginRight="10dp"
-            android:layout_below="@id/profile_card" />
+            android:layout_marginRight="10dp" />
 
         <android.support.v4.view.ViewPager
             android:id="@+id/pager"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_below="@+id/tabs_profile"
             android:layout_marginLeft="5dp"
             android:layout_marginRight="5dp"
-            android:layout_below="@+id/tabs_profile"
             app:layout_behavior="@string/appbar_scrolling_view_behavior" />
     </RelativeLayout>
 </FrameLayout>
