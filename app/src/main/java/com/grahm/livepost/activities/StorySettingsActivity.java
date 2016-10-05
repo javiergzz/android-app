@@ -39,8 +39,8 @@ public class StorySettingsActivity extends FirebaseActivity {
     private static final String TAG = "StorySettingsActivity";
     @BindView(R.id.list_contributors)
     public RecyclerView mListContributors;
-//    @BindView(R.id.settings_toolbar)
-//    public Toolbar mToolbar;
+    @BindView(R.id.toolbar)
+    public Toolbar mToolbar;
 
     @BindView(R.id.text_story_code)
     public TextView mTextStoryCode;
@@ -91,11 +91,10 @@ public class StorySettingsActivity extends FirebaseActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_story_settings);
         ButterKnife.bind(this);
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
+        setSupportActionBar(mToolbar);
         restoreState(savedInstanceState);
-//        mToolbar.setTitle(getString(R.string.story_settings_title));
-        //if(mStory.getAuthor()==mUser.getAuthorString())
+        mToolbar.setTitle(getString(R.string.story_settings_title));
+        //if(mStory.getAuthor()==mUser.getUserKey())
 
         setupContributors();
         setupAddButton();
@@ -141,9 +140,9 @@ public class StorySettingsActivity extends FirebaseActivity {
             public void onDataChange(DataSnapshot dataSnapshot) {
                 Map<String, Object> map = (Map<String, Object>) dataSnapshot.getValue();
                 if (map != null) {
-                    mContributorsAdapter = new ContributorsAdapter(FirebaseDatabase.getInstance().getReference("users"), mId, map);
-                    mListContributors.setLayoutManager(new LinearLayoutManager(StorySettingsActivity.this));
-                    mListContributors.setAdapter(mContributorsAdapter);
+                        mContributorsAdapter = new ContributorsAdapter(FirebaseDatabase.getInstance().getReference("users"), mId, map);
+                        mListContributors.setLayoutManager(new LinearLayoutManager(StorySettingsActivity.this));
+                        mListContributors.setAdapter(mContributorsAdapter);
                 }
             }
 
@@ -176,8 +175,8 @@ public class StorySettingsActivity extends FirebaseActivity {
                     for (Map.Entry<String, User> entry : m.entrySet()) {
                         try {
                             //Remove from each user's contributed posts field
-                            mFirebaseRef.child("users/" + entry.getKey() + "/posts_contributed_to/").child(mId).removeValue();
-                            System.out.println(entry.getKey() + "/" + entry.getValue());
+                            mFirebaseRef.child("users/" + entry.getValue().getUserKey() + "/posts_contributed_to/").child(mId).removeValue();
+                            Log.d(TAG,entry.getKey() + "/" + entry.getValue());
                         } catch (Exception e) {
                             Log.e(TAG, e.getMessage());
                         }
@@ -194,6 +193,9 @@ public class StorySettingsActivity extends FirebaseActivity {
 
         //Delete entry from creator
         mFirebaseRef.child("users/" + mStory.getAuthor() + "/posts_created/" + mId).removeValue();
+        //Delete all updates
+        mFirebaseRef.child("updates/" + mId).removeValue();
+
         onBackPressed();
     }
 
@@ -230,13 +232,13 @@ public class StorySettingsActivity extends FirebaseActivity {
         Map<String, Object> map = new HashMap<String, Object>();
         Map<String, Object> k = new HashMap<String, Object>();
         k.put("role", "contributor");
-        k.put("uid", mContributor.getAuthorString());
-        map.put(mContributor.getAuthorString(), k);
+        k.put("uid", mContributor.getUserKey());
+        map.put(mContributor.getUserKey(), k);
         mFirebaseRef.child("members/" + mId).updateChildren(map);
 
 
-        Log.d(TAG, "users/" + mContributor.getAuthorString() + "/posts_contributed_to/" + map.toString());
-        mFirebaseRef.child("users/" + mContributor.getAuthorString() + "/posts_contributed_to/" + mId).setValue(mStory);
+        Log.d(TAG,"users/" + mContributor.getUserKey() + "/posts_contributed_to/"+map.toString());
+        mFirebaseRef.child("users/" + mContributor.getUserKey() + "/posts_contributed_to/"+mId).setValue(mStory);
 
         mTextContributor.setText("");
         mTextContributor.clearListSelection();

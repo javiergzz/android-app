@@ -1,96 +1,68 @@
 package com.grahm.livepost.util;
 
+/*
+* By Jorge E. Hernandez (@lalongooo) 2015
+* */
 
 import android.annotation.TargetApi;
+import android.content.ComponentName;
+import android.content.ContentResolver;
 import android.content.ContentUris;
 import android.content.Context;
+import android.content.Intent;
+import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
+import android.content.pm.ResolveInfo;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.media.ThumbnailUtils;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Environment;
+import android.os.Parcelable;
+import android.preference.PreferenceManager;
 import android.provider.DocumentsContract;
 import android.provider.MediaStore;
+import android.text.format.DateFormat;
+import android.util.Log;
+import android.webkit.MimeTypeMap;
 
 import com.amazonaws.auth.BasicAWSCredentials;
 import com.amazonaws.auth.CognitoCachingCredentialsProvider;
+import com.amazonaws.regions.Regions;
 import com.amazonaws.services.s3.AmazonS3Client;
 import com.amazonaws.services.s3.model.DeleteObjectsRequest;
 import com.amazonaws.services.s3.model.DeleteObjectsRequest.KeyVersion;
 import com.amazonaws.services.s3.model.S3ObjectSummary;
+import com.github.hiteshsondhi88.libffmpeg.FFmpeg;
+import com.github.hiteshsondhi88.libffmpeg.LoadBinaryResponseHandler;
+import com.github.hiteshsondhi88.libffmpeg.exceptions.FFmpegNotSupportedException;
+import com.grahm.livepost.BuildConfig;
+import com.grahm.livepost.utils.Config;
 
 import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
+import java.util.UUID;
 
-/*
+
+/* 
  * This class just handles getting the client since we don't need to have more than
  * one per application
  */
 public class Util {
     private static final String TAG = Util.class.getCanonicalName();
     private static AmazonS3Client sS3Client;
-    private static CognitoCachingCredentialsProvider sCredProvider;
 
-    public static String getPrefix(Context context) {
-        return System.currentTimeMillis() + "/";
-    }
-
-    public static AmazonS3Client getS3ClientIdentifiedByKeys(Context context) {
-        if (sS3Client == null) {
-            sS3Client = new AmazonS3Client(new BasicAWSCredentials(GV.ACCESS_KEY_ID,GV.SECRET_KEY));
-        }
-        return sS3Client;
-    }
-
-    public static String getFileName(String path) {
-        return path.substring(path.lastIndexOf("/") + 1);
-    }
-
-    public static boolean doesBucketExist() {
-        return sS3Client.doesBucketExist(GV.PICTURE_BUCKET.toLowerCase(Locale.US));
-    }
-
-    public static void createBucket() {
-        sS3Client.createBucket(GV.PICTURE_BUCKET.toLowerCase(Locale.US));
-    }
-
-    public static void deleteBucket() {
-        String name = GV.PICTURE_BUCKET.toLowerCase(Locale.US);
-        List<S3ObjectSummary> objData = sS3Client.listObjects(name).getObjectSummaries();
-        if (objData.size() > 0) {
-            DeleteObjectsRequest emptyBucket = new DeleteObjectsRequest(name);
-            List<KeyVersion> keyList = new ArrayList<>();
-            for (S3ObjectSummary summary : objData) {
-                keyList.add(new KeyVersion(summary.getKey()));
-            }
-            emptyBucket.withKeys(keyList);
-            sS3Client.deleteObjects(emptyBucket);
-        }
-        sS3Client.deleteBucket(name);
-    }
-
-    public static Bitmap createThumbnail(String filePath) {
-        Bitmap bitmap = null;
-
-        if (filePath.contains(".mp4")) {
-            File file = new File(filePath);
-            if (file.exists()) {
-                bitmap = ThumbnailUtils.createVideoThumbnail(filePath, MediaStore.Video.Thumbnails.MICRO_KIND);
-            } else {
-                return null;
-            }
-        }
-
-        return bitmap;
-    }
-
-    public static boolean shouldCopy(Context context, Uri uri) {
-        // return !isApplicationMediaFile(getPathFromUri(context, uri));
-        return false;
-    }
 
     @TargetApi(Build.VERSION_CODES.KITKAT)
     public static String getPathFromUri(final Context context, final Uri uri) {
@@ -211,5 +183,181 @@ public class Util {
     public static boolean isMediaDocument(Uri uri) {
         return "com.android.providers.media.documents".equals(uri.getAuthority());
     }
+
+    public static void setupFfmpeg(Context context) {
+        FFmpeg ffmpeg = FFmpeg.getInstance(context);
+        try {
+            ffmpeg.loadBinary(new LoadBinaryResponseHandler() {
+
+                @Override
+                public void onStart() {
+                }
+
+                @Override
+                public void onFailure() {
+                }
+
+                @Override
+                public void onSuccess() {
+                }
+
+                @Override
+                public void onFinish() {
+                }
+            });
+        } catch (FFmpegNotSupportedException e) {
+            // Handle if FFmpeg is not supported by device
+            Log.e(TAG, e.getMessage());
+        }
+    }
+
+    public static Intent buildIntent(Context context, String chooserTitle,int type){
+        try {
+            Uri outputFileUri = createCameraPictureFile(context);
+
+        ArrayList cameraIntents = new ArrayList();
+        Intent captureIntent = new Intent("android.media.action.IMAGE_CAPTURE");
+            Intent videoIntent = new Intent(MediaStore.ACTION_VIDEO_CAPTURE);
+        PackageManager packageManager = context.getPackageManager();
+        List camList = packageManager.queryIntentActivities(captureIntent, 0);
+        Iterator galleryIntent = camList.iterator();
+
+        while(galleryIntent.hasNext()) {
+            ResolveInfo chooserIntent = (ResolveInfo)galleryIntent.next();
+            String packageName = chooserIntent.activityInfo.packageName;
+            Intent intent = new Intent(captureIntent);
+            intent.setComponent(new ComponentName(chooserIntent.activityInfo.packageName, chooserIntent.activityInfo.name));
+            intent.setPackage(packageName);
+            intent.putExtra("output", outputFileUri);
+            cameraIntents.add(intent);
+            intent = new Intent(videoIntent);
+            cameraIntents.add(intent);
+        }
+
+        Intent galleryIntent1;
+        galleryIntent1 = createDocumentsIntent(context, type);
+
+
+        Intent chooserIntent1 = Intent.createChooser(galleryIntent1, chooserTitle);
+        chooserIntent1.putExtra("android.intent.extra.INITIAL_INTENTS", (Parcelable[])cameraIntents.toArray(new Parcelable[cameraIntents.size()]));
+            return chooserIntent1;
+        }catch (Exception e){
+            Log.e(TAG,e.getMessage());
+            return null;
+        }
+
+    }
+    private static Intent createDocumentsIntent(Context context, int type) {
+        Intent intent = new Intent("android.intent.action.GET_CONTENT");
+        intent.setType("image/*");
+        return intent;
+    }
+    private static Uri createCameraPictureFile(Context context) throws IOException {
+        File imagePath = getCameraPicturesLocation(context);
+        Uri uri = Uri.fromFile(imagePath);
+        SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(context).edit();
+        editor.putString("pl.aprilapps.easyphotopicker.photo_uri", uri.toString());
+        editor.putString("pl.aprilapps.easyphotopicker.last_photo", imagePath.toString());
+        editor.apply();
+        return uri;
+    }
+    public static File getCameraPicturesLocation(Context context) throws IOException {
+        String localdir= context.getExternalFilesDir(Environment.DIRECTORY_PICTURES).toString();
+        File dir = new File(localdir, "EasyImage");
+        if(!dir.exists()) {
+            dir.mkdirs();
+        }
+
+        File imageFile = File.createTempFile(UUID.randomUUID().toString(), ".jpg", dir);
+        return imageFile;
+    }
+
+    /*public static File getFile(int requestCode,Context context, Uri photoUri){
+        if(requestCode == 7460 || requestCode == 7458 || requestCode == 7459 || requestCode == 7457) {
+            if(resultCode == -1) {
+                if (requestCode == 7457) {
+                    onPictureReturnedFromDocuments(data, activity, callbacks);
+                } else if (requestCode == 7458) {
+                    onPictureReturnedFromGallery(data, activity, callbacks);
+                } else if (requestCode == 7459) {
+                    onPictureReturnedFromCamera(activity, callbacks);
+                } else if (data != null && data.getData() != null) {
+                    onPictureReturnedFromDocuments(data, activity, callbacks);
+                } else {
+                    onPictureReturnedFromCamera(activity, callbacks);
+                }
+            }
+        }
+    }*/
+
+
+    public static File pickedExistingPicture(Context context, Uri photoUri) throws IOException {
+        InputStream pictureInputStream = context.getContentResolver().openInputStream(photoUri);
+        String localdir= context.getExternalFilesDir(Environment.DIRECTORY_PICTURES).toString();
+        File directory = new File(localdir, "EasyImage");
+        File photoFile = new File(directory, UUID.randomUUID().toString() + "." + getMimeType(context, photoUri));
+        photoFile.createNewFile();
+        writeToFile(pictureInputStream, photoFile);
+        return photoFile;
+    }
+    private static File takenCameraPicture(Context context) throws IOException, URISyntaxException {
+        URI imageUri = new URI(PreferenceManager.getDefaultSharedPreferences(context).getString("pl.aprilapps.easyphotopicker.photo_uri", (String)null));
+        notifyGallery(context, imageUri);
+        return new File(imageUri);
+    }
+
+    private static void notifyGallery(Context context, URI pictureUri) throws URISyntaxException {
+        Intent mediaScanIntent = new Intent("android.intent.action.MEDIA_SCANNER_SCAN_FILE");
+        File f = new File(pictureUri);
+        Uri contentUri = Uri.fromFile(f);
+        mediaScanIntent.setData(contentUri);
+        context.sendBroadcast(mediaScanIntent);
+    }
+
+    public static String getMimeType(Context context, Uri uri) {
+        String extension;
+        if(uri.getScheme().equals("content")) {
+            MimeTypeMap mime = MimeTypeMap.getSingleton();
+            extension = mime.getExtensionFromMimeType(context.getContentResolver().getType(uri));
+        } else {
+            extension = MimeTypeMap.getFileExtensionFromUrl(Uri.fromFile(new File(uri.getPath())).toString());
+        }
+
+        return extension;
+    }
+    public static String getMimeTypeFromUri(Context context, Uri uri) {
+        MimeTypeMap mime = MimeTypeMap.getSingleton();
+        String mimeType = mime.getMimeTypeFromExtension(getMimeType(context,uri));
+        return mimeType;
+    }
+    public static String getExtensionFromUri(Context context, Uri uri) {
+        MimeTypeMap mime = MimeTypeMap.getSingleton();
+        return mime.getExtensionFromMimeType(context.getContentResolver().getType(uri));
+    }
+
+
+    public static String getMimeTypeFromUrl(String url){
+        return MimeTypeMap.getSingleton().getMimeTypeFromExtension(MimeTypeMap.getFileExtensionFromUrl(url));
+    }
+
+
+    public static void writeToFile(InputStream in, File file) {
+        try {
+            FileOutputStream e = new FileOutputStream(file);
+            byte[] buf = new byte[1024];
+
+            int len;
+            while((len = in.read(buf)) > 0) {
+                e.write(buf, 0, len);
+            }
+
+            e.close();
+            in.close();
+        } catch (Exception var5) {
+            var5.printStackTrace();
+        }
+
+    }
+
 
 }

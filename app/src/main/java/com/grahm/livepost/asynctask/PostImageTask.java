@@ -24,11 +24,13 @@ import com.grahm.livepost.interfaces.OnPutImageListener;
 import com.grahm.livepost.R;
 import com.grahm.livepost.objects.User;
 import com.grahm.livepost.util.GV;
+import com.grahm.livepost.util.Util;
 import com.nostra13.universalimageloader.core.ImageLoader;
 import com.nostra13.universalimageloader.core.assist.ImageSize;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.InputStream;
 import java.net.URL;
 import java.util.Date;
 
@@ -44,6 +46,7 @@ public class PostImageTask extends AsyncTask<Uri, String, String> {
     private Boolean mShowDialog;
     private String mUid;
     private User mUser;
+    private String mExtension;
     SharedPreferences mSharedPref;
 
     public PostImageTask(Context context, AmazonS3Client client, OnPutImageListener listener, Boolean showDialog) {
@@ -99,6 +102,7 @@ public class PostImageTask extends AsyncTask<Uri, String, String> {
     }
 
     protected String uploadImages(Uri srcUri) {
+        mExtension = Util.getMimeType(mContext,srcUri);
         String url = "";
         Resources r = mContext.getResources();
         DisplayMetrics d = r.getDisplayMetrics();
@@ -108,7 +112,8 @@ public class PostImageTask extends AsyncTask<Uri, String, String> {
         int maxMediumHeight = Math.round(TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, r.getDimension(R.dimen.max_medium_height), d));
         long l = System.currentTimeMillis()/1000L;
         mPictureName = mUser.getName()+l;
-        url = uploadImage(mPictureName + ".jpg", srcUri, maxMediumWidth, maxMediumHeight);
+
+        url = uploadImage(mPictureName +"." +mExtension, srcUri, maxMediumWidth, maxMediumHeight);
         return url;
     }
 
@@ -131,29 +136,44 @@ public class PostImageTask extends AsyncTask<Uri, String, String> {
 
     private String uploadImage(String pictureName, Uri srcUri, int mDstWidth, int mDstHeight) {
         String url = "";
-        Bitmap scaledBitmap = getScaledBitmap(srcUri, mDstWidth, mDstHeight);
+        ByteArrayInputStream bs;
+        ByteArrayOutputStream bos;
+        InputStream is = null;
         ContentResolver resolver = mContext.getContentResolver();
         ObjectMetadata metadata = new ObjectMetadata();
         metadata.setContentType(resolver.getType(srcUri));
-        /* Get byte stream */
-        ByteArrayOutputStream bos = new ByteArrayOutputStream();
-        //scaledBitmap.compress(Bitmap.CompressFormat.PNG, 0 /*ignored for PNG*/, bos);
-        scaledBitmap.compress(Bitmap.CompressFormat.JPEG, 80, bos);
-        byte[] bitmapdata = bos.toByteArray();
-        ByteArrayInputStream bs = new ByteArrayInputStream(bitmapdata);
 
-        metadata.setContentLength(bos.size());
+        if(!mExtension.contains("gif")) {
+            Bitmap scaledBitmap = getScaledBitmap(srcUri, mDstWidth, mDstHeight);
+        /* Get byte stream */
+            bos = new ByteArrayOutputStream();
+            //scaledBitmap.compress(Bitmap.CompressFormat.PNG, 0 /*ignored for PNG*/, bos);
+            scaledBitmap.compress(Bitmap.CompressFormat.JPEG, 80, bos);
+            byte[] bitmapdata = bos.toByteArray();
+            bs = new ByteArrayInputStream(bitmapdata);
+            metadata.setContentLength(bos.size());
+            is= bs;
+        }else{
+            try {
+                is = resolver.openInputStream(srcUri);
+                metadata.setContentLength(is.available());
+            }catch (Exception e){
+                Log.e(TAG,e.getMessage());
+            }
+        }
         try {
-            PutObjectRequest por = new PutObjectRequest(GV.PICTURE_BUCKET, pictureName, bs, metadata).withCannedAcl(CannedAccessControlList.PublicRead);
-            mS3Client.putObject(por);
-            ResponseHeaderOverrides override = new ResponseHeaderOverrides();
-            override.setContentType("image/jpeg");
-            GeneratePresignedUrlRequest urlRequest = new GeneratePresignedUrlRequest(GV.PICTURE_BUCKET, pictureName);
-            urlRequest.setExpiration(new Date(System.currentTimeMillis() + 3600000));
-            urlRequest.setResponseHeaders(override);
-            URL urlUri = mS3Client.generatePresignedUrl(urlRequest);
-            Uri.parse(urlUri.toURI().toString());
-            url = urlUri.toString();
+            if(is!=null) {
+                PutObjectRequest por = new PutObjectRequest(GV.PICTURE_BUCKET, pictureName, is, metadata).withCannedAcl(CannedAccessControlList.PublicRead);
+                mS3Client.putObject(por);
+                ResponseHeaderOverrides override = new ResponseHeaderOverrides();
+                override.setContentType(Util.getMimeTypeFromUri(mContext, srcUri));
+                GeneratePresignedUrlRequest urlRequest = new GeneratePresignedUrlRequest(GV.PICTURE_BUCKET, pictureName);
+                urlRequest.setExpiration(new Date(System.currentTimeMillis() + 3600000));
+                urlRequest.setResponseHeaders(override);
+                URL urlUri = mS3Client.generatePresignedUrl(urlRequest);
+                Uri.parse(urlUri.toURI().toString());
+                url = urlUri.toString();
+            }
         } catch (Exception exception) {
             Log.e("AsyncTask", "Error: " + exception);
         }

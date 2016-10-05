@@ -19,6 +19,7 @@ import android.view.View;
 
 
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.FirebaseDatabase;
 import com.grahm.livepost.R;
 import com.grahm.livepost.adapters.HomeFragmentAdapter;
 import com.grahm.livepost.fragments.FragmentChatClass;

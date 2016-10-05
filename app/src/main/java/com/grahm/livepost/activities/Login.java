@@ -8,6 +8,7 @@ import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.provider.MediaStore;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
@@ -19,6 +20,11 @@ import com.amazonaws.services.s3.AmazonS3Client;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.AuthResult;
+import com.android.volley.RequestQueue;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.JsonObjectRequest;
+import com.android.volley.toolbox.Volley;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DatabaseReference;
@@ -36,7 +42,13 @@ import com.grahm.livepost.ui.Controls;
 import com.grahm.livepost.util.Utilities;
 import com.grahm.livepost.utils.Config;
 
+
 import java.io.File;
+import org.json.JSONObject;
+
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -221,24 +233,35 @@ public class Login extends AppCompatActivity implements OnFragmentInteractionLis
         new S3PutObjectTask(Login.this, s3Client, OnPutImageListener, pictureName, false).execute(mIimageUri);
     }
 
-    private void signUpUser() {
-        Controls.createDialog(Login.this, "Loading...", false);
-        mAuth.createUserWithEmailAndPassword(mUser.getEmail().toString().toLowerCase(), mPassword)
-                .addOnFailureListener(this, new OnFailureListener() {
-                    @Override
-                    public void onFailure(@NonNull Exception e) {
-                        Controls.dismissDialog();
-                        if(e != null){
-                            Log.e(TAG_CLASS, "createUserWithEmail:onFailure:" + e.getMessage());
-                        }
-                    }
-                })
-                .addOnSuccessListener(this, new OnSuccessListener<AuthResult>() {
-                    @Override
-                    public void onSuccess(AuthResult authResult) {
-                        Log.d(TAG_CLASS, "createUserWithEmail:onComplete:" + authResult.getUser().getUid());
-                    }
-                });
+    private void signUpUser(){
+        RequestQueue queue = Volley.newRequestQueue(this);
+        String url = getString(R.string.heroku_url);
+        Map<String,String> params = new HashMap<String, String>();
+        params.put("email",mUser.getEmail().toString().toLowerCase());
+        params.put("name",mUser.getName());
+        params.put("password", mPassword);
+        params.put("picture",mUser.getProfile_picture());
+        JSONObject json = new JSONObject(params);
+        JsonObjectRequest request = new JsonObjectRequest(url, json, new Response.Listener<JSONObject>() {
+            @Override
+            public void onResponse(JSONObject response) {
+                Log.i(TAG_CLASS, response.toString());
+                //If response failed, its string will contain an error code. #TODO this should be improved
+                if(!response.toString().contains("code")){
+                    Intent mainIntent = new Intent(Login.this, MainActivity.class);
+                    Login.this.startActivity(mainIntent);
+                    Login.this.finish();
+                }
+                Controls.dismissDialog();
+            }
+        }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                Controls.dismissDialog();
+            }
+        });
+        Controls.setDialogMessage("Loading...");
+        queue.add(request);
     }
 
 }

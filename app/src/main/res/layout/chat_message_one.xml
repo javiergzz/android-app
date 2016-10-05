@@ -23,17 +23,27 @@
                 android:layout_height="wrap_content"
                 android:padding="5dp" />
 
-            <ImageView
-                android:id="@+id/imgChat"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_centerInParent="true"
-                android:maxHeight="300dp"
-                android:scaleType="fitCenter"
-                android:src="@drawable/ic_session"
-                android:layout_marginLeft="10dp"
-                android:layout_marginRight="10dp"
-                android:visibility="gone" />
+                <RelativeLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content">
+                <ImageView
+                    xmlns:app="http://schemas.android.com/apk/res-auto"
+                    android:id="@+id/imgChat"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:maxHeight="300dp"
+                    android:layout_centerInParent="true"
+                    android:scaleType="fitCenter"
+                    android:src="@drawable/ic_session"
+                    android:visibility="gone" />
+                <ImageView
+                    android:id="@+id/icon_play"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:src="@android:drawable/ic_media_play"
+                    android:visibility="gone"
+                    android:layout_centerInParent="true"/>
+                </RelativeLayout>
 
         </RelativeLayout>
 

@@ -220,7 +220,7 @@ public class NewStoryFragment extends Fragment implements OnPutImageListener {
     public void attemptSessionCreation() {
         if (mStoryTask != null) return;
 
-        mStory.setAuthor(mUser.getAuthorString());
+        mStory.setAuthor(mUser.getUserKey());
         mStory.setAuthor_name(mUser.getName());
         mStoryTask = new CreateStoryTask(mStory, mFirebaseRef.child("posts"), getActivity(), s3Client, this, true);
         if (mUri != null) mStoryTask.execute(mUri);

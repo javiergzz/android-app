@@ -1,5 +1,6 @@
 package com.grahm.livepost.fragments;
 
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.TabLayout;
@@ -17,11 +18,17 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
+import com.google.firebase.database.ValueEventListener;
+import com.google.gson.Gson;
 import com.grahm.livepost.R;
 import com.grahm.livepost.activities.SettingsActivity;
+import com.grahm.livepost.adapters.StoryContributedLinearListAdapter;
 import com.grahm.livepost.adapters.StoryListAdapter;
 import com.grahm.livepost.objects.MultipartFormField;
 import com.grahm.livepost.objects.User;
@@ -31,6 +38,7 @@ import com.nostra13.universalimageloader.core.ImageLoader;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -156,11 +164,41 @@ public class ProfileFragment extends Fragment {
             }
 
             public void onSetup(ViewGroup layout) {
-                Query q = mFirebaseRef.child("users").child(mUser.getAuthorString()).child("posts_contributed_to");
+                Query q = mFirebaseRef.child("users").child(mUser.getUserKey()).child("posts_contributed_to");
                 RecyclerView recyclerView = ButterKnife.findById(layout, R.id.profile_list);
                 recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
                 recyclerView.setAdapter(new StoryListAdapter(q, (AppCompatActivity) getActivity(), 0, false));
             }
+            /*public void onSetup(ViewGroup layout) {
+                Map<String,Object> m = mUser.getPosts_contributed();
+                if(m!=null) {
+                    final RecyclerView recyclerView = ButterKnife.findById(layout, R.id.profile_list);
+                    final DatabaseReference f = mFirebaseRef.child("posts");
+                    recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
+                    String uid = FirebaseAuth.getInstance().getCurrentUser().getUid();
+
+                    final StoryContributedLinearListAdapter storyLinearListAdapter = new StoryContributedLinearListAdapter(f, (AppCompatActivity) getActivity(), 1, mUser.getPosts_contributed());
+                    recyclerView.setAdapter(storyLinearListAdapter);
+
+                    mFirebaseRef.child("users/"+uid).addValueEventListener(new ValueEventListener() {
+                        @Override
+                        public void onDataChange(DataSnapshot dataSnapshot) {
+                            //mUser = new Gson().fromJson(getActivity().getSharedPreferences(getString(R.string.preference_file_key), Context.MODE_PRIVATE).getString("user", null), User.class);
+                            mUser = dataSnapshot.getValue(User.class);
+                            getActivity().getSharedPreferences(getString(R.string.preference_file_key), Context.MODE_PRIVATE).edit().putString("user",new Gson().toJson(mUser,User.class)).commit();
+                            StoryContributedLinearListAdapter sessionLinearListAdapter = new StoryContributedLinearListAdapter(f, (AppCompatActivity) getActivity(), 1, mUser.getPosts_contributed());
+                            recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
+                            recyclerView.setAdapter(sessionLinearListAdapter);
+                            sessionLinearListAdapter.notifyDataSetChanged();
+                        }
+
+                        @Override
+                        public void onCancelled(DatabaseError firebaseError) {
+
+                        }
+                    });
+                }
+            }*/
         }
 
         public class CreatedPostsField extends MultipartFormField {
@@ -177,7 +215,7 @@ public class ProfileFragment extends Fragment {
             }
 
             public void onSetup(ViewGroup layout) {
-                Query q = mFirebaseRef.child("posts").orderByChild("author").equalTo(mUser.getAuthorString());
+                Query q = mFirebaseRef.child("posts").orderByChild("author").equalTo(mUser.getUserKey());
                 RecyclerView recyclerView = ButterKnife.findById(layout, R.id.profile_list);
                 recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
                 recyclerView.setAdapter(new StoryListAdapter(q, (AppCompatActivity) getActivity(), 0, false));
