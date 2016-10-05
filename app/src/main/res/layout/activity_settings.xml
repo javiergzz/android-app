@@ -225,6 +225,7 @@
             android:orientation="vertical">
 
             <Button
+                android:id="@+id/btn_log_out"
                 android:layout_width="wrap_content"
                 android:layout_height="20dp"
                 android:layout_marginBottom="10dp"
