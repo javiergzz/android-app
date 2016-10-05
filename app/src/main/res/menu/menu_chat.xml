@@ -3,7 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
     <item
         android:id="@+id/action_settings_chat"
-        android:icon="@drawable/ic_gear"
+        android:icon="@android:drawable/ic_menu_sort_by_size"
         android:title="@string/action_settings"
         app:showAsAction="ifRoom"/>
 </menu>

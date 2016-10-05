@@ -55,7 +55,7 @@ public class ContributorsAdapter extends FirebaseListFilteredAdapter<User> {
         h.mButtonView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                deleteContributor(user.getAuthorString());
+                deleteContributor(user.getUserKey());
             }
         });
     }

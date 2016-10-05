@@ -1,7 +1,7 @@
 <resources>
     <string name="app_name">LivePost</string>
     <string name="tab_name_home">Home</string>
-    <string name="tab_name_new">New Post</string>
+    <string name="tab_name_new">New Story</string>
     <string name="tab_name_profile">Profile</string>
     <string name="txt_signup_header">Cover news &amp; events \n in real time</string>
     <string name="btn_login_twitter"> Log In with Twitter</string>
@@ -317,4 +317,9 @@
     <string name="set_url_privacy">https://livepost.co/html/privacy_policy.html</string>
     <string name="set_url_terms">https://livepost.co/html/terms_conditions.html</string>
     <string name="set_url_faq">https://livepost.freshdesk.com/support/home</string>
+
+    <string name="error_video_uploader_busy">Please wait! Another video is still being uploaded</string>
+    <string name="error_picker">Unrecognized or corrupted file.</string>
+
+    <string name="title_activity_player">PlayerActivity</string>
 </resources>

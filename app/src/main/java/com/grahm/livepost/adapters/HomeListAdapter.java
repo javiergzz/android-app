@@ -11,6 +11,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.webkit.MimeTypeMap;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
@@ -76,10 +77,11 @@ public class HomeListAdapter extends FirebaseListAdapter<Story> {
             final ViewHolderI iholder = (ViewHolderI) holder;
             iholder.mItem = story;
             final String lastMessage = story.getLast_message();
-            if (lastMessage != null && lastMessage != "") {
-                if (lastMessage.contains(".png") || lastMessage.contains(".jpg")) {
+            if (!TextUtils.isEmpty(lastMessage)) {
+                String mimeString =  MimeTypeMap.getSingleton().getMimeTypeFromExtension(MimeTypeMap.getFileExtensionFromUrl(lastMessage));
+                if(!TextUtils.isEmpty(mimeString) && (mimeString.contains("image"))){
                     iholder.mLastMsgView.setText("Image");
-                } else if (lastMessage.contains(".mp4") || lastMessage.contains(".MOV")) {
+                } else if (!TextUtils.isEmpty(mimeString) && mimeString.contains("video")) {
                     iholder.mLastMsgView.setText("Video");
                 } else {
                     iholder.mLastMsgView.setText(lastMessage);
