@@ -20,12 +20,9 @@ import com.amazonaws.services.s3.model.PutObjectRequest;
 import com.amazonaws.services.s3.model.ResponseHeaderOverrides;
 import com.grahm.livepost.interfaces.OnPutImageListener;
 import com.grahm.livepost.R;
+import com.grahm.livepost.objects.ImageSize;
 import com.grahm.livepost.util.GV;
-import com.grahm.livepost.util.ScalingUtilities;
-import com.grahm.livepost.util.ScalingUtilities.ScalingLogic;
-import com.nostra13.universalimageloader.core.DisplayImageOptions;
-import com.nostra13.universalimageloader.core.ImageLoader;
-import com.nostra13.universalimageloader.core.assist.ImageSize;
+import com.grahm.livepost.util.Util;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -42,7 +39,6 @@ public class S3PutObjectTask extends AsyncTask<Uri, String, String> {
     private AmazonS3Client mS3Client;
     private OnPutImageListener mListener;
     private String mPictureName;
-    private ImageLoader mImageLoader;
     private Boolean mShowDialog;
     public S3PutObjectTask(Context context, AmazonS3Client client, OnPutImageListener listener, String pictureName, Boolean showDialog){
         mContext = context;
@@ -50,7 +46,6 @@ public class S3PutObjectTask extends AsyncTask<Uri, String, String> {
         mListener = listener;
         mPictureName = pictureName;
         mShowDialog = showDialog;
-        mImageLoader = ImageLoader.getInstance();
     }
     protected void onPreExecute() {
         dialog = new ProgressDialog(mContext);
@@ -115,22 +110,21 @@ public class S3PutObjectTask extends AsyncTask<Uri, String, String> {
         return url;
     }
 
-    private Bitmap getScaledBitmap(Uri srcUri,int mDstWidth, int mDstHeight){
-        Bitmap unscaledBitmap =  mImageLoader.loadImageSync(srcUri.toString());
-        if(unscaledBitmap != null){
-            ImageSize srcSize = new ImageSize(unscaledBitmap.getWidth(),unscaledBitmap.getHeight());
-            ImageSize boundarySize = new ImageSize(mDstWidth,mDstHeight);
+    private Bitmap getScaledBitmap(Uri srcUri, int mDstWidth, int mDstHeight) {
+        Bitmap unscaledBitmap = Util.loadBitmapFromUri(mContext,srcUri);
 
-            //Use Height -1 for width-dependent images to be used on staggered list
-            if(unscaledBitmap.getWidth()<=mDstWidth && unscaledBitmap.getHeight()<=mDstHeight)
-                return unscaledBitmap;
-            else {
-                unscaledBitmap.recycle();
-                return  mImageLoader.loadImageSync(srcUri.toString(),getScaledDimension(srcSize,boundarySize));
+        Bitmap scaledBitmap;
+        ImageSize srcSize = new ImageSize(unscaledBitmap.getWidth(), unscaledBitmap.getHeight());
+        ImageSize boundarySize = new ImageSize(mDstWidth, mDstHeight);
 
-            }
+        //Use Height -1 for width-dependent images to be used on staggered list
+        if (unscaledBitmap.getWidth() <= mDstWidth && unscaledBitmap.getHeight() <= mDstHeight)
+            return unscaledBitmap;
+        else {
+            unscaledBitmap.recycle();
+            ImageSize s = getScaledDimension(srcSize, boundarySize);
+            return Bitmap.createScaledBitmap(Util.loadBitmapFromUri(mContext,srcUri), s.getWidth(), s.getHeight(), false);
         }
-        return unscaledBitmap;
     }
     private String uploadImage(String pictureName,Uri srcUri,int mDstWidth, int mDstHeight){
         String url = "";

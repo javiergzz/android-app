@@ -23,7 +23,6 @@ import com.google.firebase.database.ValueEventListener;
 import com.grahm.livepost.R;
 import com.grahm.livepost.objects.FirebaseActivity;
 import com.grahm.livepost.objects.User;
-import com.nostra13.universalimageloader.core.ImageLoader;
 
 import java.util.Map;
 

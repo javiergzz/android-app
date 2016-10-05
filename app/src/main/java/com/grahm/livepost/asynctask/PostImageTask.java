@@ -6,6 +6,7 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
+import android.media.Image;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.text.TextUtils;
@@ -13,6 +14,7 @@ import android.util.DisplayMetrics;
 import android.util.Log;
 import android.util.TypedValue;
 
+import com.bumptech.glide.Glide;
 import com.google.gson.Gson;
 import com.amazonaws.services.s3.AmazonS3Client;
 import com.amazonaws.services.s3.model.CannedAccessControlList;
@@ -22,11 +24,11 @@ import com.amazonaws.services.s3.model.PutObjectRequest;
 import com.amazonaws.services.s3.model.ResponseHeaderOverrides;
 import com.grahm.livepost.interfaces.OnPutImageListener;
 import com.grahm.livepost.R;
+import com.grahm.livepost.objects.ImageSize;
 import com.grahm.livepost.objects.User;
 import com.grahm.livepost.util.GV;
 import com.grahm.livepost.util.Util;
-import com.nostra13.universalimageloader.core.ImageLoader;
-import com.nostra13.universalimageloader.core.assist.ImageSize;
+
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -42,7 +44,6 @@ public class PostImageTask extends AsyncTask<Uri, String, String> {
     private AmazonS3Client mS3Client;
     private OnPutImageListener mListener;
     private String mPictureName;
-    private ImageLoader mImageLoader;
     private Boolean mShowDialog;
     private String mUid;
     private User mUser;
@@ -55,7 +56,6 @@ public class PostImageTask extends AsyncTask<Uri, String, String> {
         mS3Client = client;
         mListener = listener;
         mShowDialog = showDialog;
-        mImageLoader = ImageLoader.getInstance();
         mSharedPref = context.getSharedPreferences(context.getString(R.string.preference_file_key), Context.MODE_PRIVATE);
 
         String s = mSharedPref.getString("user", null);
@@ -118,7 +118,8 @@ public class PostImageTask extends AsyncTask<Uri, String, String> {
     }
 
     private Bitmap getScaledBitmap(Uri srcUri, int mDstWidth, int mDstHeight) {
-        Bitmap unscaledBitmap = mImageLoader.loadImageSync(srcUri.toString());
+        Bitmap unscaledBitmap = Util.loadBitmapFromUri(mContext,srcUri);
+
         Bitmap scaledBitmap;
         ImageSize srcSize = new ImageSize(unscaledBitmap.getWidth(), unscaledBitmap.getHeight());
         ImageSize boundarySize = new ImageSize(mDstWidth, mDstHeight);
@@ -128,8 +129,8 @@ public class PostImageTask extends AsyncTask<Uri, String, String> {
             return unscaledBitmap;
         else {
             unscaledBitmap.recycle();
-            return mImageLoader.loadImageSync(srcUri.toString(), getScaledDimension(srcSize, boundarySize));
-
+            ImageSize s = getScaledDimension(srcSize, boundarySize);
+            return Bitmap.createScaledBitmap(Util.loadBitmapFromUri(mContext,srcUri), s.getWidth(), s.getHeight(), false);
         }
     }
 
@@ -144,6 +145,7 @@ public class PostImageTask extends AsyncTask<Uri, String, String> {
         metadata.setContentType(resolver.getType(srcUri));
 
         if (!mExtension.contains("gif")) {
+
             Bitmap scaledBitmap = getScaledBitmap(srcUri, mDstWidth, mDstHeight);
         /* Get byte stream */
             bos = new ByteArrayOutputStream();

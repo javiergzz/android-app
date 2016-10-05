@@ -17,6 +17,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
+import com.bumptech.glide.Glide;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
@@ -27,7 +28,6 @@ import com.grahm.livepost.objects.MultipartFormField;
 import com.grahm.livepost.objects.User;
 import com.grahm.livepost.specialViews.RoundedImageView;
 import com.grahm.livepost.util.Utilities;
-import com.nostra13.universalimageloader.core.ImageLoader;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -90,8 +90,7 @@ public class ProfileFragment extends Fragment {
         View view = inflater.inflate(R.layout.fragment_profile, container, false);
         ButterKnife.bind(this, view);
 
-        ImageLoader imageLoader = ImageLoader.getInstance();
-        imageLoader.displayImage(Utilities.trimProfilePic(mUser), mImageView);
+        Glide.with(this).load(Utilities.trimProfilePic(mUser)).into(mImageView);
 
         if(mUser!=null) {
             mTitleView.setText(mUser.getName());

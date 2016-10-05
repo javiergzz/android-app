@@ -23,6 +23,7 @@ import android.widget.Toast;
 
 import com.amazonaws.auth.BasicAWSCredentials;
 import com.amazonaws.services.s3.AmazonS3Client;
+import com.bumptech.glide.Glide;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ServerValue;
@@ -38,7 +39,6 @@ import com.grahm.livepost.objects.User;
 import com.grahm.livepost.util.GV;
 import com.grahm.livepost.util.Util;
 import com.grahm.livepost.util.Utilities;
-import com.nostra13.universalimageloader.core.ImageLoader;
 import com.twitter.sdk.android.Twitter;
 import com.twitter.sdk.android.core.TwitterAuthConfig;
 import com.twitter.sdk.android.core.TwitterCore;
@@ -83,7 +83,6 @@ public class ChatActivity extends FirebaseActivity implements AbsListView.OnItem
     private Story mStory;
     private Uri mIimageUri;
     private AmazonS3Client s3Client = new AmazonS3Client(new BasicAWSCredentials(GV.ACCESS_KEY_ID, GV.SECRET_KEY));
-    private ImageLoader mImageLoader;
 
     private ChatAdapter mMessagesListAdapter;
     private User mUser;
@@ -118,7 +117,6 @@ public class ChatActivity extends FirebaseActivity implements AbsListView.OnItem
             mStory = (Story) args.getSerializable(TAG_STORY);
         }
         mUser = Utilities.getUser(mFirebaseRef, this, args);
-        mImageLoader= ImageLoader.getInstance();
     }
 
     @Override
@@ -137,17 +135,8 @@ public class ChatActivity extends FirebaseActivity implements AbsListView.OnItem
 
         setSupportActionBar(mToolbar);
         restoreState(savedInstanceState);
-        EasyImage.configuration(this)
-                .setImagesFolderName("images")
-                .saveInAppExternalFilesDir()
-                .setCopyExistingPicturesToPublicLocation(true);
         mFirebaseRef = FirebaseDatabase.getInstance().getReference("updates").child(mId);
-        setupViews();
-    }
-
-    private void setupViews() {
         setupMenu();
-        mImageLoader.displayImage(mStory.getPosts_picture(), mBackdropImageView);
     }
 
 
@@ -282,24 +271,7 @@ public class ChatActivity extends FirebaseActivity implements AbsListView.OnItem
 
     private void setupMenu() {
         getSupportActionBar().setTitle(mStory.getTitle());
-//        mToolbar.inflateMenu(R.menu.menu_chat);
-//        mToolbar.setOnMenuItemClickListener(new Toolbar.OnMenuItemClickListener() {
-//            @Override
-//            public boolean onMenuItemClick(MenuItem item) {
-//                int id = item.getItemId();
-//                switch (id) {
-//                    case R.id.action_settings_chat:
-//                        Intent intent = new Intent(ChatActivity.this, StorySettingsActivity.class);
-//                        intent.putExtra(TAG_STORY, mStory);
-//                        intent.putExtra(TAG_ID, mId);
-//                        startActivityForResult(intent, 1);
-//                        ChatActivity.this.finish();
-//                        return true;
-//                }
-//                ;
-//                return true;
-//            }
-//        });
+        Glide.with(this).load(mStory.getPosts_picture()).into(mBackdropImageView);
     }
 
 }
