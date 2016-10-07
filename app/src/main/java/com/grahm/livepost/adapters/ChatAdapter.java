@@ -152,7 +152,7 @@ public class ChatAdapter extends FirebaseListAdapter<Update> {
         try {
             Bitmap bmp = Utilities.retriveVideoFrameFromVideo(Utilities.cleanVideoUrl(msg));
             h.mImgChatView.setImageBitmap(bmp);
-            new UploadVideoThumbTask(FirebaseDatabase.getInstance().getReference("updates/"+key),h.mItem,mActivity, new AmazonS3Client(new BasicAWSCredentials(GV.ACCESS_KEY_ID, GV.SECRET_KEY)) )
+            new UploadVideoThumbTask(FirebaseDatabase.getInstance().getReference("updates/"+mChatKey+"/"+key),h.mItem,mActivity, new AmazonS3Client(new BasicAWSCredentials(GV.ACCESS_KEY_ID, GV.SECRET_KEY)) )
                     .execute(bmp);
         }catch (Throwable e){
             Log.e(TAG, "Error:"+e);
