@@ -21,7 +21,10 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.grahm.livepost.R;
+import com.grahm.livepost.activities.MainActivity;
 import com.grahm.livepost.adapters.HomeListAdapter;
+import com.grahm.livepost.interfaces.OnFragmentInteractionListener;
+import com.objectlife.statelayout.StateLayout;
 
 /**
  * Created by javiergonzalez on 6/21/16.

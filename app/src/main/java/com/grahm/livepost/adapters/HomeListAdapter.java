@@ -21,12 +21,18 @@ import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.load.resource.drawable.GlideDrawable;
 import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.target.Target;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
+import com.google.firebase.database.ValueEventListener;
 import com.grahm.livepost.R;
 import com.grahm.livepost.activities.MainActivity;
 import com.grahm.livepost.interfaces.OnFragmentInteractionListener;
 import com.grahm.livepost.objects.Story;
 import com.grahm.livepost.util.Utilities;
+import com.objectlife.statelayout.StateLayout;
 
 import java.sql.Timestamp;
 
@@ -56,6 +62,43 @@ public class HomeListAdapter extends FirebaseListAdapter<Story> {
         mCtx = activity.getApplicationContext();
         mActivity = activity;
         mOnFragmentInteractionListener = (OnFragmentInteractionListener) mActivity;
+        setConnectivityObservers(ref);
+
+    }
+    private void setConnectivityObservers(Query ref){
+        ref.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                switchMainActivityView(StateLayout.VIEW_CONTENT);
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+                switchMainActivityView(StateLayout.VIEW_ERROR);
+            }
+        });
+        DatabaseReference connectedRef = FirebaseDatabase.getInstance().getReference(".info/connected");
+        connectedRef.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot snapshot) {
+                boolean connected = snapshot.getValue(Boolean.class);
+                if (connected) {
+                    System.out.println("connected");
+                    switchMainActivityView(StateLayout.VIEW_CONTENT);
+                } else {
+                    System.out.println("not connected");
+                    if(getItemCount()<=0){
+                        switchMainActivityView(StateLayout.VIEW_ERROR);
+                    }
+                }
+            }
+
+            @Override
+            public void onCancelled(DatabaseError error) {
+                System.err.println("Listener was cancelled");
+                switchMainActivityView(StateLayout.VIEW_ERROR);
+            }
+        });
     }
 
     @Override
@@ -174,6 +217,12 @@ public class HomeListAdapter extends FirebaseListAdapter<Story> {
         //if(s.getCategory()==HEADER_ID)
         //    return TYPE_HEADER;
         return TYPE_ITEM;
+    }
+
+    private void switchMainActivityView(int state){
+        Bundle b = new Bundle();
+        b.putInt(MainActivity.STATE_KEY, state);
+        mOnFragmentInteractionListener.onFragmentInteraction(MainActivity.VIEW_INTERACTIONS,b);
     }
 
 

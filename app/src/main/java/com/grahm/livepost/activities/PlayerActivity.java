@@ -1,29 +1,19 @@
 package com.grahm.livepost.activities;
 
-import android.annotation.SuppressLint;
 import android.content.res.Configuration;
-import android.util.Log;
-import android.widget.MediaController;
 import android.net.Uri;
-import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.os.Handler;
-import android.view.MotionEvent;
 import android.view.View;
-import android.view.MenuItem;
-import android.support.v4.app.NavUtils;
 
-import com.afollestad.easyvideoplayer.EasyVideoCallback;
 import com.afollestad.easyvideoplayer.EasyVideoPlayer;
 import com.github.rtoshiro.view.video.FullscreenVideoLayout;
 import com.grahm.livepost.R;
-import com.grahm.livepost.objects.Update;
 import com.grahm.livepost.util.Utilities;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
-import 	android.widget.VideoView;
 
 import java.io.IOException;
 
@@ -43,7 +33,7 @@ public class PlayerActivity extends AppCompatActivity {
      * user interaction before hiding the system UI.
      */
     private static final int AUTO_HIDE_DELAY_MILLIS = 3000;
-    public static final String UPDATE_KEY="update";
+    public static final String VIDEO_URL_KEY ="update";
 
     /**
      * Some older devices needs a small delay between UI widget updates
@@ -53,19 +43,21 @@ public class PlayerActivity extends AppCompatActivity {
     private final Handler mHideHandler = new Handler();
     private View mContentView;
     private EasyVideoPlayer player;
-    private Update mUpdate;
+    private String mVideoUrl;
     @BindView(R.id.videoview)
     public FullscreenVideoLayout videoLayout;
 
     @Override
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
-        outState.putSerializable(UPDATE_KEY,mUpdate);
+        outState.putSerializable(VIDEO_URL_KEY,mVideoUrl);
     }
 
     private void restoreState(Bundle savedInstanceState){
         Bundle args = savedInstanceState !=null?savedInstanceState:getIntent().getExtras();
-        mUpdate = (Update)args.getSerializable(UPDATE_KEY);
+        mVideoUrl = args.getString(VIDEO_URL_KEY);
+        videoLayout.setShouldAutoplay(true);
+        videoLayout.setBackgroundColor(0);
         videoLayout.setActivity(this);
     }
 
@@ -76,7 +68,7 @@ public class PlayerActivity extends AppCompatActivity {
         ButterKnife.bind(this);
         restoreState(savedInstanceState);
 
-        Uri videoUri = Uri.parse( Utilities.cleanVideoUrl(mUpdate.getMessage()));
+        Uri videoUri = Uri.parse( Utilities.cleanVideoUrl(mVideoUrl));
         try {
             videoLayout.setVideoURI(videoUri);
             videoLayout.start();

@@ -322,4 +322,12 @@
     <string name="error_picker">Unrecognized or corrupted file.</string>
 
     <string name="title_activity_player">PlayerActivity</string>
+    <string name="view_empty_main_msg_1">Create or contribute to a story.</string>
+    <string name="view_empty_main_msg_2">It\'ll be added here!</string>
+    <string name="view_error_main_msg_1">408</string>
+    <string name="view_error_main_msg_2">We can’t seem to connect to the internet.
+    Please check your internet connection
+    and try again</string>
+    <string name="view_empty_chat_msg_1">This story has no messages yet.</string>
+    <string name="view_empty_chat_msg_2">Be the first to add one!</string>
 </resources>

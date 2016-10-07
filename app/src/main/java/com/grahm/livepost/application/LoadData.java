@@ -9,7 +9,7 @@ import com.google.firebase.database.FirebaseDatabase;
  * Created by javiergonzalez on 6/21/16.
  */
 
-public class LoadData extends Application {
+public class LoadData extends android.support.multidex.MultiDexApplication {
 
     @Override
     public void onCreate() {

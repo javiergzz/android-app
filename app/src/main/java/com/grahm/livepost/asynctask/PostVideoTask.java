@@ -29,6 +29,9 @@ import com.grahm.livepost.interfaces.OnPutImageListener;
 import com.grahm.livepost.objects.User;
 import com.grahm.livepost.util.GV;
 import com.grahm.livepost.util.Util;
+import com.grahm.livepost.util.Utilities;
+
+import java.io.File;
 import java.io.InputStream;
 
 import java.io.ByteArrayInputStream;
@@ -164,26 +167,30 @@ public class PostVideoTask extends AsyncTask<Uri, String, String> {
             urlRequest.setResponseHeaders(override);
             URL urlUri = mS3Client.generatePresignedUrl(urlRequest);
             Uri.parse(urlUri.toURI().toString());
-            url = urlUri.toString();
+            url = "<video>"+urlUri.toString()+"</video>";
 
             //Upload thumbnail
-            Bitmap thumb = ThumbnailUtils.createVideoThumbnail(srcUri.toString(), MediaStore.Video.Thumbnails.MINI_KIND);
+            Bitmap thumb = ThumbnailUtils.createVideoThumbnail(new File(srcUri.getPath()).getAbsolutePath(), MediaStore.Video.Thumbnails.MINI_KIND);
             ByteArrayOutputStream bos = new ByteArrayOutputStream();
             //scaledBitmap.compress(Bitmap.CompressFormat.PNG, 0 /*ignored for PNG*/, bos);
             thumb.compress(Bitmap.CompressFormat.PNG, 80, bos);
             byte[] bitmapdata = bos.toByteArray();
             ByteArrayInputStream bs = new ByteArrayInputStream(bitmapdata);
             metadata.setContentLength(bos.size());
-            metadata.setContentType(resolver.getType(srcUri));
+            metadata.setContentType("image/png");
             if(bos.size()>0) {
-                por = new PutObjectRequest(GV.PICTURE_BUCKET, videoName.replace(".mp4",".png"), bs, metadata).withCannedAcl(CannedAccessControlList.PublicRead);
+                Log.e(TAG,Utilities.replaceExtension(videoName,".png"));
+                por = new PutObjectRequest(GV.VIDEO_BUCKET, Utilities.replaceExtension(videoName,".png"), bs, metadata).withCannedAcl(CannedAccessControlList.PublicRead);
                 mS3Client.putObject(por);
                 override = new ResponseHeaderOverrides();
                 override.setContentType(Util.getMimeTypeFromUri(mContext, srcUri));
-                urlRequest = new GeneratePresignedUrlRequest(GV.PICTURE_BUCKET, videoName.replace(".mp4",".png"));
+                urlRequest = new GeneratePresignedUrlRequest(GV.VIDEO_BUCKET, Utilities.replaceExtension(videoName,".png"));
                 urlRequest.setExpiration(new Date(System.currentTimeMillis() + 3600000));
                 urlRequest.setResponseHeaders(override);
                 mS3Client.generatePresignedUrl(urlRequest);
+                URL thumbUrlUri = mS3Client.generatePresignedUrl(urlRequest);
+                url += "<thumb>"+thumbUrlUri.toString()+"</thumb>";
+
             }
         } catch (Exception exception) {
             Log.e("AsyncTask", "Error: " + exception);

@@ -31,6 +31,7 @@ import com.grahm.livepost.R;
 import com.grahm.livepost.adapters.ChatAdapter;
 import com.grahm.livepost.asynctask.PostImageTask;
 import com.grahm.livepost.asynctask.PostVideoTask;
+import com.grahm.livepost.interfaces.OnFragmentInteractionListener;
 import com.grahm.livepost.interfaces.OnPutImageListener;
 import com.grahm.livepost.objects.FirebaseActivity;
 import com.grahm.livepost.objects.Story;
@@ -39,6 +40,7 @@ import com.grahm.livepost.objects.User;
 import com.grahm.livepost.util.GV;
 import com.grahm.livepost.util.Util;
 import com.grahm.livepost.util.Utilities;
+import com.objectlife.statelayout.StateLayout;
 import com.twitter.sdk.android.Twitter;
 import com.twitter.sdk.android.core.TwitterAuthConfig;
 import com.twitter.sdk.android.core.TwitterCore;
@@ -56,7 +58,7 @@ import butterknife.OnTextChanged;
 import io.fabric.sdk.android.Fabric;
 import pl.aprilapps.easyphotopicker.EasyImage;
 
-public class ChatActivity extends FirebaseActivity implements AbsListView.OnItemClickListener {
+public class ChatActivity extends FirebaseActivity implements AbsListView.OnItemClickListener, OnFragmentInteractionListener {
     private static final String TAG_CLASS = "ChatActivity";
     public static final String TAG_ID = "key";
     public static final String TAG_USER = "user";
@@ -74,7 +76,9 @@ public class ChatActivity extends FirebaseActivity implements AbsListView.OnItem
     public ImageView mBackdropImageView;
     @BindView(R.id.btnSend)
     public FloatingActionButton mBtnSend;
-    
+    @BindView(R.id.sl_layout_state)
+    public StateLayout mStateLayout;
+
     public static MainActivity.FragmentsEnum page = MainActivity.FragmentsEnum.CHAT;
     private DatabaseReference mFirebaseRef;
     private PostImageTask mPostImageTask;
@@ -90,7 +94,7 @@ public class ChatActivity extends FirebaseActivity implements AbsListView.OnItem
         @Override
         public void onSuccess(String url) {
             mFirebaseRef.getRoot().child("posts/" + mId + "/last_message").setValue(url);
-            Update m = new Update(0,null,url,mUser.getProfile_picture(), mUser.getName(), mUser.getUserKey());
+            Update m = new Update(0, null, url, mUser.getProfile_picture(), mUser.getName(), mUser.getUserKey());
             // Create a new, auto-generated child of that chat location, and save our chat data there
             DatabaseReference r = mFirebaseRef.push();
             r.setValue(m);
@@ -137,6 +141,11 @@ public class ChatActivity extends FirebaseActivity implements AbsListView.OnItem
         restoreState(savedInstanceState);
         mFirebaseRef = FirebaseDatabase.getInstance().getReference("updates").child(mId);
         setupMenu();
+        mStateLayout.setContentViewResId(R.id.v_content)
+                .setErrorViewResId(R.id.v_error)
+                .setEmptyViewResId(R.id.v_empty)
+                .setLoadingViewResId(R.id.v_loading)
+                .initWithState(StateLayout.VIEW_LOADING);
     }
 
 
@@ -187,13 +196,13 @@ public class ChatActivity extends FirebaseActivity implements AbsListView.OnItem
 
             @Override
             public void onImagePicked(File file, com.grahm.livepost.util.EasyImage.ImageSource source, int type) {
-                String mimeType = Util.getMimeTypeFromUri(getBaseContext(),Uri.fromFile(file));
-                if(mimeType.contains("video") ){
+                String mimeType = Util.getMimeTypeFromUri(getBaseContext(), Uri.fromFile(file));
+                if (mimeType.contains("video")) {
                     onVideoReturned(file);
-                }else {
+                } else {
                     onPhotoReturned(file);
                 }
-                Log.e(TAG_CLASS,"imagefile:"+file.getName()+"type:"+type+" requestCode:"+requestCode+ " resultCode:"+resultCode);
+                Log.e(TAG_CLASS, "imagefile:" + file.getName() + "type:" + type + " requestCode:" + requestCode + " resultCode:" + resultCode);
             }
 
             @Override
@@ -203,18 +212,18 @@ public class ChatActivity extends FirebaseActivity implements AbsListView.OnItem
         });
     }
 
-    private void onVideoReturned(File file){
+    private void onVideoReturned(File file) {
         Uri uri = Uri.fromFile(file);
 
-        mPostVideoTask = new PostVideoTask(this,s3Client,putImageListener,true);
-        if(uri!= null) mPostVideoTask.execute(uri);
+        mPostVideoTask = new PostVideoTask(this, s3Client, putImageListener, true);
+        if (uri != null) mPostVideoTask.execute(uri);
     }
 
     private void onPhotoReturned(File imageFile) {
         Uri uri = Uri.fromFile(imageFile);
 
-        mPostImageTask = new PostImageTask(this,s3Client,putImageListener,true);
-        if(uri!= null) mPostImageTask.execute(uri);
+        mPostImageTask = new PostImageTask(this, s3Client, putImageListener, true);
+        if (uri != null) mPostImageTask.execute(uri);
     }
 
     @Override
@@ -232,7 +241,7 @@ public class ChatActivity extends FirebaseActivity implements AbsListView.OnItem
             com.grahm.livepost.util.EasyImage.openChooserWithDocuments(this, mId + "_" + l, 1);
         } else {
             mFirebaseRef.getRoot().child("posts/" + mId + "/last_message").setValue(input);
-            Update m = new Update(0,null,input,Utilities.trimProfilePic(mUser), mUser.getName(), mUser.getUserKey());
+            Update m = new Update(0, null, input, Utilities.trimProfilePic(mUser), mUser.getName(), mUser.getUserKey());
             // Create a new, auto-generated child of that chat location, and save our chat data there
             DatabaseReference r = mFirebaseRef.push();
             r.setValue(m);
@@ -274,4 +283,9 @@ public class ChatActivity extends FirebaseActivity implements AbsListView.OnItem
         Glide.with(this).load(mStory.getPosts_picture()).into(mBackdropImageView);
     }
 
+    @Override
+    public void onFragmentInteraction(int state, Bundle args) {
+        if (mStateLayout.getState() != state)
+            mStateLayout.setState(state);
+    }
 }
