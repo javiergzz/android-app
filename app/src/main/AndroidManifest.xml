@@ -88,9 +88,9 @@
         </activity>
         <activity
             android:name=".activities.PlayerActivity"
-            android:configChanges="orientation|keyboardHidden|screenLayout|screenSize"
+            android:configChanges="keyboardHidden|screenLayout|screenSize"
             android:label="@string/title_activity_player"
-            android:theme="@style/AppTheme.NoActionBar"></activity>
+            android:theme="@style/AppTheme.NoActionBar.Fullscreen"></activity>
 
         <meta-data
             android:name="com.google.android.gms.version"

@@ -1,21 +1,22 @@
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:background="@android:color/black"
-    tools:context=".activities.PlayerActivity">
-
-
-    <FrameLayout
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:background="@android:color/black">
-
-        <com.github.rtoshiro.view.video.FullscreenVideoLayout
-            android:id="@+id/videoview"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:background="@android:color/black" />
-    </FrameLayout>
-
-</LinearLayout>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:background="@android:color/black">
+    <VideoView android:id="@+id/video_view"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentLeft="true"
+        android:focusable="false"
+        android:focusableInTouchMode="false"
+        android:layout_centerInParent="true">
+    </VideoView>
+    <ProgressBar
+        android:id="@+id/progress_bar"
+        android:layout_width="200dp"
+        android:layout_height="wrap_content"
+        android:visibility="visible"
+        android:layout_centerInParent="true"
+        style="@android:style/Widget.Holo.ProgressBar.Large"
+        />
+</RelativeLayout>

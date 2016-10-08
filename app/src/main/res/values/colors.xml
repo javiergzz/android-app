@@ -12,6 +12,7 @@
     <color name="red_delete">#FF5722</color>
     <color name="green_edit">#009688</color>
     <dimen name="card_title_size_staggered">21dp</dimen>
+    <color name="black">#000</color>
     <color name="dark_grey">#222</color>
     <color name="grey">#333</color>
     <color name="light_grey">#EEE</color>

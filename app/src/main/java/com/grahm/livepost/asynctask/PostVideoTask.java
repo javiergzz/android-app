@@ -167,7 +167,7 @@ public class PostVideoTask extends AsyncTask<Uri, String, String> {
             urlRequest.setResponseHeaders(override);
             URL urlUri = mS3Client.generatePresignedUrl(urlRequest);
             Uri.parse(urlUri.toURI().toString());
-            url = "<video>"+urlUri.toString()+"</video>";
+            url = "<video>"+Utilities.cleanUrl(urlUri.toString())+"</video>";
 
             //Upload thumbnail
             Bitmap thumb = ThumbnailUtils.createVideoThumbnail(new File(srcUri.getPath()).getAbsolutePath(), MediaStore.Video.Thumbnails.MINI_KIND);
@@ -189,7 +189,7 @@ public class PostVideoTask extends AsyncTask<Uri, String, String> {
                 urlRequest.setResponseHeaders(override);
                 mS3Client.generatePresignedUrl(urlRequest);
                 URL thumbUrlUri = mS3Client.generatePresignedUrl(urlRequest);
-                url += "<thumb>"+thumbUrlUri.toString()+"</thumb>";
+                url += "<thumb>"+Utilities.cleanUrl(thumbUrlUri.toString())+"</thumb>";
 
             }
         } catch (Exception exception) {

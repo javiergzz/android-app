@@ -1,21 +1,31 @@
 package com.grahm.livepost.activities;
 
-import android.content.res.Configuration;
-import android.net.Uri;
+import android.media.MediaPlayer;
+import android.os.AsyncTask;
+import android.text.TextUtils;
+import android.view.View;
+import android.webkit.URLUtil;
+import android.widget.MediaController;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.os.Handler;
-import android.view.View;
+import android.util.Log;
+import android.widget.ProgressBar;
 
-import com.afollestad.easyvideoplayer.EasyVideoPlayer;
-import com.github.rtoshiro.view.video.FullscreenVideoLayout;
 import com.grahm.livepost.R;
 import com.grahm.livepost.util.Utilities;
+
+import android.widget.Toast;
+import android.widget.VideoView;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.net.URL;
+import java.net.URLConnection;
 
 /**
  * An example full-screen activity that shows and hides the system UI (i.e.
@@ -39,13 +49,11 @@ public class PlayerActivity extends AppCompatActivity {
      * Some older devices needs a small delay between UI widget updates
      * and a change of the status and navigation bar.
      */
-    private static final int UI_ANIMATION_DELAY = 300;
-    private final Handler mHideHandler = new Handler();
-    private View mContentView;
-    private EasyVideoPlayer player;
     private String mVideoUrl;
-    @BindView(R.id.videoview)
-    public FullscreenVideoLayout videoLayout;
+    @BindView(R.id.video_view)
+    public VideoView mVideoView;
+    @BindView(R.id.progress_bar)
+    public ProgressBar mProgressBar;
 
     @Override
     protected void onSaveInstanceState(Bundle outState) {
@@ -56,9 +64,6 @@ public class PlayerActivity extends AppCompatActivity {
     private void restoreState(Bundle savedInstanceState){
         Bundle args = savedInstanceState !=null?savedInstanceState:getIntent().getExtras();
         mVideoUrl = args.getString(VIDEO_URL_KEY);
-        videoLayout.setShouldAutoplay(true);
-        videoLayout.setBackgroundColor(0);
-        videoLayout.setActivity(this);
     }
 
     @Override
@@ -67,17 +72,91 @@ public class PlayerActivity extends AppCompatActivity {
         setContentView(R.layout.activity_player);
         ButterKnife.bind(this);
         restoreState(savedInstanceState);
-
-        Uri videoUri = Uri.parse( Utilities.cleanVideoUrl(mVideoUrl));
         try {
-            videoLayout.setVideoURI(videoUri);
-            videoLayout.start();
-        } catch (IOException e) {
-            e.printStackTrace();
+            //mVideoView.setBackgroundColor(getResources().getColor(R.color.black));
+            MediaController mediaController = new MediaController(this);
+            mediaController.setAnchorView(mVideoView);
+            mVideoView.setMediaController(mediaController);
+            new fetchVideoTask().execute(mVideoUrl);
+            //mVideoView.start();
+        } catch (Exception e) {
+            Log.e(TAG,"Exception:"+e);
+            Toast.makeText(this, "Error connecting", Toast.LENGTH_LONG).show();
         }
     }
-    @Override
-    public void onConfigurationChanged(Configuration newConfig) {
-        super.onConfigurationChanged(newConfig);
+
+    class fetchVideoTask extends AsyncTask<String,Integer,Boolean>{
+        String mVideoPath;
+
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+            mProgressBar.setVisibility(View.VISIBLE);
+        }
+
+        @Override
+        protected void onPostExecute(Boolean aBoolean) {
+            super.onPostExecute(aBoolean);
+            if(!TextUtils.isEmpty(mVideoPath)) {
+                Log.d(TAG,"Playing video:"+mVideoPath);
+                mVideoView.setVideoPath(mVideoPath);
+                mVideoView.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
+                    @Override
+                    public void onPrepared(MediaPlayer mp) {
+                        mp.start();
+                        mProgressBar.setVisibility(View.GONE);
+                        mp.setOnVideoSizeChangedListener(new MediaPlayer.OnVideoSizeChangedListener() {
+                            @Override
+                            public void onVideoSizeChanged(MediaPlayer mp, int width, int height) {
+                                mp.start();
+                                mProgressBar.setVisibility(View.GONE);
+                            }
+                        });
+                    }
+                });
+            }
+        }
+
+
+        @Override
+        protected Boolean doInBackground(String... params){
+            try {
+                mVideoPath = getDataSource(Utilities.cleanUrl(mVideoUrl));
+                return true;
+            }catch (IOException ex) {
+                Log.e(TAG, "error: " + ex.getMessage(), ex);
+                return false;
+            }
+        }
+        private String getDataSource(String path) throws IOException {
+            if (!URLUtil.isNetworkUrl(path)) {
+                return path;
+            } else {
+                URL url = new URL(path);
+                URLConnection cn = url.openConnection();
+                cn.connect();
+
+                InputStream stream = cn.getInputStream();
+                if (stream == null)
+                    throw new RuntimeException("stream is null");
+                File temp = File.createTempFile("mediaplayertmp", "dat");
+                temp.deleteOnExit();
+                String tempPath = temp.getAbsolutePath();
+                FileOutputStream out = new FileOutputStream(temp);
+                byte buf[] = new byte[128];
+                do {
+                    int numread = stream.read(buf);
+                    if (numread <= 0)
+                        break;
+                    out.write(buf, 0, numread);
+                } while (true);
+                try {
+                    stream.close();
+                } catch (IOException ex) {
+                    Log.e(TAG, "error: " + ex.getMessage(), ex);
+                }
+                return tempPath;
+            }
+        }
     }
 }

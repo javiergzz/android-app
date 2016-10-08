@@ -103,7 +103,7 @@ public class UploadVideoThumbTask extends AsyncTask<Bitmap, String, Void> {
                 urlRequest.setResponseHeaders(override);
                 URL thumbUrlUri = mS3Client.generatePresignedUrl(urlRequest);
                 if(thumbUrlUri!=null)
-                    updateFirebaseEntry("<thumb>"+thumbUrlUri.toString()+"</thumb>");
+                    updateFirebaseEntry("<thumb>"+Utilities.cleanUrl(thumbUrlUri.toString())+"</thumb>");
 
             }
         } catch (Exception exception) {

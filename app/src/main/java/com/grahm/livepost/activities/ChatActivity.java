@@ -63,8 +63,6 @@ public class ChatActivity extends FirebaseActivity implements AbsListView.OnItem
     public static final String TAG_ID = "key";
     public static final String TAG_USER = "user";
     public static final String TAG_STORY = "story";
-    private static final int TAKE_PICTURE = 0;
-    private static final int PHOTO_SELECTED = 1;
 
     @BindView(R.id.messageInput)
     public EditText mInputText;
@@ -76,6 +74,8 @@ public class ChatActivity extends FirebaseActivity implements AbsListView.OnItem
     public ImageView mBackdropImageView;
     @BindView(R.id.btnSend)
     public FloatingActionButton mBtnSend;
+    @BindView(R.id.btnBottom)
+    public FloatingActionButton mBtnBottom;
     @BindView(R.id.sl_layout_state)
     public StateLayout mStateLayout;
 
@@ -85,7 +85,7 @@ public class ChatActivity extends FirebaseActivity implements AbsListView.OnItem
     private PostVideoTask mPostVideoTask;
     private String mId;
     private Story mStory;
-    private Uri mIimageUri;
+    private LinearLayoutManager mLinearLayoutManager;
     private AmazonS3Client s3Client = new AmazonS3Client(new BasicAWSCredentials(GV.ACCESS_KEY_ID, GV.SECRET_KEY));
 
     private ChatAdapter mMessagesListAdapter;
@@ -165,12 +165,10 @@ public class ChatActivity extends FirebaseActivity implements AbsListView.OnItem
     @Override
     public void onStart() {
         super.onStart();
-
-        ButterKnife.bind(this);
         try {
-            LinearLayoutManager llm = new LinearLayoutManager(this);
-            llm.setOrientation(LinearLayoutManager.VERTICAL);
-            mListView.setLayoutManager(llm);
+            mLinearLayoutManager = new LinearLayoutManager(this);
+            mLinearLayoutManager.setOrientation(LinearLayoutManager.VERTICAL);
+            mListView.setLayoutManager(mLinearLayoutManager);
             mMessagesListAdapter = new ChatAdapter(mFirebaseRef.limitToLast(50), this, mId, mUser);
             mListView.setAdapter(mMessagesListAdapter);
             mMessagesListAdapter.registerAdapterDataObserver(new RecyclerView.AdapterDataObserver() {
@@ -178,6 +176,17 @@ public class ChatActivity extends FirebaseActivity implements AbsListView.OnItem
                 public void onChanged() {
                     super.onChanged();
                     mListView.scrollToPosition(mMessagesListAdapter.getItemCount() - 1);
+                }
+            });
+            mListView.addOnScrollListener(new RecyclerView.OnScrollListener() {
+                @Override
+                public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
+                    super.onScrolled(recyclerView, dx, dy);
+                    if(mLinearLayoutManager.findLastCompletelyVisibleItemPosition()+3 < mMessagesListAdapter.getItemCount()){
+                        if(!mBtnBottom.isShown())mBtnBottom.show();
+                    }else if(mBtnBottom.isShown()){
+                        mBtnBottom.hide();
+                    }
                 }
             });
         } catch (Exception e) {
@@ -256,6 +265,12 @@ public class ChatActivity extends FirebaseActivity implements AbsListView.OnItem
 
     }
 
+    @OnClick(R.id.btnBottom)
+    public void gotoBottom(View view) {
+        mListView.scrollToPosition(mMessagesListAdapter.getItemCount() - 1);
+    }
+
+
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
@@ -269,6 +284,7 @@ public class ChatActivity extends FirebaseActivity implements AbsListView.OnItem
                 return true;
         }
         getSupportActionBar().setTitle(mStory.getTitle());
+        setTitle(mStory.getTitle());
         return super.onOptionsItemSelected(item);
     }
 
@@ -280,6 +296,7 @@ public class ChatActivity extends FirebaseActivity implements AbsListView.OnItem
 
     private void setupMenu() {
         getSupportActionBar().setTitle(mStory.getTitle());
+        setTitle(mStory.getTitle());
         Glide.with(this).load(mStory.getPosts_picture()).into(mBackdropImageView);
     }
 
