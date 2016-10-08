@@ -18,6 +18,7 @@ import android.view.MenuItem;
 import android.view.View;
 
 
+import com.bumptech.glide.Glide;
 import com.google.firebase.auth.FirebaseAuth;
 import com.grahm.livepost.R;
 import com.grahm.livepost.adapters.HomeFragmentAdapter;
@@ -27,9 +28,11 @@ import com.grahm.livepost.fragments.NewStoryFragment;
 import com.grahm.livepost.fragments.ProfileFragment;
 import com.grahm.livepost.interfaces.OnFragmentInteractionListener;
 import com.grahm.livepost.objects.FirebaseActivity;
+import com.objectlife.statelayout.StateLayout;
 
 import java.io.Serializable;
 
+import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 
@@ -49,7 +52,7 @@ public class MainActivity extends FirebaseActivity implements OnFragmentInteract
     public static final int NEW_STORY_IDX = 1;
     public static final int PROFILE_IDX = 2;
     public static final int CHAT_IDX = 4;
-    public static final String REBOOT_REQ = "reboot_req";
+    public static final int VIEW_INTERACTIONS = 5;
 
     /*Fragment tags*/
     public static final String HOME_TAG = "home";
@@ -61,20 +64,26 @@ public class MainActivity extends FirebaseActivity implements OnFragmentInteract
     public static final String PAGE_KEY = "page";
     public static final String FRAG_ARGS = "frag_args";
     public static final String FRAG_KEY = "frag";
+    public static final String STATE_KEY = "state";
 
     private FragmentsEnum mCurrentPage;
     private SectionsFragmentManager mSectionsFragmentManager;
+    @BindView(R.id.sl_layout_state)
+    public StateLayout mStateLayout;
+    @BindView(R.id.toolbar)
+    public Toolbar toolbar;
 
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        ButterKnife.bind(this);
         setSupportActionBar(toolbar);
         setupNavigation(savedInstanceState);
         setupTabs();
     }
+
 
     private void setupTabs() {
         TabLayout tabLayout = (TabLayout) findViewById(R.id.tabs);
@@ -93,6 +102,12 @@ public class MainActivity extends FirebaseActivity implements OnFragmentInteract
             mSectionsFragmentManager.setCurrentFragment(f);
         }
         getSupportActionBar().setTitle(mCurrentPage.getTitle(this));
+
+        mStateLayout.setContentViewResId(R.id.container)
+                .setErrorViewResId(R.id.v_error)
+                .setEmptyViewResId(R.id.v_empty)
+                .setLoadingViewResId(R.id.v_loading)
+                .initWithState(StateLayout.VIEW_LOADING);
     }
 
     @Override
@@ -135,6 +150,10 @@ public class MainActivity extends FirebaseActivity implements OnFragmentInteract
                 mainIntent.putExtras(args);
                 this.startActivity(mainIntent);
                 break;
+            case VIEW_INTERACTIONS:
+                int state = args.getInt(STATE_KEY,StateLayout.VIEW_CONTENT);
+                if(mStateLayout.getState()!=state)
+                    mStateLayout.setState(state);
         }
     }
 

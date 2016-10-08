@@ -8,6 +8,7 @@ android {
         applicationId "com.grahm.livepost"
         minSdkVersion 16
         targetSdkVersion 24
+        multiDexEnabled true
         versionCode 1
         versionName "1.0"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
@@ -74,4 +75,10 @@ dependencies {
     compile 'com.afollestad:easyvideoplayer:0.2.13'
     compile 'com.github.rtoshiro.fullscreenvideoview:fullscreenvideoview:1.1.2'
     compile 'com.objectlife.statelayout:statelayout:1.0.3'
+    compile 'com.android.support:multidex:+'
+    compile 'com.crystal:crystalpreloaders:1.0.0'
+    compile 'com.github.baoyachi:StepView:1.9'
+    compile 'com.percolate:foam:0.9.4'
+    compile 'com.squareup.retrofit:retrofit:1.9.0'
+    compile 'com.google.code.gson:gson:2.3'
 }

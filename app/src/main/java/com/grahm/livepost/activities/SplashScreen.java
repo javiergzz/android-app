@@ -5,6 +5,8 @@ import android.content.SharedPreferences;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.os.Handler;
+
+import com.google.firebase.database.FirebaseDatabase;
 import com.grahm.livepost.R;
 
 import com.twitter.sdk.android.Twitter;
@@ -33,6 +35,7 @@ public class SplashScreen extends AppCompatActivity {
         final boolean onboarding = settings.getBoolean(PREFS_ONBOARDING, false);
         final boolean isLogin = settings.getBoolean(PREFS_LOGIN, false);
         setContentView(R.layout.activity_splash_screen);
+        FirebaseDatabase.getInstance().setPersistenceEnabled(true);
 //        FirebaseAuth auth = FirebaseAuth.getInstance();
 //        DatabaseReference ref = FirebaseDatabase.getInstance().getReference();
 

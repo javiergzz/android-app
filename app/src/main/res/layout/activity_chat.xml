@@ -11,7 +11,6 @@
         android:layout_width="match_parent"
         android:layout_height="200dp"
         android:layout_above="@+id/msg_list"
-        android:fitsSystemWindows="true"
         android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar">
 
         <android.support.design.widget.CollapsingToolbarLayout
@@ -39,42 +38,54 @@
                 android:layout_width="match_parent"
                 android:layout_height="?attr/actionBarSize"
                 app:layout_collapseMode="pin"
-                app:popupTheme="@style/ThemeOverlay.AppCompat.Dark"/>
+                app:popupTheme="@style/ThemeOverlay.AppCompat.Dark" />
         </android.support.design.widget.CollapsingToolbarLayout>
     </android.support.design.widget.AppBarLayout>
 
-    <RelativeLayout
-        android:id="@+id/chat_list_container"
+
+    <com.objectlife.statelayout.StateLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        android:id="@+id/sl_layout_state"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="match_parent"
+        android:focusable="true"
+        android:focusableInTouchMode="true"
         app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
-        <android.support.v7.widget.RecyclerView
-            android:id="@+id/msg_list"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_marginBottom="75dp"
-            android:background="@android:color/white"
-            android:elevation="1dp" />
+        <include
+            android:id="@+id/v_content"
+            layout="@layout/chat_view" />
 
-    </RelativeLayout>
+        <include
+            android:id="@+id/v_empty"
+            layout="@layout/view_empty_main" />
+
+        <include
+            android:id="@+id/v_error"
+            layout="@layout/view_error_main" />
+
+        <include
+            android:id="@+id/v_loading"
+            layout="@layout/view_loading_main" />
+
+    </com.objectlife.statelayout.StateLayout>
 
     <LinearLayout
         android:id="@+id/buttons_view"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
+        android:background="#FFF"
         android:gravity="bottom"
         android:orientation="vertical"
-        android:background="#FFF"
-        app:layout_anchor="@id/chat_list_container"
+        android:translationZ="20dp"
+        app:layout_anchor="@id/sl_layout_state"
         app:layout_anchorGravity="bottom|right|end">
 
 
         <RelativeLayout
             android:id="@+id/listFooter"
             android:layout_width="match_parent"
-            android:layout_height="70dp"
+            android:layout_height="wrap_content"
             android:layout_alignParentBottom="true"
             android:gravity="bottom">
 
@@ -82,24 +93,40 @@
                 android:id="@+id/messageInput"
                 android:layout_width="match_parent"
                 android:layout_height="65dp"
-                android:layout_marginRight="70dp"
                 android:layout_marginLeft="5dp"
+                android:layout_marginRight="70dp"
+                android:inputType="textShortMessage"
+                android:lines="1"
                 android:padding="10dp"
                 android:paddingBottom="15dp"
-                android:inputType="textShortMessage"
-                android:lines="1" />
-
+                android:nextFocusUp="@id/messageInput"
+                android:nextFocusLeft="@id/messageInput"/>
             <android.support.design.widget.FloatingActionButton
                 android:id="@+id/btnSend"
                 android:layout_width="60dp"
                 android:layout_height="60dp"
-                android:layout_marginRight="5dp"
-                android:layout_alignParentTop="true"
                 android:layout_alignParentRight="true"
+                android:layout_alignParentTop="true"
+                android:layout_marginRight="5dp"
                 android:src="@android:drawable/ic_menu_camera"
-                />
+                app:layout_anchorGravity="bottom|right|end"/>
+
 
         </RelativeLayout>
     </LinearLayout>
+
+    <android.support.design.widget.FloatingActionButton
+        android:id="@+id/btnBottom"
+        android:layout_width="30dp"
+        android:layout_height="30dp"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentTop="true"
+        android:layout_marginRight="5dp"
+        android:src="@android:drawable/arrow_down_float"
+        app:fabSize="mini"
+        app:backgroundTint="@color/authui_colorAccent"
+        app:layout_anchor="@id/sl_layout_state"
+        app:layout_anchorGravity="top|center" />
+
     <!--android:src="@android:drawable/ic_menu_send"-->
 </android.support.design.widget.CoordinatorLayout>
