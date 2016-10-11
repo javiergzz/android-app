@@ -322,4 +322,5 @@
     <string name="error_picker">Unrecognized or corrupted file.</string>
 
     <string name="title_activity_player">PlayerActivity</string>
+    <string name="facebook_app_id">1509780745996760</string>
 </resources>

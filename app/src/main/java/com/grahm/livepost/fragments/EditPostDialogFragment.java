@@ -53,6 +53,7 @@ public class EditPostDialogFragment extends DialogFragment {
     public EditText mTextEdit;
     @BindView(R.id.chat_img)
     public ImageView mImageEdit;
+
     private OnPutImageListener putImageListener = new OnPutImageListener() {
         @Override
         public void onSuccess(String url) {
@@ -60,6 +61,7 @@ public class EditPostDialogFragment extends DialogFragment {
             mFirebaseRef.child(Update.MESSAGE_FIELD_STR).setValue(url);
         }
     };
+
     public static EditPostDialogFragment newInstance(String storyKey, String key, Update m) {
         EditPostDialogFragment f = new EditPostDialogFragment();
         // Supply num input as an argument.
@@ -79,7 +81,7 @@ public class EditPostDialogFragment extends DialogFragment {
         mChatType = args.getInt(TYPE_KEY, Utilities.deduceMessageType(mMsg.getMessage()));
         mFirebaseRef = FirebaseDatabase.getInstance().getReference("updates/" + mStoryKey + "/" + mKey);
         mS3client = new AmazonS3Client(new BasicAWSCredentials(GV.ACCESS_KEY_ID, GV.SECRET_KEY));
-        mLoadedUri = new Gson().fromJson(args.getString(IMAGE_URI_KEY),Uri.class);
+        mLoadedUri = new Gson().fromJson(args.getString(IMAGE_URI_KEY), Uri.class);
     }
 
     @Override
@@ -89,8 +91,6 @@ public class EditPostDialogFragment extends DialogFragment {
         LayoutInflater inflater = getActivity().getLayoutInflater();
         View v = inflater.inflate(R.layout.fragment_edit_dialog, null);
         ButterKnife.bind(this, v);
-        restoreState(savedInstanceState);
-        chooseViewElements();
 
         // Inflate and set the layout for the dialog
         // Pass null as the parent view because its going in the dialog layout
@@ -109,7 +109,8 @@ public class EditPostDialogFragment extends DialogFragment {
         // Create the AlertDialog object and return it
         return builder.create();
     }
-    private void chooseViewElements(){
+
+    private void chooseViewElements() {
         final String message = mMsg != null ? mMsg.getMessage() : null;
         if (message == null) return;
 
@@ -121,7 +122,7 @@ public class EditPostDialogFragment extends DialogFragment {
                 mImageEdit.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        Log.i(TAG,"Add picture callback");
+                        Log.i(TAG, "Add picture callback");
                         addPictureCallback();
                     }
                 });
@@ -129,7 +130,7 @@ public class EditPostDialogFragment extends DialogFragment {
             case Utilities.MSG_TYPE_VIDEO://TODO
                 mTextEdit.setVisibility(View.GONE);
                 mImageEdit.setVisibility(View.VISIBLE);
-                Glide.with(this).load(Utilities.cleanVideoUrl(message).replace(".mp4",".png")).into(mImageEdit);
+                Glide.with(this).load(Utilities.cleanVideoUrl(message).replace(".mp4", ".png")).into(mImageEdit);
                 mImageEdit.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {//Do nothing
@@ -145,11 +146,12 @@ public class EditPostDialogFragment extends DialogFragment {
                 break;
         }
     }
+
     private void editAction() {
         switch (mChatType) {
             case Utilities.MSG_TYPE_IMAGE:
-                mPostTask = new PostImageTask(getActivity(),mS3client,putImageListener,true);
-                if(mLoadedUri!= null) mPostTask.execute(mLoadedUri);
+                mPostTask = new PostImageTask(getActivity(), mS3client, putImageListener, true);
+                if (mLoadedUri != null) mPostTask.execute(mLoadedUri);
                 break;
             case Utilities.MSG_TYPE_VIDEO://TODO
 
@@ -168,13 +170,13 @@ public class EditPostDialogFragment extends DialogFragment {
         switch (mChatType) {
             case Utilities.MSG_TYPE_IMAGE:
                 String deleteUrl = Utilities.cleanUrl(mMsg.getMessage());
-                new DeleteImageTask(getActivity(),mS3client,deleteUrl);
+                new DeleteImageTask(getActivity(), mS3client, deleteUrl);
                 break;
             case Utilities.MSG_TYPE_VIDEO://TODO
                 break;
             default:
                 String deleteVideoUrl = Utilities.cleanVideoUrl(mMsg.getMessage());
-                new DeleteVideoTask(getActivity(),mS3client,deleteVideoUrl);
+                new DeleteVideoTask(getActivity(), mS3client, deleteVideoUrl);
                 break;
         }
         mFirebaseRef.removeValue();
@@ -187,7 +189,7 @@ public class EditPostDialogFragment extends DialogFragment {
         outState.putString(ChatAdapter.KEY_KEY, mKey);
         outState.putString(ChatAdapter.STORY_KEY, mStoryKey);
         outState.putInt(TYPE_KEY, mChatType);
-        outState.putString(IMAGE_URI_KEY,new Gson().toJson(mLoadedUri));
+        outState.putString(IMAGE_URI_KEY, new Gson().toJson(mLoadedUri));
         super.onSaveInstanceState(outState);
     }
 
@@ -214,7 +216,7 @@ public class EditPostDialogFragment extends DialogFragment {
         });
     }
 
-    private void onPhotoReturned(File imageFile){
+    private void onPhotoReturned(File imageFile) {
         mLoadedUri = Uri.fromFile(imageFile);
         Glide.with(this).load(mLoadedUri.toString()).into(mImageEdit);
     }

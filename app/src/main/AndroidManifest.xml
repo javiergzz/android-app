@@ -97,6 +97,11 @@
         <meta-data
             android:name="io.fabric.ApiKey"
             android:value="26cd4c486e5b2d52ff9e916670ef1dbbd5d89c30" />
+        <meta-data android:name="com.facebook.sdk.ApplicationId" android:value="@string/facebook_app_id"/>
+
+        <provider android:authorities="com.facebook.app.FacebookContentProvider1509780745996760"
+            android:name="com.facebook.FacebookContentProvider"
+            android:exported="true"/>
     </application>
 
 </manifest>

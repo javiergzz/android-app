@@ -24,6 +24,12 @@ import android.widget.Toast;
 import com.amazonaws.auth.BasicAWSCredentials;
 import com.amazonaws.services.s3.AmazonS3Client;
 import com.bumptech.glide.Glide;
+import com.facebook.CallbackManager;
+import com.facebook.FacebookCallback;
+import com.facebook.FacebookException;
+import com.facebook.FacebookSdk;
+import com.facebook.share.Sharer;
+import com.facebook.share.widget.ShareDialog;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ServerValue;
@@ -42,6 +48,7 @@ import com.grahm.livepost.util.Utilities;
 import com.twitter.sdk.android.Twitter;
 import com.twitter.sdk.android.core.TwitterAuthConfig;
 import com.twitter.sdk.android.core.TwitterCore;
+import com.twitter.sdk.android.tweetcomposer.TweetComposer;
 import com.twitter.sdk.android.tweetui.TweetUi;
 
 import java.io.File;
@@ -55,6 +62,10 @@ import butterknife.OnEditorAction;
 import butterknife.OnTextChanged;
 import io.fabric.sdk.android.Fabric;
 import pl.aprilapps.easyphotopicker.EasyImage;
+
+import static com.facebook.FacebookSdk.getApplicationContext;
+import static com.grahm.livepost.util.GV.TWITTER_KEY;
+import static com.grahm.livepost.util.GV.TWITTER_SECRET;
 
 public class ChatActivity extends FirebaseActivity implements AbsListView.OnItemClickListener {
     private static final String TAG_CLASS = "ChatActivity";
@@ -131,7 +142,9 @@ public class ChatActivity extends FirebaseActivity implements AbsListView.OnItem
         setContentView(R.layout.activity_chat);
         ButterKnife.bind(this);
         TwitterAuthConfig authConfig = new TwitterAuthConfig(TWITTER_KEY, TWITTER_SECRET);
-        Fabric.with(this, new TwitterCore(authConfig), new TweetUi(), new Twitter(authConfig), new TweetUi());
+        Fabric.with(this, new TwitterCore(authConfig), new TweetUi(), new Twitter(authConfig), new TweetUi(), new TweetComposer());
+
+        FacebookSdk.sdkInitialize(getApplicationContext());
 
         setSupportActionBar(mToolbar);
         restoreState(savedInstanceState);

@@ -12,6 +12,9 @@ import com.twitter.sdk.android.core.TwitterAuthConfig;
 
 import io.fabric.sdk.android.Fabric;
 
+import static com.grahm.livepost.util.GV.TWITTER_KEY;
+import static com.grahm.livepost.util.GV.TWITTER_SECRET;
+
 public class SplashScreen extends AppCompatActivity {
 
     private static final int SPLASH_DISPLAY_LENGTH = 3000;
@@ -22,8 +25,6 @@ public class SplashScreen extends AppCompatActivity {
     public static final String PREFS_TWITTER = "twitter";
     public static final String PREFS_ONBOARDING = "onboarding";
     private Class mForwardActivity;
-    private static final String TWITTER_KEY = "roDB8OWxSlYv3hiKXYnPusPUJ";
-    private static final String TWITTER_SECRET = "hV1sxHw8CcQaFMnKU59F0ze5qFVEcxDrRtQCouf2sXWXoZ300w";
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);

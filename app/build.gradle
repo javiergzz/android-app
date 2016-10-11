@@ -74,4 +74,5 @@ dependencies {
     compile 'com.afollestad:easyvideoplayer:0.2.13'
     compile 'com.github.rtoshiro.fullscreenvideoview:fullscreenvideoview:1.1.2'
     compile 'com.objectlife.statelayout:statelayout:1.0.3'
+    compile 'com.facebook.android:facebook-android-sdk:[4,5)'
 }

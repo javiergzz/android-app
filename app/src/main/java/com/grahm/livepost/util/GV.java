@@ -11,4 +11,6 @@ public class GV {
     public static final String OAUTH_TOKEN = "264927564-76v4QsuckvhEyA2bIr9FcwSSJrXRexau1UkUwLUw";
     public static final String OAUTH_SECRET = "QjhruikDzKZrUl4EG0zk8Wjl8ZVyJLp4sHTA3jCKgS4UD";
     public static final String OAUTH_ID = "264927564";
+    public static final String TWITTER_KEY = "roDB8OWxSlYv3hiKXYnPusPUJ";
+    public static final String TWITTER_SECRET = "hV1sxHw8CcQaFMnKU59F0ze5qFVEcxDrRtQCouf2sXWXoZ300w";
 }
