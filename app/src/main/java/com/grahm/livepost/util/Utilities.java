@@ -1,13 +1,18 @@
 package com.grahm.livepost.util;
 
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.database.Cursor;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.media.MediaMetadataRetriever;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.provider.MediaStore;
 import android.text.TextUtils;
 import android.text.format.DateUtils;
 import android.util.Log;
@@ -163,13 +168,33 @@ public class Utilities {
     }
 
     public static int deduceMessageType(String messageString) {
+        if(TextUtils.isEmpty(messageString)) return MSG_TYPE_TEXT;
         String mimeString = Util.getMimeTypeFromUrl(messageString);
         if(TextUtils.isEmpty(mimeString)) return MSG_TYPE_TEXT;
         if (mimeString.contains("image")) return MSG_TYPE_IMAGE;
         if (mimeString.contains("video")) return MSG_TYPE_VIDEO;
         return MSG_TYPE_TEXT;
     }
+    public static String getRealPathFromUri(Context context, Uri contentUri) {
+        Cursor cursor = null;
+        try {
+            String[] proj = { MediaStore.Images.Media.DATA };
+            cursor = context.getContentResolver().query(contentUri,  proj, null, null, null);
+            int column_index = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA);
+            cursor.moveToFirst();
+            return cursor.getString(column_index);
+        } finally {
+            if (cursor != null) {
+                cursor.close();
+            }
+        }
+    }
 
+    public static String replaceExtension(String srcUrl, String newExtension)
+    {
+        int extdotIndex = srcUrl.lastIndexOf(".");
+        return srcUrl.substring(0,extdotIndex)+newExtension;
+    }
     public static User readUser(Context ctx) {
         if (FirebaseAuth.getInstance().getCurrentUser() == null) {
             return null;

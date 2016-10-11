@@ -27,8 +27,8 @@
                     android:id="@+id/btn_share_facebook"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:background="@color/com_facebook_blue"
                     android:layout_centerInParent="true"
+                    android:background="@color/com_facebook_blue"
                     android:src="@drawable/com_facebook_button_icon" />
             </RelativeLayout>
 
@@ -41,8 +41,8 @@
                     android:id="@+id/btn_share_twitter"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:background="#4099FF"
                     android:layout_centerInParent="true"
+                    android:background="#4099FF"
                     android:src="@drawable/tw__ic_logo_default" />
             </RelativeLayout>
         </LinearLayout>
@@ -86,8 +86,15 @@
                     android:src="@android:drawable/ic_media_play"
                     android:visibility="gone" />
 
-            </RelativeLayout>
+                <ProgressBar
+                    android:id="@+id/progress"
+                    style="@android:style/Widget.Holo.ProgressBar.Small"
+                    android:layout_width="200dp"
+                    android:layout_height="wrap_content"
+                    android:layout_centerInParent="true"
+                    android:visibility="gone" />
 
+            </RelativeLayout>
 
             <LinearLayout
                 android:id="@+id/author_area"
