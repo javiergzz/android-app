@@ -22,12 +22,6 @@ import android.provider.MediaStore;
 import android.util.Log;
 import android.webkit.MimeTypeMap;
 
-import com.amazonaws.auth.BasicAWSCredentials;
-import com.amazonaws.auth.CognitoCachingCredentialsProvider;
-import com.amazonaws.services.s3.AmazonS3Client;
-import com.amazonaws.services.s3.model.DeleteObjectsRequest;
-import com.amazonaws.services.s3.model.DeleteObjectsRequest.KeyVersion;
-import com.amazonaws.services.s3.model.S3ObjectSummary;
 import com.github.hiteshsondhi88.libffmpeg.FFmpeg;
 import com.github.hiteshsondhi88.libffmpeg.LoadBinaryResponseHandler;
 import com.github.hiteshsondhi88.libffmpeg.exceptions.FFmpegNotSupportedException;
@@ -43,6 +37,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.UUID;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /*
  * This class just handles getting the client since we don't need to have more than
@@ -50,45 +46,12 @@ import java.util.UUID;
  */
 public class Util {
     private static final String TAG = Util.class.getCanonicalName();
-    private static AmazonS3Client sS3Client;
-    private static CognitoCachingCredentialsProvider sCredProvider;
-
     public static String getPrefix(Context context) {
         return System.currentTimeMillis() + "/";
     }
 
-    public static AmazonS3Client getS3ClientIdentifiedByKeys(Context context) {
-        if (sS3Client == null) {
-            sS3Client = new AmazonS3Client(new BasicAWSCredentials(GV.ACCESS_KEY_ID, GV.SECRET_KEY));
-        }
-        return sS3Client;
-    }
-
     public static String getFileName(String path) {
         return path.substring(path.lastIndexOf("/") + 1);
-    }
-
-    public static boolean doesBucketExist() {
-        return sS3Client.doesBucketExist(GV.PICTURE_BUCKET.toLowerCase(Locale.US));
-    }
-
-    public static void createBucket() {
-        sS3Client.createBucket(GV.PICTURE_BUCKET.toLowerCase(Locale.US));
-    }
-
-    public static void deleteBucket() {
-        String name = GV.PICTURE_BUCKET.toLowerCase(Locale.US);
-        List<S3ObjectSummary> objData = sS3Client.listObjects(name).getObjectSummaries();
-        if (objData.size() > 0) {
-            DeleteObjectsRequest emptyBucket = new DeleteObjectsRequest(name);
-            List<KeyVersion> keyList = new ArrayList<>();
-            for (S3ObjectSummary summary : objData) {
-                keyList.add(new KeyVersion(summary.getKey()));
-            }
-            emptyBucket.withKeys(keyList);
-            sS3Client.deleteObjects(emptyBucket);
-        }
-        sS3Client.deleteBucket(name);
     }
 
     public static Bitmap createThumbnail(String filePath) {
@@ -332,6 +295,7 @@ public class Util {
         return photoFile;
     }
 
+
     private static File takenCameraPicture(Context context) throws IOException, URISyntaxException {
         URI imageUri = new URI(PreferenceManager.getDefaultSharedPreferences(context).getString("pl.aprilapps.easyphotopicker.photo_uri", (String) null));
         notifyGallery(context, imageUri);
@@ -402,6 +366,5 @@ public class Util {
         }
         return bitmap;
     }
-
 
 }

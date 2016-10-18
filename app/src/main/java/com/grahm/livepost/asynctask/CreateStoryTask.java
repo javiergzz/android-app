@@ -13,13 +13,7 @@ import android.util.DisplayMetrics;
 import android.util.Log;
 import android.util.TypedValue;
 
-import com.amazonaws.services.s3.AmazonS3Client;
-import com.amazonaws.services.s3.model.CannedAccessControlList;
-import com.amazonaws.services.s3.model.GeneratePresignedUrlRequest;
-import com.amazonaws.services.s3.model.ObjectMetadata;
-import com.amazonaws.services.s3.model.PutObjectRequest;
-import com.amazonaws.services.s3.model.ResponseHeaderOverrides;
-import com.google.firebase.auth.FirebaseAuth;
+import com.grahm.livepost.util.AzureUtils;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.ServerValue;
 import com.google.gson.Gson;
@@ -35,8 +29,6 @@ import com.grahm.livepost.util.Util;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import java.net.URL;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -45,7 +37,6 @@ public class CreateStoryTask extends AsyncTask<Uri, String, String> {
     public static final int ASPECT_HEIGHT = -1;
     private ProgressDialog dialog;
     private Context mContext;
-    private AmazonS3Client mS3Client;
     private OnPutImageListener mListener;
     private String mPictureName;
     private Boolean mShowDialog;
@@ -55,10 +46,9 @@ public class CreateStoryTask extends AsyncTask<Uri, String, String> {
     DatabaseReference mFirebaseRef;
     SharedPreferences mSharedPref;
 
-    public CreateStoryTask(Story story, DatabaseReference ref, Context context, AmazonS3Client client, OnPutImageListener listener, Boolean showDialog) {
+    public CreateStoryTask(Story story, DatabaseReference ref, Context context, OnPutImageListener listener, Boolean showDialog) {
         mUid = null;
         mContext = context;
-        mS3Client = client;
         mListener = listener;
         mShowDialog = showDialog;
         mStory = story;
@@ -186,27 +176,14 @@ public class CreateStoryTask extends AsyncTask<Uri, String, String> {
         String url = "";
         Bitmap scaledBitmap = getScaledBitmap(srcUri, mDstWidth, mDstHeight);
         ContentResolver resolver = mContext.getContentResolver();
-        ObjectMetadata metadata = new ObjectMetadata();
-        metadata.setContentType(resolver.getType(srcUri));
         /* Get byte stream */
         ByteArrayOutputStream bos = new ByteArrayOutputStream();
         scaledBitmap.compress(Bitmap.CompressFormat.JPEG, 80, bos);
         byte[] bitmapdata = bos.toByteArray();
         ByteArrayInputStream bs = new ByteArrayInputStream(bitmapdata);
-
-        metadata.setContentLength(bos.size());
         try {
-            PutObjectRequest por = new PutObjectRequest(GV.DEV_BUCKET, pictureName, bs, metadata).withCannedAcl(CannedAccessControlList.PublicRead);
-            mS3Client.putObject(por);
-            ResponseHeaderOverrides override = new ResponseHeaderOverrides();
-            override.setContentType("image/jpeg");
-            GeneratePresignedUrlRequest urlRequest = new GeneratePresignedUrlRequest(GV.DEV_BUCKET, pictureName);
-            urlRequest.setExpiration(new Date(System.currentTimeMillis() + 3600000));
-            urlRequest.setResponseHeaders(override);
-            URL urlUri = mS3Client.generatePresignedUrl(urlRequest);
-            Uri.parse(urlUri.toURI().toString());
-            url = urlUri.toString();
-        } catch (Exception exception) {
+            url = AzureUtils.uploadBlob(pictureName, bs, GV.PICTURE_BUCKET);
+        }catch (Exception exception) {
             Log.e("AsyncTask", "Error: " + exception);
         }
         return url;

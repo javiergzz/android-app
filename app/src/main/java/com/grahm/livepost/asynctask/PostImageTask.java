@@ -6,7 +6,6 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
-import android.media.Image;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.text.TextUtils;
@@ -14,18 +13,12 @@ import android.util.DisplayMetrics;
 import android.util.Log;
 import android.util.TypedValue;
 
-import com.bumptech.glide.Glide;
 import com.google.gson.Gson;
-import com.amazonaws.services.s3.AmazonS3Client;
-import com.amazonaws.services.s3.model.CannedAccessControlList;
-import com.amazonaws.services.s3.model.GeneratePresignedUrlRequest;
-import com.amazonaws.services.s3.model.ObjectMetadata;
-import com.amazonaws.services.s3.model.PutObjectRequest;
-import com.amazonaws.services.s3.model.ResponseHeaderOverrides;
 import com.grahm.livepost.interfaces.OnPutImageListener;
 import com.grahm.livepost.R;
 import com.grahm.livepost.objects.ImageSize;
 import com.grahm.livepost.objects.User;
+import com.grahm.livepost.util.AzureUtils;
 import com.grahm.livepost.util.GV;
 import com.grahm.livepost.util.Util;
 
@@ -33,15 +26,12 @@ import com.grahm.livepost.util.Util;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
-import java.net.URL;
-import java.util.Date;
 
 public class PostImageTask extends AsyncTask<Uri, String, String> {
     public static final String TAG = "CreateSessionTask";
     public static final int ASPECT_HEIGHT = -1;
     private ProgressDialog dialog;
     private Context mContext;
-    private AmazonS3Client mS3Client;
     private OnPutImageListener mListener;
     private String mPictureName;
     private Boolean mShowDialog;
@@ -50,10 +40,9 @@ public class PostImageTask extends AsyncTask<Uri, String, String> {
     private String mExtension;
     SharedPreferences mSharedPref;
 
-    public PostImageTask(Context context, AmazonS3Client client, OnPutImageListener listener, Boolean showDialog) {
+    public PostImageTask(Context context, OnPutImageListener listener, Boolean showDialog) {
         mUid = null;
         mContext = context;
-        mS3Client = client;
         mListener = listener;
         mShowDialog = showDialog;
         mSharedPref = context.getSharedPreferences(context.getString(R.string.preference_file_key), Context.MODE_PRIVATE);
@@ -141,8 +130,6 @@ public class PostImageTask extends AsyncTask<Uri, String, String> {
         ByteArrayOutputStream bos;
         InputStream is = null;
         ContentResolver resolver = mContext.getContentResolver();
-        ObjectMetadata metadata = new ObjectMetadata();
-        metadata.setContentType(resolver.getType(srcUri));
 
         if (!mExtension.contains("gif")) {
 
@@ -153,28 +140,17 @@ public class PostImageTask extends AsyncTask<Uri, String, String> {
             scaledBitmap.compress(Bitmap.CompressFormat.JPEG, 80, bos);
             byte[] bitmapdata = bos.toByteArray();
             bs = new ByteArrayInputStream(bitmapdata);
-            metadata.setContentLength(bos.size());
             is = bs;
         } else {
             try {
                 is = resolver.openInputStream(srcUri);
-                metadata.setContentLength(is.available());
             } catch (Exception e) {
                 Log.e(TAG, e.getMessage());
             }
         }
         try {
             if (is != null) {
-                PutObjectRequest por = new PutObjectRequest(GV.PICTURE_BUCKET, pictureName, is, metadata).withCannedAcl(CannedAccessControlList.PublicRead);
-                mS3Client.putObject(por);
-                ResponseHeaderOverrides override = new ResponseHeaderOverrides();
-                override.setContentType(Util.getMimeTypeFromUri(mContext, srcUri));
-                GeneratePresignedUrlRequest urlRequest = new GeneratePresignedUrlRequest(GV.PICTURE_BUCKET, pictureName);
-                urlRequest.setExpiration(new Date(System.currentTimeMillis() + 3600000));
-                urlRequest.setResponseHeaders(override);
-                URL urlUri = mS3Client.generatePresignedUrl(urlRequest);
-                Uri.parse(urlUri.toURI().toString());
-                url = urlUri.toString();
+                    url = AzureUtils.uploadBlob(pictureName, is, GV.PICTURE_BUCKET);
             }
         } catch (Exception exception) {
             Log.e("AsyncTask", "Error: " + exception);

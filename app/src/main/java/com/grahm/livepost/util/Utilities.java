@@ -229,6 +229,7 @@ public class Utilities {
     }
 
     public static String cleanUrl(String url) {
+        if(TextUtils.isEmpty(url)) return url;
         String[] parts = url.split("\\?");
         return parts[0];
     }

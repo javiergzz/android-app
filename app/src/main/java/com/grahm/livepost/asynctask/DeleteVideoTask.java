@@ -4,23 +4,24 @@ import android.app.ProgressDialog;
 import android.content.Context;
 import android.os.AsyncTask;
 
-import com.amazonaws.services.s3.AmazonS3Client;
-import com.amazonaws.services.s3.model.DeleteObjectRequest;
+
 import com.grahm.livepost.R;
 import com.grahm.livepost.util.GV;
 import com.grahm.livepost.util.Utilities;
+
+import static com.grahm.livepost.util.AzureUtils.deleteBlob;
 
 public class DeleteVideoTask extends AsyncTask<Void, Void, Void> {
     public static final String TAG = "DeleteVideoTask";
     private ProgressDialog dialog;
     private Context mContext;
-    private AmazonS3Client mS3Client;
     private String mUrl;
+    private String mThumb;
 
-    public DeleteVideoTask(Context context, AmazonS3Client client, String url) {
+    public DeleteVideoTask(Context context, String url, String thumb) {
         mContext = context;
-        mS3Client = client;
         mUrl = url;
+        mThumb = thumb;
     }
 
 
@@ -34,12 +35,9 @@ public class DeleteVideoTask extends AsyncTask<Void, Void, Void> {
     @Override
     protected Void doInBackground(Void... params) {
         String deleteUrl = Utilities.cleanVideoUrl(mUrl);
-        //delete video
-        DeleteObjectRequest doq = new DeleteObjectRequest(GV.VIDEO_BUCKET, deleteUrl);
-        mS3Client.deleteObject(doq);
-        //delete thumbnail
-        doq = new DeleteObjectRequest(GV.PICTURE_BUCKET, deleteUrl.replace(".mp4", ".png"));
-        mS3Client.deleteObject(doq);
+        deleteBlob(deleteUrl,GV.VIDEO_BUCKET);
+        if(mThumb!=null)
+            deleteBlob(mThumb,GV.PICTURE_BUCKET);
         return null;
     }
 

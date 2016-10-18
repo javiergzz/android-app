@@ -33,27 +33,19 @@ import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
-import com.amazonaws.auth.BasicAWSCredentials;
-import com.amazonaws.services.s3.AmazonS3Client;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.load.resource.drawable.GlideDrawable;
 import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.target.BitmapImageViewTarget;
 import com.bumptech.glide.request.target.Target;
-import com.daimajia.swipe.SimpleSwipeListener;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
 import com.grahm.livepost.R;
-import com.grahm.livepost.asynctask.S3PutObjectTask;
-import com.grahm.livepost.fragments.FragmentChatClass;
 import com.grahm.livepost.interfaces.OnFragmentInteractionListener;
-import com.grahm.livepost.specialViews.RoundedImageView;
-import com.grahm.livepost.specialViews.SwipeLayout;
 import com.grahm.livepost.activities.MainActivity;
 import com.grahm.livepost.objects.Story;
-import com.grahm.livepost.util.GV;
 import com.grahm.livepost.util.Utilities;
 
 
@@ -172,18 +164,6 @@ public class StoryListAdapter extends FirebaseListAdapter<Story> {
         dialog.show();
     }
 
-    void reupload(final String resUrl, final ImageView imageView, final ProgressBar progressBar) {
-        /** Image Compression and re-upload ran once **/
-        AmazonS3Client s3Client = new AmazonS3Client(new BasicAWSCredentials(GV.ACCESS_KEY_ID, GV.SECRET_KEY));
-        List<String> tempList = Arrays.asList(resUrl.split("/"));
-        String pictureName = tempList.get(tempList.size() - 1);
-        if (pictureName.contains(".")) {
-            List<String> tempList2 = Arrays.asList(pictureName.split("\\."));
-            pictureName = tempList2.get(0);
-        }
-        Uri uri = Uri.parse(resUrl);
-        new S3PutObjectTask(mCtx, s3Client, null, pictureName, false).execute(uri);
-    }
 
     public void loadBitmap(final String resUrl, final ImageView imageView, final ProgressBar progressBar, final boolean retry) {
 

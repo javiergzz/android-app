@@ -20,9 +20,8 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.widget.Button;
 
-import com.amazonaws.auth.BasicAWSCredentials;
-import com.amazonaws.services.s3.AmazonS3Client;
 import com.bumptech.glide.Glide;
 import com.facebook.FacebookSdk;
 import com.google.firebase.database.DatabaseReference;
@@ -76,7 +75,7 @@ public class ChatActivity extends FirebaseActivity implements AbsListView.OnItem
     @BindView(R.id.btnSend)
     public FloatingActionButton mBtnSend;
     @BindView(R.id.btnBottom)
-    public FloatingActionButton mBtnBottom;
+    public Button mBtnBottom;
     @BindView(R.id.sl_layout_state)
     public StateLayout mStateLayout;
 
@@ -87,7 +86,6 @@ public class ChatActivity extends FirebaseActivity implements AbsListView.OnItem
     private String mId;
     private Story mStory;
     private LinearLayoutManager mLinearLayoutManager;
-    private AmazonS3Client s3Client = new AmazonS3Client(new BasicAWSCredentials(GV.ACCESS_KEY_ID, GV.SECRET_KEY));
 
     private ChatAdapter mMessagesListAdapter;
     private User mUser;
@@ -186,9 +184,9 @@ public class ChatActivity extends FirebaseActivity implements AbsListView.OnItem
                 public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
                     super.onScrolled(recyclerView, dx, dy);
                     if(mLinearLayoutManager.findLastCompletelyVisibleItemPosition()+3 < mMessagesListAdapter.getItemCount()){
-                        if(!mBtnBottom.isShown())mBtnBottom.show();
+                        if(!mBtnBottom.isShown())mBtnBottom.setVisibility(View.VISIBLE);
                     }else if(mBtnBottom.isShown()){
-                        mBtnBottom.hide();
+                        mBtnBottom.setVisibility(View.GONE);
                     }
                 }
             });
@@ -227,14 +225,14 @@ public class ChatActivity extends FirebaseActivity implements AbsListView.OnItem
     private void onVideoReturned(File file) {
         Uri uri = Uri.fromFile(file);
 
-        mPostVideoTask = new PostVideoTask(this, s3Client, putImageListener, true);
+        mPostVideoTask = new PostVideoTask(this, putImageListener, true);
         if (uri != null) mPostVideoTask.execute(uri);
     }
 
     private void onPhotoReturned(File imageFile) {
         Uri uri = Uri.fromFile(imageFile);
 
-        mPostImageTask = new PostImageTask(this, s3Client, putImageListener, true);
+        mPostImageTask = new PostImageTask(this,  putImageListener, true);
         if (uri != null) mPostImageTask.execute(uri);
     }
 

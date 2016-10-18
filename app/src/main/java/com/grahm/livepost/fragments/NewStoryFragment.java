@@ -1,6 +1,7 @@
 package com.grahm.livepost.fragments;
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -31,8 +32,6 @@ import android.widget.ProgressBar;
 import android.widget.Spinner;
 import android.widget.TextView;
 
-import com.amazonaws.auth.BasicAWSCredentials;
-import com.amazonaws.services.s3.AmazonS3Client;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.grahm.livepost.R;
@@ -68,7 +67,6 @@ public class NewStoryFragment extends Fragment implements OnPutImageListener {
     public static final String URI_KEY = "uri";
     private DatabaseReference mFirebaseRef;
     private static final String TAG = "NewStoryFragment";
-    private AmazonS3Client s3Client = new AmazonS3Client(new BasicAWSCredentials(GV.ACCESS_KEY_ID, GV.SECRET_KEY));
     private CreateStoryTask mStoryTask = null;
     private Story mStory;
     private Uri mUri;
@@ -230,7 +228,7 @@ public class NewStoryFragment extends Fragment implements OnPutImageListener {
 
         mStory.setAuthor(mUser.getUserKey());
         mStory.setAuthor_name(mUser.getName());
-        mStoryTask = new CreateStoryTask(mStory, mFirebaseRef.child("posts"), getActivity(), s3Client, this, true);
+        mStoryTask = new CreateStoryTask(mStory, mFirebaseRef.child("posts"), getActivity(), this, true);
         if (mUri != null) mStoryTask.execute(mUri);
 
     }

@@ -14,8 +14,6 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.Toast;
 
-import com.amazonaws.auth.BasicAWSCredentials;
-import com.amazonaws.services.s3.AmazonS3Client;
 import com.bumptech.glide.Glide;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
@@ -27,7 +25,9 @@ import com.grahm.livepost.asynctask.DeleteVideoTask;
 import com.grahm.livepost.asynctask.PostImageTask;
 import com.grahm.livepost.interfaces.OnPutImageListener;
 import com.grahm.livepost.objects.Update;
+import com.grahm.livepost.objects.VideoMessageObject;
 import com.grahm.livepost.util.GV;
+import com.grahm.livepost.util.Util;
 import com.grahm.livepost.util.Utilities;
 
 import java.io.File;
@@ -43,7 +43,6 @@ public class EditPostDialogFragment extends DialogFragment {
     public static final String IMAGE_URI_KEY = "img_uri";
     private Update mMsg;
     private DatabaseReference mFirebaseRef;
-    private AmazonS3Client mS3client;
     private PostImageTask mPostTask;
     private String mKey;
     private String mStoryKey;
@@ -80,7 +79,6 @@ public class EditPostDialogFragment extends DialogFragment {
         mMsg = (Update) args.getSerializable(ChatAdapter.MSG_KEY);
         mChatType = args.getInt(TYPE_KEY, Utilities.deduceMessageType(mMsg.getMessage()));
         mFirebaseRef = FirebaseDatabase.getInstance().getReference("updates/" + mStoryKey + "/" + mKey);
-        mS3client = new AmazonS3Client(new BasicAWSCredentials(GV.ACCESS_KEY_ID, GV.SECRET_KEY));
         mLoadedUri = new Gson().fromJson(args.getString(IMAGE_URI_KEY), Uri.class);
     }
 
@@ -91,7 +89,7 @@ public class EditPostDialogFragment extends DialogFragment {
         LayoutInflater inflater = getActivity().getLayoutInflater();
         View v = inflater.inflate(R.layout.fragment_edit_dialog, null);
         ButterKnife.bind(this, v);
-
+        chooseViewElements();
         // Inflate and set the layout for the dialog
         // Pass null as the parent view because its going in the dialog layout
         builder.setView(v)
@@ -150,7 +148,7 @@ public class EditPostDialogFragment extends DialogFragment {
     private void editAction() {
         switch (mChatType) {
             case Utilities.MSG_TYPE_IMAGE:
-                mPostTask = new PostImageTask(getActivity(), mS3client, putImageListener, true);
+                mPostTask = new PostImageTask(getActivity(), putImageListener, true);
                 if (mLoadedUri != null) mPostTask.execute(mLoadedUri);
                 break;
             case Utilities.MSG_TYPE_VIDEO://TODO
@@ -170,13 +168,14 @@ public class EditPostDialogFragment extends DialogFragment {
         switch (mChatType) {
             case Utilities.MSG_TYPE_IMAGE:
                 String deleteUrl = Utilities.cleanUrl(mMsg.getMessage());
-                new DeleteImageTask(getActivity(), mS3client, deleteUrl);
+                new DeleteImageTask(getActivity(), deleteUrl);
                 break;
             case Utilities.MSG_TYPE_VIDEO://TODO
                 break;
             default:
-                String deleteVideoUrl = Utilities.cleanVideoUrl(mMsg.getMessage());
-                new DeleteVideoTask(getActivity(), mS3client, deleteVideoUrl);
+                VideoMessageObject v = new VideoMessageObject(mMsg.getMessage());
+
+                new DeleteVideoTask(getActivity(), v.videoUrl,v.thumbnailUrl);
                 break;
         }
         mFirebaseRef.removeValue();

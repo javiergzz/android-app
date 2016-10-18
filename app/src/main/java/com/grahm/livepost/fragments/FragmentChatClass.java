@@ -23,8 +23,6 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.amazonaws.auth.BasicAWSCredentials;
-import com.amazonaws.services.s3.AmazonS3Client;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -75,7 +73,6 @@ public class FragmentChatClass extends Fragment implements AbsListView.OnItemCli
     private OnFragmentInteractionListener mListener;
     private ValueEventListener mConnectedListener;
     private Uri mIimageUri;
-    private AmazonS3Client s3Client = new AmazonS3Client(new BasicAWSCredentials(GV.ACCESS_KEY_ID, GV.SECRET_KEY));
     private OnPutImageListener putImageListener;
     private ChatAdapter mMessagesListAdapter;
     private User mUser;
@@ -250,7 +247,7 @@ public class FragmentChatClass extends Fragment implements AbsListView.OnItemCli
     private void onPhotoReturned(File imageFile){
         Uri uri = Uri.fromFile(imageFile);
 
-        mPostTask = new PostImageTask(getActivity(),s3Client,putImageListener,true);
+        mPostTask = new PostImageTask(getActivity(),putImageListener,true);
         if(uri!= null) mPostTask.execute(uri);
     }
 

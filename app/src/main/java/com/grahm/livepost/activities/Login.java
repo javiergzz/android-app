@@ -14,8 +14,6 @@ import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
 
-import com.amazonaws.auth.BasicAWSCredentials;
-import com.amazonaws.services.s3.AmazonS3Client;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.AuthResult;
@@ -26,8 +24,8 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.gson.Gson;
 import com.grahm.livepost.R;
 import com.grahm.livepost.adapters.ProfilePagerAdapter;
+import com.grahm.livepost.asynctask.PostImageTask;
 import com.grahm.livepost.asynctask.RegisterUserTask;
-import com.grahm.livepost.asynctask.S3PutObjectTask;
 import com.grahm.livepost.fragments.ProfilePictureFragment;
 import com.grahm.livepost.interfaces.OnFragmentInteractionListener;
 import com.grahm.livepost.interfaces.OnPutImageListener;
@@ -60,7 +58,6 @@ public class Login extends AppCompatActivity implements OnFragmentInteractionLis
     private static final int TAKE_PICTURE = 1;
     private static final int PHOTO_SELECTED = 0;
     private static final int TWITTER_LOGIN = 140;
-    private AmazonS3Client s3Client = new AmazonS3Client(new BasicAWSCredentials(Config.ACCESS_KEY_ID, Config.SECRET_KEY));
     private OnPutImageListener OnPutImageListener = new OnPutImageListener() {
         @Override
         public void onSuccess(String url) {
@@ -218,7 +215,7 @@ public class Login extends AppCompatActivity implements OnFragmentInteractionLis
         mUid = uid;
         Long tsLong = System.currentTimeMillis() / 1000;
         String pictureName = uid + "_" + tsLong.toString();
-        new S3PutObjectTask(Login.this, s3Client, OnPutImageListener, pictureName, false).execute(mIimageUri);
+        new PostImageTask(Login.this, OnPutImageListener, false).execute(mIimageUri);
     }
 
     private void signUpUser() {

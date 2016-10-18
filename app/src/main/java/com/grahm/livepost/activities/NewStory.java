@@ -22,25 +22,19 @@ import android.widget.ExpandableListView;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.amazonaws.auth.BasicAWSCredentials;
-import com.amazonaws.services.s3.AmazonS3Client;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.grahm.livepost.adapters.ExpandableListAdapter;
-import com.grahm.livepost.asynctask.S3PutObjectTask;
+import com.grahm.livepost.asynctask.PostImageTask;
 import com.grahm.livepost.interfaces.OnPutImageListener;
 import com.grahm.livepost.R;
 import com.grahm.livepost.objects.User;
 import com.grahm.livepost.util.Utilities;
 import com.grahm.livepost.objects.Story;
-import com.grahm.livepost.util.GV;
 
 
 import java.io.IOException;
-import java.security.Timestamp;
-import java.text.SimpleDateFormat;
 import java.util.Arrays;
-import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
 
@@ -59,7 +53,6 @@ public class NewStory extends ActionBarActivity implements OnPutImageListener{
     private HashMap<String, List<String>> listDataChild;
     private ExpandableListAdapter listAdapter;
     private OnPutImageListener putImageListener;
-    private AmazonS3Client s3Client = new AmazonS3Client(new BasicAWSCredentials(GV.ACCESS_KEY_ID, GV.SECRET_KEY));
     private User mUser;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -151,8 +144,7 @@ public class NewStory extends ActionBarActivity implements OnPutImageListener{
                     saveSession(url);
                 }
             };
-            new S3PutObjectTask(NewStory.this, s3Client, putImageListener, pictureName, true).execute(mIimageUri);
-
+            new PostImageTask(NewStory.this, putImageListener, true).execute(mIimageUri);
         }
     }
 

@@ -18,8 +18,6 @@ import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
-import com.amazonaws.auth.BasicAWSCredentials;
-import com.amazonaws.services.s3.AmazonS3Client;
 import com.bumptech.glide.BitmapRequestBuilder;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
@@ -62,7 +60,8 @@ import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.sql.Timestamp;
 import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+
+import static com.grahm.livepost.objects.VideoMessageObject.videoMessagePattern;
 
 
 public class ChatAdapter extends FirebaseListAdapter<Update> {
@@ -115,7 +114,6 @@ public class ChatAdapter extends FirebaseListAdapter<Update> {
         return new ChatViewHolder(LayoutInflater.from(parent.getContext()).inflate(R.layout.chat_message_one, parent, false));
     }
 
-    private static final Pattern videoMessagePattern = Pattern.compile("^\\<video\\>(.+)\\<\\/video\\>\\<thumb\\>(.+)\\<\\/thumb\\>");
 
     @Override
     public void onBindViewHolder(final RecyclerView.ViewHolder holder, int position) {
@@ -127,7 +125,7 @@ public class ChatAdapter extends FirebaseListAdapter<Update> {
         }
         final String key = getItemKey(position);
         h.mItem = m;
-        h.mView.setTag(new ChatTag(key, m));
+        h.mContentView.setTag(new ChatTag(key, m));
         h.mAuthorView.setText(m.getSender() + " ");
         final String msg = m.getMessage();
         String mimeString = Util.getMimeTypeFromUrl(Utilities.cleanUrl(m.getMessage()));
@@ -242,7 +240,7 @@ public class ChatAdapter extends FirebaseListAdapter<Update> {
                 .fitCenter()
                 ;
         thumbRequest.into(h.mImgChatView);
-        h.mView.setOnClickListener(new View.OnClickListener() { // or any parent of imgFeed
+        h.mContentView.setOnClickListener(new View.OnClickListener() { // or any parent of imgFeed
             @Override public void onClick(View v) {
                 h.mProgressBar.setVisibility(View.VISIBLE);
                 Glide
@@ -346,9 +344,9 @@ public class ChatAdapter extends FirebaseListAdapter<Update> {
         //4.Update firebase entry as XML
         Log.d(TAG, "video:" + Utilities.cleanVideoUrl(h.mItem.getMessage()));
         try {
-            Bitmap bmp = Utilities.retriveVideoFrameFromVideo(Utilities.cleanVideoUrl(msg));
+            Bitmap bmp = Utilities.retriveVideoFrameFromVideo(msg);
             h.mImgChatView.setImageBitmap(bmp);
-            new UploadVideoThumbTask(FirebaseDatabase.getInstance().getReference("updates/"+mChatKey+"/"+key),h.mItem,mActivity, new AmazonS3Client(new BasicAWSCredentials(GV.ACCESS_KEY_ID, GV.SECRET_KEY)) )
+            new UploadVideoThumbTask(FirebaseDatabase.getInstance().getReference("updates/"+mChatKey+"/"+key),h.mItem,mActivity)
                     .execute(bmp);
         }catch (Throwable e){
             Log.e(TAG, "Error:"+e);
@@ -357,7 +355,7 @@ public class ChatAdapter extends FirebaseListAdapter<Update> {
         setVideoClickCallback(h,msg,null);
     }
     private void setVideoClickCallback(final ChatViewHolder h, final String msg, final Matcher matcher){
-        h.mView.setOnClickListener(new View.OnClickListener() {
+        h.mContentView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Log.d(TAG, "Click event");
@@ -397,6 +395,7 @@ public class ChatAdapter extends FirebaseListAdapter<Update> {
 
     public class ChatViewHolder extends RecyclerView.ViewHolder {
         public final View mView;
+        public final View mContentView;
         public final TextView mMessageView;
         public final TextView mAuthorView;
         public final TextView mDateView;
@@ -414,7 +413,23 @@ public class ChatAdapter extends FirebaseListAdapter<Update> {
         public ChatViewHolder(View view) {
             super(view);
             mView = view;
-            view.setOnLongClickListener(new View.OnLongClickListener() {
+            mContentView = view.findViewById(R.id.content);
+            mPlayIcon = (ImageView) view.findViewById(R.id.icon_play);
+            mMessageView = (TextView) view.findViewById(R.id.message);
+            mAuthorView = (TextView) view.findViewById(R.id.author);
+            mDateView = (TextView) view.findViewById(R.id.date);
+            mImgChatView = (ImageView) view.findViewById(R.id.imgChat);
+            mRelativeMsg = (RelativeLayout) view.findViewById(R.id.msgArea);
+            mSwipeLayout = (SwipeLayout) view.findViewById(R.id.swipeSurface);
+            mViewShareFacebook = mSwipeLayout.findViewById(R.id.view_share_facebook);
+            mBtnShareFacebook = (ImageButton) mSwipeLayout.findViewById(R.id.btn_share_facebook);
+            mBtnShareTwitter = (ImageButton) mSwipeLayout.findViewById(R.id.btn_share_twitter);
+            mProgressBar = (ProgressBar) view.findViewById(R.id.progress);
+            bindClickListeners();
+        }
+
+        private void bindClickListeners(){
+            mContentView.setOnLongClickListener(new View.OnLongClickListener() {
                 @Override
                 public boolean onLongClick(View v) {
                     Log.d(TAG, "Longclick");
@@ -427,44 +442,10 @@ public class ChatAdapter extends FirebaseListAdapter<Update> {
                     return true;
                 }
             });
-            view.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    Log.d(TAG, "Click");
-
-                    ChatTag u = (ChatTag) v.getTag();
-                    String sender = u.update.getSender_key();
-                    String message = u.update.getMessage();
-                    if (TextUtils.isEmpty(message)) return;
-                    String mimeString = Util.getMimeTypeFromUrl(message);
-                    if (!TextUtils.isEmpty(mimeString) || mimeString.contains("video")) {
-                        if (mUsername != null && mUsername.equals(sender)) {
-                            //Edition dialog
-                            Log.d(TAG, "Play Video");
-                            Intent playIntent = new Intent(mActivity, PlayerActivity.class);
-                            mActivity.startActivity(playIntent);
-                        }
-                    } else if (mimeString.contains("gif")) {
-
-
-                    }
-
-                    Log.d(TAG, "uname:" + mUsername + " sender:" + sender);
-                }
-            });
-            mPlayIcon = (ImageView) view.findViewById(R.id.icon_play);
-            mMessageView = (TextView) view.findViewById(R.id.message);
-            mAuthorView = (TextView) view.findViewById(R.id.author);
-            mDateView = (TextView) view.findViewById(R.id.date);
-            mImgChatView = (ImageView) view.findViewById(R.id.imgChat);
-            mRelativeMsg = (RelativeLayout) view.findViewById(R.id.msgArea);
-            mSwipeLayout = (SwipeLayout) view.findViewById(R.id.swipeSurface);
-            mViewShareFacebook = mSwipeLayout.findViewById(R.id.view_share_facebook);
-            mBtnShareFacebook = (ImageButton) mSwipeLayout.findViewById(R.id.btn_share_facebook);
-            mBtnShareTwitter = (ImageButton) mSwipeLayout.findViewById(R.id.btn_share_twitter);
-            mProgressBar = (ProgressBar) view.findViewById(R.id.progress);
         }
     }
+
+
 
     public class ChatTag implements Serializable {
         public Update update;
