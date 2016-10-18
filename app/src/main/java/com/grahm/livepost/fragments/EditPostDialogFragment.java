@@ -89,6 +89,7 @@ public class EditPostDialogFragment extends DialogFragment {
         LayoutInflater inflater = getActivity().getLayoutInflater();
         View v = inflater.inflate(R.layout.fragment_edit_dialog, null);
         ButterKnife.bind(this, v);
+        restoreState(savedInstanceState);
         chooseViewElements();
         // Inflate and set the layout for the dialog
         // Pass null as the parent view because its going in the dialog layout
@@ -125,10 +126,22 @@ public class EditPostDialogFragment extends DialogFragment {
                     }
                 });
                 break;
-            case Utilities.MSG_TYPE_VIDEO://TODO
+            case Utilities.MSG_TYPE_VIDEO:
                 mTextEdit.setVisibility(View.GONE);
                 mImageEdit.setVisibility(View.VISIBLE);
                 Glide.with(this).load(Utilities.cleanVideoUrl(message).replace(".mp4", ".png")).into(mImageEdit);
+                mImageEdit.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {//Do nothing
+                    }
+                });
+                mImageEdit.setVisibility(View.GONE);
+                break;
+            case Utilities.MSG_TYPE_VIDEO_W_THUMBNAIL:
+                VideoMessageObject v = new VideoMessageObject(message);
+                mTextEdit.setVisibility(View.GONE);
+                mImageEdit.setVisibility(View.VISIBLE);
+                Glide.with(this).load(v.thumbnailUrl).into(mImageEdit);
                 mImageEdit.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {//Do nothing

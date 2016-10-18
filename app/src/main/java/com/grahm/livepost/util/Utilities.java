@@ -35,10 +35,13 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
+import static com.grahm.livepost.objects.VideoMessageObject.videoMessagePattern;
+
 public class Utilities {
     public static final int MSG_TYPE_TEXT = 0;
     public static final int MSG_TYPE_IMAGE = 1;
     public static final int MSG_TYPE_VIDEO = 2;
+    public static final int MSG_TYPE_VIDEO_W_THUMBNAIL = 3;
     public static String[] userLettersPalette = {"300009", "e50019", "c5c4b6", "645f69", "2a3a59"};
     public static User mUser;
 
@@ -173,6 +176,7 @@ public class Utilities {
         if(TextUtils.isEmpty(mimeString)) return MSG_TYPE_TEXT;
         if (mimeString.contains("image")) return MSG_TYPE_IMAGE;
         if (mimeString.contains("video")) return MSG_TYPE_VIDEO;
+        if(videoMessagePattern.matcher(messageString).matches()) return MSG_TYPE_VIDEO_W_THUMBNAIL;
         return MSG_TYPE_TEXT;
     }
     public static String getRealPathFromUri(Context context, Uri contentUri) {

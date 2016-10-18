@@ -129,26 +129,21 @@ public class ChatAdapter extends FirebaseListAdapter<Update> {
         h.mAuthorView.setText(m.getSender() + " ");
         final String msg = m.getMessage();
         String mimeString = Util.getMimeTypeFromUrl(Utilities.cleanUrl(m.getMessage()));
+
         if (!TextUtils.isEmpty(mimeString)) {
             h.mMessageView.setVisibility(View.GONE);
             h.mImgChatView.setVisibility(View.VISIBLE);
             if (mimeString.contains("image")) {
-                h.mPlayIcon.setVisibility(View.GONE);
-                Glide.with(mActivity).load(msg).diskCacheStrategy(DiskCacheStrategy.RESULT).placeholder(R.drawable.default_placeholder).fitCenter().into(h.mImgChatView);
-            } else if (mimeString.contains("video")) {
-                h.mPlayIcon.setVisibility(View.VISIBLE);
-                Log.e(TAG, "video:" + Utilities.cleanVideoUrl(h.mItem.getMessage()));
-                //Bitmap thumb = ThumbnailUtils.createVideoThumbnail(Utilities.cleanVideoUrl(h.mItem.getMessage()), MediaStore.Images.Thumbnails.MINI_KIND);
-                try {
-                    Glide.with(mActivity).load(msg.replace(".mp4", ".png")).into(h.mImgChatView);
-                } catch (Throwable e) {
-                    h.mImgChatView.setImageResource(R.drawable.default_placeholder);
-                    Log.e(TAG, e.getMessage());
-                }
                 if(mimeString.contains("gif"))
                     setupGifMessage(h,Utilities.cleanUrl(msg));
                 else
                     setupImageMessage(h, Utilities.cleanUrl(msg));
+            } else if (mimeString.contains("video")) {
+                Matcher matcher = videoMessagePattern.matcher(msg);
+                if(matcher.matches())
+                    setupVideoMessageXml(h,matcher);
+                else
+                    setupVideoMessage(h, Utilities.cleanUrl(msg),key);
             } else if (mimeString.contains("video")) {
                 Matcher matcher = videoMessagePattern.matcher(msg);
                 if(matcher.matches())
@@ -175,10 +170,6 @@ public class ChatAdapter extends FirebaseListAdapter<Update> {
                 }
             });
         } else {
-            h.mMessageView.setVisibility(View.VISIBLE);
-            h.mPlayIcon.setVisibility(View.GONE);
-            h.mImgChatView.setVisibility(View.GONE);
-            h.mMessageView.setText(msg);
             h.mViewShareFacebook.setVisibility(View.GONE);
             h.mBtnShareTwitter.setOnClickListener(new View.OnClickListener() {
                 @Override
