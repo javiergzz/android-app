@@ -129,7 +129,7 @@ public class EditPostDialogFragment extends DialogFragment {
             case Utilities.MSG_TYPE_VIDEO:
                 mTextEdit.setVisibility(View.GONE);
                 mImageEdit.setVisibility(View.VISIBLE);
-                Glide.with(this).load(Utilities.cleanVideoUrl(message).replace(".mp4", ".png")).into(mImageEdit);
+                Glide.with(this).load(R.drawable.default_placeholder).into(mImageEdit);
                 mImageEdit.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {//Do nothing
