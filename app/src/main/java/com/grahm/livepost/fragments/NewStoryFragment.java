@@ -65,6 +65,7 @@ public class NewStoryFragment extends Fragment implements OnPutImageListener {
     public static final String SESSION_KEY = "session";
     public static final String PAGE_KEY = "page";
     public static final String URI_KEY = "uri";
+    public static final String FILE_KEY = "file";
     private DatabaseReference mFirebaseRef;
     private static final String TAG = "NewStoryFragment";
     private CreateStoryTask mStoryTask = null;
@@ -114,6 +115,7 @@ public class NewStoryFragment extends Fragment implements OnPutImageListener {
             mCurrentItem = savedInstanceState.getInt(PAGE_KEY, 0);
             String uriString = savedInstanceState.getString(URI_KEY);
             mUri = uriString == null ? null : Uri.parse(uriString);
+            mFile = (File)savedInstanceState.getSerializable(FILE_KEY);
         }
         mUser = Utilities.getUser(mFirebaseRef, getActivity(), savedInstanceState);
         mStory = mStory == null ? new Story() : mStory;
@@ -192,6 +194,8 @@ public class NewStoryFragment extends Fragment implements OnPutImageListener {
         outState.putSerializable(SESSION_KEY, mStory);
         if (mUri != null)
             outState.putString(URI_KEY, mUri.toString());
+        if(mFile != null)
+            outState.putSerializable(FILE_KEY,mFile);
     }
 
     @Override

@@ -89,4 +89,16 @@ dependencies {
     compile 'com.microsoft.azure.android:azure-storage-android:0.7.0@aar'
     // https://mvnrepository.com/artifact/com.fasterxml.jackson.core/jackson-core
     compile group: 'com.fasterxml.jackson.core', name: 'jackson-core', version: '2.8.3'
+
+    //Papertrail
+    compile 'org.slf4j:slf4j-api:1.7.13'
+    compile 'com.github.tony19:logback-android-core:1.1.1-4'
+    compile 'com.github.tony19:logback-android-classic:1.1.1-4'
+    compile ('com.papertrailapp:logback-syslog4j:1.0.0'){
+        exclude group: 'ch.qos.logback'
+    }
+    //compile 'com.flurry.android:analytics:6.2.0'
+    compile 'com.jcmore2.appcrash:appcrash:1.1.0'
+    compile 'com.alipay.euler:andfix:0.5.0@aar'
+
 }
