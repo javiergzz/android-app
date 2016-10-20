@@ -8,6 +8,7 @@ import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.graphics.drawable.BitmapDrawable;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.design.widget.TextInputLayout;
 import android.support.v4.app.Fragment;
@@ -233,7 +234,13 @@ public class NewStoryFragment extends Fragment implements OnPutImageListener {
         mStory.setAuthor(mUser.getUserKey());
         mStory.setAuthor_name(mUser.getName());
         mStoryTask = new CreateStoryTask(mStory, mFirebaseRef.child("posts"), getActivity(), this, true);
-        if (mUri != null) mStoryTask.execute(mUri);
+        if (mUri != null) {
+            Log.e(TAG,"Executing: "+mUri);
+            //mStoryTask.execute(mUri);
+            mStoryTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, mUri);
+        }else{
+            Log.e(TAG,"Null Uri: "+mUri);
+        }
 
     }
 

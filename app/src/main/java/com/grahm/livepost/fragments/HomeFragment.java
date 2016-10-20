@@ -4,13 +4,11 @@ import android.content.Context;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.CardView;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
-import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
@@ -21,10 +19,9 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.grahm.livepost.R;
-import com.grahm.livepost.activities.MainActivity;
 import com.grahm.livepost.adapters.HomeListAdapter;
-import com.grahm.livepost.interfaces.OnFragmentInteractionListener;
-import com.objectlife.statelayout.StateLayout;
+
+import static com.grahm.livepost.util.Utilities.mUser;
 
 /**
  * Created by javiergonzalez on 6/21/16.
@@ -82,7 +79,7 @@ public class HomeFragment extends Fragment {
 
     private void setupAdapter(final RecyclerView recyclerView) {
         Log.d(TAG, mFirebaseRef.toString());
-        mHomeListAdapter = new HomeListAdapter(mFirebaseRef.orderByChild("last_time").limitToLast(50), (AppCompatActivity) getActivity(), 1, false);
+        mHomeListAdapter = new HomeListAdapter(mFirebaseRef.orderByChild("author").equalTo(mUser.getUserKey()).limitToLast(50),mFirebaseRef.orderByChild("last_time").getRef(),(AppCompatActivity) getActivity(), mUser.getPosts_contributed_to());
         recyclerView.setAdapter(mHomeListAdapter);
         mHomeListAdapter.registerAdapterDataObserver(new RecyclerView.AdapterDataObserver() {
             @Override

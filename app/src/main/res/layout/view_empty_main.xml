@@ -21,7 +21,7 @@
             android:layout_width="50dp"
             android:layout_height="50dp"
             android:layout_margin="10dp"
-            android:onClick="onFragmentInteraction(FragmentsEnum.NEW_STORY, null)"
+            android:onClick="MainActivity.this.onFragmentInteraction(FragmentsEnum.NEW_STORY, null)"
             android:src="@drawable/img_zero_posts" />
 
         <TextView

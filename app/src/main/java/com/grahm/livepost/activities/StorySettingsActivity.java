@@ -35,6 +35,8 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 
+import static com.flurry.sdk.fs.a.e;
+
 public class StorySettingsActivity extends FirebaseActivity {
     private static final String TAG = "StorySettingsActivity";
     @BindView(R.id.list_contributors)
@@ -178,6 +180,7 @@ public class StorySettingsActivity extends FirebaseActivity {
                             //Remove from each user's contributed posts field
                             mFirebaseRef.child("users/" + entry.getValue().getUserKey() + "/posts_contributed_to/").child(mId).removeValue();
                             System.out.println(entry.getKey() + "/" + entry.getValue());
+                            Log.d(TAG, entry.getKey() + "/" + entry.getValue());
                         } catch (Exception e) {
                             Log.e(TAG, e.getMessage());
                         }
