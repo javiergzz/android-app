@@ -1,13 +1,11 @@
 package com.grahm.livepost.adapters;
 
 import android.content.Context;
-import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.RecyclerView;
 import android.text.Html;
 import android.text.TextUtils;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -35,41 +33,41 @@ import com.grahm.livepost.util.Utilities;
 import com.objectlife.statelayout.StateLayout;
 
 import java.sql.Timestamp;
-import java.util.Map;
 
 /**
  * Created by javiergonzalez on 6/21/16.
  */
 
-public class HomeListAdapter extends FirebaseListJointAdapter<Story> {
+public class AllPostsListAdapter extends FirebaseListAdapter<Story> {
 
     private static final int TYPE_HEADER = 0;
     private static final int TYPE_ITEM = 1;
+    public static final int LIST = 1;
+    public static final int STAGGERED = 0;
     private static final String TAG = "HomeListAdapter";
+    private static final String HEADER_ID = "header";
+    private int mVItemLayout;
+    private int mListType;
     private Context mCtx;
     private AppCompatActivity mActivity;
     private OnFragmentInteractionListener mOnFragmentInteractionListener;
-    private Map<String, Object> mFilter;
 
 
-    public HomeListAdapter(Query query, DatabaseReference ref, AppCompatActivity activity, Map<String, Object> filter) {
-        super(query, ref, Story.class, filter);
+    public AllPostsListAdapter(Query ref, AppCompatActivity activity, int listType, boolean searchingFlag) {
+        super(ref, Story.class, searchingFlag);
+        mListType = listType;
+        mVItemLayout = listType == STAGGERED ? R.layout.item_story_staggered : R.layout.item_story;
         mCtx = activity.getApplicationContext();
         mActivity = activity;
         mOnFragmentInteractionListener = (OnFragmentInteractionListener) mActivity;
-        mFilter = filter;
-        setConnectivityObservers(query);
+        setConnectivityObservers(ref);
 
     }
     private void setConnectivityObservers(Query ref){
         ref.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
-                if(getItemCount()<=0){
-                    switchMainActivityView(StateLayout.VIEW_EMPTY);
-                }else {
-                    switchMainActivityView(StateLayout.VIEW_CONTENT);
-                }
+                switchMainActivityView(StateLayout.VIEW_CONTENT);
             }
 
             @Override
@@ -83,11 +81,8 @@ public class HomeListAdapter extends FirebaseListJointAdapter<Story> {
             public void onDataChange(DataSnapshot snapshot) {
                 boolean connected = snapshot.getValue(Boolean.class);
                 if (connected) {
-                    if(getItemCount()<=0){
-                        switchMainActivityView(StateLayout.VIEW_EMPTY);
-                    }else {
-                        switchMainActivityView(StateLayout.VIEW_CONTENT);
-                    }
+                    System.out.println("connected");
+                    switchMainActivityView(StateLayout.VIEW_CONTENT);
                 } else {
                     System.out.println("not connected");
                     if(getItemCount()<=0){
@@ -106,7 +101,7 @@ public class HomeListAdapter extends FirebaseListJointAdapter<Story> {
 
     @Override
     public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        return new ViewHolderI(LayoutInflater.from(parent.getContext()).inflate(R.layout.item_story, parent, false));
+        return new ViewHolderI(LayoutInflater.from(parent.getContext()).inflate(mVItemLayout, parent, false));
     }
 
     @Override

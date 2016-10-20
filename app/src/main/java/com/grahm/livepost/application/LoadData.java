@@ -41,6 +41,7 @@ public class LoadData extends FoamMultiDexApplication {
         }catch (Exception e){
             Log.e(TAG,e.getMessage());
         }
+        FirebaseDatabase.getInstance().setPersistenceEnabled(true);
     }
 
 }

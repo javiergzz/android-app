@@ -37,7 +37,6 @@ import com.grahm.livepost.objects.FirebaseActivity;
 import com.grahm.livepost.objects.Story;
 import com.grahm.livepost.objects.Update;
 import com.grahm.livepost.objects.User;
-import com.grahm.livepost.util.GV;
 import com.grahm.livepost.util.Util;
 import com.grahm.livepost.util.Utilities;
 import com.objectlife.statelayout.StateLayout;
@@ -257,10 +256,10 @@ public class ChatActivity extends FirebaseActivity implements AbsListView.OnItem
             r.setValue(m);
             r.child(Update.TIMESTAMP_FIELD_STR).setValue(ServerValue.TIMESTAMP);
             //Update Shared Preferences
-            Map<String, Object> map = mUser.getPosts_contributed() == null ? new HashMap<String, Object>() : mUser.getPosts_contributed();
+            Map<String, Object> map = mUser.getPosts_contributed_to() == null ? new HashMap<String, Object>() : mUser.getPosts_contributed_to();
             map.put(mId, true);
-            mUser.setPosts_contributed(map);
-            mFirebaseRef.getRoot().child("users/" + mUser.getUid() + "/posts_contributed").updateChildren(mUser.getPosts_contributed());
+            mUser.setPosts_contributed_to(map);
+            mFirebaseRef.getRoot().child("users/" + mUser.getUid() + "/posts_contributed").updateChildren(mUser.getPosts_contributed_to());
             mInputText.setText("");
         }
 

@@ -60,6 +60,7 @@ public class CreateStoryTask extends AsyncTask<Uri, String, String> {
             mUser = new Gson().fromJson(s, User.class);
             mStory.setAuthor(mUser.getUserKey());
         }
+        Log.e(TAG,"constructor: "+s);
     }
 
     protected void onPreExecute() {
@@ -69,11 +70,13 @@ public class CreateStoryTask extends AsyncTask<Uri, String, String> {
         if (mShowDialog) {
             dialog.show();
         }
+        Log.e(TAG,"onPreExecute: "+mUid);
     }
 
     protected String doInBackground(Uri... uris) {
         String url = "";
-        if (uris == null || uris.length != 1) {
+        Log.e(TAG,"doInBackground: "+uris[0]);
+        if (uris == null || uris.length < 1) {
             return null;
         }
         // The file location of the image selected.
@@ -120,8 +123,8 @@ public class CreateStoryTask extends AsyncTask<Uri, String, String> {
         int maxLargeWidth = Math.round(TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, r.getDimension(R.dimen.max_large_width), d));
         int maxLargeHeight = Math.round(TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, r.getDimension(R.dimen.max_large_height), d));
         mPictureName = mUser.getName().trim().toLowerCase() + "_" + mStory.getTitle().toLowerCase() + "_" + System.currentTimeMillis() / 1000L;
-        uploadImage(mPictureName + "_thumb.jpg", srcUri, thumbSize, thumbSize);
-        uploadImage(mPictureName + "_l_thumb.jpg", srcUri, largeThumbWidth, largeThumbMaxHeight);
+        //uploadImage(mPictureName + "_thumb.jpg", srcUri, thumbSize, thumbSize);
+        //uploadImage(mPictureName + "_l_thumb.jpg", srcUri, largeThumbWidth, largeThumbMaxHeight);
         uploadImage(mPictureName + "_md.jpg", srcUri, maxMediumWidth, maxMediumHeight);
         url = uploadImage(mPictureName + ".jpg", srcUri, maxLargeWidth, maxLargeHeight);
         return url;
@@ -145,6 +148,7 @@ public class CreateStoryTask extends AsyncTask<Uri, String, String> {
     }
 
     private synchronized void addFirebaseEntry() {
+
         try {
             mStory.setIsLive(true);
             DatabaseReference ref = mFirebaseRef.push();
@@ -155,7 +159,7 @@ public class CreateStoryTask extends AsyncTask<Uri, String, String> {
             //Set Timestamps
             ref.child("last_time").setValue(ServerValue.TIMESTAMP);
             //(int count_likes, Map<String, Integer> likes, String message, String profile_picture, String sender, String sender_key, long timestamp)
-
+            Log.e(TAG,"FirebaseEntrying: "+ref.toString());
             DatabaseReference r = mFirebaseRef.getRoot().child("updates/" + key).push();
             r.setValue(new Update(0, null, mStory.getPosts_picture(), mUser.getProfile_picture(), mStory.getAuthor_name(), mStory.getAuthor()));
             r.child(Story.TIMESTAMP_FIELD_STR).setValue(ServerValue.TIMESTAMP);

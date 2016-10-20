@@ -39,7 +39,6 @@ import com.grahm.livepost.interfaces.OnFragmentInteractionListener;
 import com.grahm.livepost.interfaces.OnPutImageListener;
 import com.grahm.livepost.objects.Update;
 import com.grahm.livepost.objects.User;
-import com.grahm.livepost.util.GV;
 import com.grahm.livepost.util.Utilities;
 
 import java.io.File;
@@ -278,13 +277,13 @@ public class FragmentChatClass extends Fragment implements AbsListView.OnItemCli
                 r.setValue(m);
                 r.child("timestamp").setValue(ServerValue.TIMESTAMP);
                 //Update Shared Preferences
-                Map<String,Object> map = mUser.getPosts_contributed()==null?new HashMap<String,Object>():mUser.getPosts_contributed();
+                Map<String,Object> map = mUser.getPosts_contributed_to()==null?new HashMap<String,Object>():mUser.getPosts_contributed_to();
                 map.put(mId, true);
-                mUser.setPosts_contributed(map);
+                mUser.setPosts_contributed_to(map);
                 SPEdit.putString(new Gson().toJson(mUser), "user");
                 SPEdit.commit();
 
-                mFirebaseRef.getRoot().child("users/"+uid+"/posts_contributed").updateChildren(mUser.getPosts_contributed());
+                mFirebaseRef.getRoot().child("users/"+uid+"/posts_contributed").updateChildren(mUser.getPosts_contributed_to());
                 inputText.setText("");
             }
 

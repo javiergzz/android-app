@@ -8,6 +8,7 @@ import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.graphics.drawable.BitmapDrawable;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.design.widget.TextInputLayout;
 import android.support.v4.app.Fragment;
@@ -44,6 +45,7 @@ import com.grahm.livepost.objects.Story;
 import com.grahm.livepost.objects.User;
 import com.grahm.livepost.util.GV;
 import com.grahm.livepost.util.Utilities;
+import com.objectlife.statelayout.StateLayout;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -122,6 +124,7 @@ public class NewStoryFragment extends Fragment implements OnPutImageListener {
         mFirebaseRef = FirebaseDatabase.getInstance().getReference();
         mNewSessionViewsManager = new NewSessionViewsManager();
         setHasOptionsMenu(true);
+
     }
 
     @Override
@@ -142,7 +145,7 @@ public class NewStoryFragment extends Fragment implements OnPutImageListener {
                 .saveInAppExternalFilesDir()
                 .setCopyExistingPicturesToPublicLocation(true);
         mViewPager.setAdapter(new NewSessionPagerAdapter(inflater));
-
+        switchMainActivityView(StateLayout.VIEW_CONTENT);
 
         updateProgressViews();
         return view;
@@ -233,10 +236,20 @@ public class NewStoryFragment extends Fragment implements OnPutImageListener {
         mStory.setAuthor(mUser.getUserKey());
         mStory.setAuthor_name(mUser.getName());
         mStoryTask = new CreateStoryTask(mStory, mFirebaseRef.child("posts"), getActivity(), this, true);
-        if (mUri != null) mStoryTask.execute(mUri);
+        if (mUri != null) {
+            Log.e(TAG,"Executing: "+mUri);
+            //mStoryTask.execute(mUri);
+            mStoryTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, mUri);
+        }else{
+            Log.e(TAG,"Null Uri: "+mUri);
+        }
 
     }
-
+    private void switchMainActivityView(int state){
+        Bundle b = new Bundle();
+        b.putInt(MainActivity.STATE_KEY, state);
+        ((OnFragmentInteractionListener)getActivity()).onFragmentInteraction(MainActivity.VIEW_INTERACTIONS,b);
+    }
     /**
      * This interface must be implemented by activities that contain this
      * fragment to allow an interaction in this fragment to be communicated
