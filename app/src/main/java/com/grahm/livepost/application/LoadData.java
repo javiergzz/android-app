@@ -8,6 +8,7 @@ import com.alipay.euler.andfix.patch.PatchManager;
 import com.facebook.FacebookSdk;
 import com.facebook.appevents.AppEventsLogger;
 import com.flurry.android.FlurryAgent;
+import com.google.firebase.database.FirebaseDatabase;
 import com.jcmore2.appcrash.AppCrash;
 import com.percolate.foam.FoamApiKeys;
 import com.percolate.foam.FoamMultiDexApplication;
@@ -26,6 +27,7 @@ public class LoadData extends FoamMultiDexApplication {
     public void onCreate() {
         super.onCreate();
         FacebookSdk.sdkInitialize(getApplicationContext());
+        FirebaseDatabase.getInstance().setPersistenceEnabled(true);
         //Foam Logger
         AppEventsLogger.activateApp(this);
         //App crash catcher
