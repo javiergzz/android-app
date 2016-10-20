@@ -2,7 +2,9 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical">
+    xmlns:tools="http://schemas.android.com/tools"
+    android:orientation="vertical"
+    tools:context=".activities.MainActivity">
 
     <LinearLayout
         android:layout_width="wrap_content"
@@ -21,7 +23,8 @@
             android:layout_width="50dp"
             android:layout_height="50dp"
             android:layout_margin="10dp"
-            android:onClick="MainActivity.this.onFragmentInteraction(FragmentsEnum.NEW_STORY, null)"
+            tools:context=".activities.MainActivity"
+            android:onClick="onFragmentInteraction(FragmentsEnum.NEW_STORY, null)"
             android:src="@drawable/img_zero_posts" />
 
         <TextView

@@ -45,6 +45,7 @@ import com.grahm.livepost.objects.Story;
 import com.grahm.livepost.objects.User;
 import com.grahm.livepost.util.GV;
 import com.grahm.livepost.util.Utilities;
+import com.objectlife.statelayout.StateLayout;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -123,6 +124,7 @@ public class NewStoryFragment extends Fragment implements OnPutImageListener {
         mFirebaseRef = FirebaseDatabase.getInstance().getReference();
         mNewSessionViewsManager = new NewSessionViewsManager();
         setHasOptionsMenu(true);
+
     }
 
     @Override
@@ -143,7 +145,7 @@ public class NewStoryFragment extends Fragment implements OnPutImageListener {
                 .saveInAppExternalFilesDir()
                 .setCopyExistingPicturesToPublicLocation(true);
         mViewPager.setAdapter(new NewSessionPagerAdapter(inflater));
-
+        switchMainActivityView(StateLayout.VIEW_CONTENT);
 
         updateProgressViews();
         return view;
@@ -243,7 +245,11 @@ public class NewStoryFragment extends Fragment implements OnPutImageListener {
         }
 
     }
-
+    private void switchMainActivityView(int state){
+        Bundle b = new Bundle();
+        b.putInt(MainActivity.STATE_KEY, state);
+        ((OnFragmentInteractionListener)getActivity()).onFragmentInteraction(MainActivity.VIEW_INTERACTIONS,b);
+    }
     /**
      * This interface must be implemented by activities that contain this
      * fragment to allow an interaction in this fragment to be communicated

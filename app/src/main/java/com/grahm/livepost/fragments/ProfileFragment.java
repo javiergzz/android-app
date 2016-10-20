@@ -25,10 +25,13 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
 import com.grahm.livepost.R;
+import com.grahm.livepost.activities.MainActivity;
 import com.grahm.livepost.adapters.StoryListAdapter;
+import com.grahm.livepost.interfaces.OnFragmentInteractionListener;
 import com.grahm.livepost.objects.MultipartFormField;
 import com.grahm.livepost.objects.User;
 import com.grahm.livepost.util.Utilities;
+import com.objectlife.statelayout.StateLayout;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -106,7 +109,7 @@ public class ProfileFragment extends Fragment {
         }
 
         setupNavigation(view, inflater);
-
+        switchMainActivityView(StateLayout.VIEW_CONTENT);
         return view;
 
     }
@@ -123,7 +126,11 @@ public class ProfileFragment extends Fragment {
         mTabs.getTabAt(0).setText(getString(R.string.my_posts));
         mTabs.getTabAt(1).setText(getString(R.string.contributed_posts));
     }
-
+    private void switchMainActivityView(int state){
+        Bundle b = new Bundle();
+        b.putInt(MainActivity.STATE_KEY, state);
+        ((OnFragmentInteractionListener)getActivity()).onFragmentInteraction(MainActivity.VIEW_INTERACTIONS,b);
+    }
     //Background callback to avoid callbacks from other fragments.
     @OnClick(R.id.background)
     public void doNothing(View v) {
