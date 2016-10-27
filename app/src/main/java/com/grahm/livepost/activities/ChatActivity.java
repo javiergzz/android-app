@@ -2,6 +2,7 @@ package com.grahm.livepost.activities;
 
 import android.content.Intent;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.widget.LinearLayoutManager;
@@ -211,7 +212,7 @@ public class ChatActivity extends FirebaseActivity implements AbsListView.OnItem
                 } else {
                     onPhotoReturned(file);
                 }
-                Log.e(TAG_CLASS, "imagefile:" + file.getName() + "type:" + type + " requestCode:" + requestCode + " resultCode:" + resultCode);
+                Log.e(TAG_CLASS, "imagefile:" + file.getName() + " type:" + type + " requestCode:" + requestCode + " resultCode:" + resultCode);
             }
 
             @Override
@@ -225,14 +226,14 @@ public class ChatActivity extends FirebaseActivity implements AbsListView.OnItem
         Uri uri = Uri.fromFile(file);
 
         mPostVideoTask = new PostVideoTask(this, putImageListener, true);
-        if (uri != null) mPostVideoTask.execute(uri);
+        if (uri != null) mPostVideoTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR,uri);
     }
 
     private void onPhotoReturned(File imageFile) {
         Uri uri = Uri.fromFile(imageFile);
 
         mPostImageTask = new PostImageTask(this,  putImageListener, true);
-        if (uri != null) mPostImageTask.execute(uri);
+        if (uri != null) mPostImageTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR,uri);
     }
 
     @Override
