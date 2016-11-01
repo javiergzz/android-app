@@ -1,5 +1,6 @@
 package com.grahm.livepost.fragments;
 
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.support.design.widget.TabLayout;
@@ -25,6 +26,7 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
 import com.grahm.livepost.R;
+import com.grahm.livepost.activities.EditProfile;
 import com.grahm.livepost.activities.MainActivity;
 import com.grahm.livepost.adapters.StoryListAdapter;
 import com.grahm.livepost.interfaces.OnFragmentInteractionListener;
@@ -136,6 +138,11 @@ public class ProfileFragment extends Fragment {
     public void doNothing(View v) {
     }
 
+    @OnClick(R.id.btn_edit_profile)
+    public void editProfile(){
+        Intent mainIntent = new Intent(getActivity(), EditProfile.class);
+        getActivity().startActivity(mainIntent);
+    }
     @Override
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);

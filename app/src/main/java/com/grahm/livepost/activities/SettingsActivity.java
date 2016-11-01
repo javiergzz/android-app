@@ -20,6 +20,7 @@ import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.grahm.livepost.R;
+import com.grahm.livepost.ui.Controls;
 import com.twitter.sdk.android.Twitter;
 import com.twitter.sdk.android.core.TwitterCore;
 import com.twitter.sdk.android.core.TwitterSession;
@@ -28,7 +29,6 @@ import butterknife.ButterKnife;
 import butterknife.OnClick;
 
 import static com.grahm.livepost.activities.SplashScreen.PREFS_LOGIN;
-import static com.grahm.livepost.activities.SplashScreen.PREFS_NAME;
 
 public class SettingsActivity extends AppCompatActivity{
 
@@ -50,7 +50,10 @@ public class SettingsActivity extends AppCompatActivity{
 
     @OnClick(R.id.btn_log_out)
     public void logOut(){
-        SharedPreferences settings = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
+
+        Controls.createDialog(SettingsActivity.this, "Log Out", false);
+
+        SharedPreferences settings = getSharedPreferences(getString(R.string.preference_file_key), MODE_PRIVATE);
         SharedPreferences.Editor editor = settings.edit();
 
         TwitterSession twitterSession = TwitterCore.getInstance().getSessionManager().getActiveSession();
@@ -71,6 +74,7 @@ public class SettingsActivity extends AppCompatActivity{
         new Handler().postDelayed(new Runnable() {
             @Override
             public void run() {
+                Controls.dismissDialog();
                 Intent mainIntent = new Intent(SettingsActivity.this, Login.class);
                 SettingsActivity.this.startActivity(mainIntent);
                 SettingsActivity.this.finish();

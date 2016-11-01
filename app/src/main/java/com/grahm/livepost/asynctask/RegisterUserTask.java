@@ -24,10 +24,12 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.ServerValue;
 import com.google.gson.Gson;
+import com.grahm.livepost.activities.Login;
 import com.grahm.livepost.interfaces.OnPutImageListener;
 import com.grahm.livepost.R;
 import com.grahm.livepost.objects.ImageSize;
 import com.grahm.livepost.objects.User;
+import com.grahm.livepost.ui.Controls;
 import com.grahm.livepost.util.AzureUtils;
 import com.grahm.livepost.util.GV;
 import com.grahm.livepost.util.Util;
@@ -41,11 +43,9 @@ import java.util.Map;
 public class RegisterUserTask extends AsyncTask<Uri, String, String> {
     public static final String TAG = "RegisterUserTask";
     public static final int ASPECT_HEIGHT = -1;
-    private ProgressDialog dialog;
     private Context mContext;
     private OnPutImageListener mListener;
     private String mPictureName;
-    private Boolean mShowDialog;
     private User mUser;
     private String mUid;
     private String mPassword;
@@ -54,26 +54,19 @@ public class RegisterUserTask extends AsyncTask<Uri, String, String> {
     FirebaseAuth mFirebaseAuth;
     SharedPreferences mSharedPref;
 
-    public RegisterUserTask(User user, String password, DatabaseReference ref, FirebaseAuth auth, Context context, OnPutImageListener listener, Boolean showDialog){
+    public RegisterUserTask(User user, String password, DatabaseReference ref, FirebaseAuth auth, Context context, OnPutImageListener listener){
         mUid = null;
         mContext = context;
         mListener = listener;
-        mShowDialog = showDialog;
         mUser=user;
         mPassword = password;
         mFirebaseRef = ref;
         mFirebaseAuth = auth;
         mSharedPref = context.getSharedPreferences(context.getString(R.string.preference_file_key), Context.MODE_PRIVATE);
-        dialog = new ProgressDialog(mContext);
 
     }
     protected void onPreExecute() {
-
-        dialog.setMessage(mContext.getString(R.string.reg_creating_text));
-        dialog.setCancelable(false);
-        if(mShowDialog && !dialog.isShowing() && !dialog.isIndeterminate()){
-            dialog.show();
-        }
+        Controls.createDialog(mContext, mContext.getString(R.string.reg_creating_text), false);
     }
 
     protected String doInBackground(Uri... uris) {
@@ -90,20 +83,20 @@ public class RegisterUserTask extends AsyncTask<Uri, String, String> {
         return url;
     }
     protected void onPostExecute(String result) {
-        if(!mShowDialog && dialog.isShowing())dialog.dismiss();
+        Controls.dismissDialog();
     }
 
     @Override
     protected void onCancelled() {
         super.onCancelled();
-        if(mShowDialog && dialog.isShowing())dialog.dismiss();
+        Controls.dismissDialog();
     }
     protected String uploadImages(Uri srcUri){
         String url = "";
         Resources r = mContext.getResources();
         DisplayMetrics d =r.getDisplayMetrics();
         int picSide = Math.round(TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, r.getDimension(R.dimen.profile_pic_w), d));
-        mPictureName = "avatar_"+mUser.getName()+ System.currentTimeMillis()/1000L+".jpg";
+        mPictureName = "avatar_"+mUser.getName().trim()+ System.currentTimeMillis()/1000L+".jpg";
         url = uploadImage(mPictureName,srcUri,picSide,picSide);
         return url;
     }
@@ -135,8 +128,8 @@ public class RegisterUserTask extends AsyncTask<Uri, String, String> {
                     // signed in user can be handled in the listener.
                     if (!task.isSuccessful()) {
                         Log.e(TAG,"User creation failed");
-                        dialog.setMessage(mContext.getString(R.string.user_reg_failed) +task.getException().getMessage());
-                        dialog.cancel();
+                        Controls.setDialogMessage(mContext.getString(R.string.user_reg_failed) +task.getException().getMessage());
+                        Controls.dismissDialog();
                         return;
                     }
                     //If user creation was successful, store extra data object
@@ -153,7 +146,7 @@ public class RegisterUserTask extends AsyncTask<Uri, String, String> {
                     editor.putString("username", mUser.getEmail());
                     editor.commit();
                     Log.i(TAG, "User " + mUser.getEmail() + " was registerd successfully!");
-                    if(mShowDialog && dialog.isShowing())dialog.dismiss();
+                    Controls.dismissDialog();
                     if(mListener != null){
                         mListener.onSuccess(mPictureName);
                     }

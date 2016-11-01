@@ -27,7 +27,6 @@ public class LoadData extends FoamMultiDexApplication {
     public void onCreate() {
         super.onCreate();
         FacebookSdk.sdkInitialize(getApplicationContext());
-        FirebaseDatabase.getInstance().setPersistenceEnabled(true);
         //Foam Logger
         AppEventsLogger.activateApp(this);
         //App crash catcher

@@ -20,7 +20,6 @@ import static com.grahm.livepost.util.GV.TWITTER_SECRET;
 public class SplashScreen extends AppCompatActivity {
 
     private static final int SPLASH_DISPLAY_LENGTH = 3000;
-    public static final String PREFS_NAME = "PrefsFile";
     public static final String PREFS_LOGIN = "isLogin";
     public static final String PREFS_AUTH = "auth";
     public static final String PREFS_LIVEPOST = "livepost";
@@ -32,7 +31,7 @@ public class SplashScreen extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         TwitterAuthConfig authConfig = new TwitterAuthConfig(TWITTER_KEY, TWITTER_SECRET);
         Fabric.with(SplashScreen.this, new Twitter(authConfig));
-        SharedPreferences settings = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
+        SharedPreferences settings = getSharedPreferences(getString(R.string.preference_file_key), MODE_PRIVATE);
         final boolean onboarding = settings.getBoolean(PREFS_ONBOARDING, false);
         final boolean isLogin = settings.getBoolean(PREFS_LOGIN, false);
         setContentView(R.layout.activity_splash_screen);

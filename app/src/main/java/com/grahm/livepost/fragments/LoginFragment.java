@@ -95,7 +95,7 @@ public class LoginFragment extends Fragment {
                 }
             }
         };
-        sharedPref = getActivity().getSharedPreferences(SplashScreen.PREFS_NAME, Context.MODE_PRIVATE);
+        sharedPref = getActivity().getSharedPreferences(getString(R.string.preference_file_key), Context.MODE_PRIVATE);
         return view;
     }
 
@@ -178,7 +178,7 @@ public class LoginFragment extends Fragment {
     }
 
     private void saveOnProperties(com.grahm.livepost.objects.User user){
-        SharedPreferences.Editor editor = getApplicationContext().getSharedPreferences(SplashScreen.PREFS_NAME, Context.MODE_PRIVATE).edit();
+        SharedPreferences.Editor editor = getApplicationContext().getSharedPreferences(getString(R.string.preference_file_key), Context.MODE_PRIVATE).edit();
         Gson gson = new Gson();
         String json = gson.toJson(user);
         editor.putString("user", json);

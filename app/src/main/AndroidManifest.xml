@@ -95,7 +95,10 @@
             android:configChanges="keyboardHidden|screenLayout|screenSize"
             android:label="@string/title_activity_player"
             android:theme="@style/AppTheme.NoActionBar.Fullscreen"></activity>
-
+        <activity
+            android:name=".activities.EditProfile"
+            android:label="@string/title_activity_edit_profile"
+            android:parentActivityName=".activities.MainActivity" />
         <meta-data
             android:name="com.google.android.gms.version"
             android:value="@integer/google_play_services_version" />

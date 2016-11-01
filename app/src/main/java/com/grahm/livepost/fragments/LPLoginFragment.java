@@ -50,7 +50,7 @@ public class LPLoginFragment extends Fragment {
             if(!attemptLogin()){
                 Log.i(TAG_CLASS, txtEmail.getText().toString() + " ::: " +  txtPassword.getText().toString());
                 mAuthTask = new UserLoginTask(txtEmail.getText().toString(), txtPassword.getText().toString());
-                mAuthTask.execute((Void) null);
+                mAuthTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR ,(Void) null);
             }
         }
     };
@@ -140,16 +140,14 @@ public class LPLoginFragment extends Fragment {
 
         protected void loginAction() {
             mUid = mAuth.getCurrentUser().getUid();
-            String emailDot = mEmail.replace("." , "<dot>");
-            Log.i(TAG, emailDot);
-            mFirebaseRef.child("users").child(emailDot).addListenerForSingleValueEvent(new ValueEventListener() {
+            mFirebaseRef.child("users").child(mUid).addListenerForSingleValueEvent(new ValueEventListener() {
 
                 @Override
                 public void onDataChange(DataSnapshot dataSnapshot) {
                     User u = dataSnapshot.getValue(User.class);
                     Gson gson = new Gson();
                     String json = gson.toJson(u);
-                    SharedPreferences sharedPref = getActivity().getSharedPreferences(SplashScreen.PREFS_NAME, Context.MODE_PRIVATE);
+                    SharedPreferences sharedPref = getActivity().getSharedPreferences(getString(R.string.preference_file_key), Context.MODE_PRIVATE);
                     SharedPreferences.Editor editor = sharedPref.edit();
                     editor.putString("user", json);
                     editor.putString("uid", mUid);
@@ -157,7 +155,7 @@ public class LPLoginFragment extends Fragment {
                     editor.putBoolean(SplashScreen.PREFS_LOGIN, true);
                     editor.putString(SplashScreen.PREFS_AUTH, SplashScreen.PREFS_LIVEPOST);
                     editor.commit();
-                    Log.i(TAG, "Login successful!");
+                    Log.i(TAG, TAG + ": Login successful!");
                     Intent mainIntent = new Intent(getActivity(), MainActivity.class);
                     startActivity(mainIntent);
                     getActivity().finish();

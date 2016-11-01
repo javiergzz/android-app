@@ -170,7 +170,7 @@ public class RegistrationActivity extends AppCompatActivity implements LoaderCal
         if (mAuthTask != null) {
             return;
         }
-        mAuthTask = new RegisterUserTask(mUser, mPassword,mFirebaseRef, FirebaseAuth.getInstance(),this,this,true);
+        mAuthTask = new RegisterUserTask(mUser, mPassword,mFirebaseRef, FirebaseAuth.getInstance(),this,this);
         mAuthTask.execute(pictureUri);
 
     }

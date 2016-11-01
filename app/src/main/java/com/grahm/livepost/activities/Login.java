@@ -6,6 +6,7 @@ import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.view.PagerAdapter;
@@ -24,7 +25,6 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.gson.Gson;
 import com.grahm.livepost.R;
 import com.grahm.livepost.adapters.ProfilePagerAdapter;
-import com.grahm.livepost.asynctask.PostImageTask;
 import com.grahm.livepost.asynctask.RegisterUserTask;
 import com.grahm.livepost.fragments.ProfilePictureFragment;
 import com.grahm.livepost.interfaces.OnFragmentInteractionListener;
@@ -32,7 +32,6 @@ import com.grahm.livepost.interfaces.OnPutImageListener;
 import com.grahm.livepost.objects.User;
 import com.grahm.livepost.ui.Controls;
 import com.grahm.livepost.util.Utilities;
-import com.grahm.livepost.utils.Config;
 
 import java.io.File;
 
@@ -62,8 +61,9 @@ public class Login extends AppCompatActivity implements OnFragmentInteractionLis
         @Override
         public void onSuccess(String url) {
             mUser.setProfile_picture(url);
-            Controls.dismissDialog();
-            saveUserOnProperties();
+            Intent mainIntent = new Intent(Login.this, MainActivity.class);
+            startActivity(mainIntent);
+            Login.this.finish();
         }
     };
     private Uri mIimageUri;
@@ -75,11 +75,13 @@ public class Login extends AppCompatActivity implements OnFragmentInteractionLis
     FirebaseAuth mAuth;
     private FirebaseAuth.AuthStateListener mAuthListener;
     private String mUid;
+    private AppCompatActivity mAvtivity;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_signup);
+        mAvtivity = this;
         ButterKnife.bind(this);
         mAuth = FirebaseAuth.getInstance();
         mFirebaseRef = FirebaseDatabase.getInstance().getReference();
@@ -96,7 +98,7 @@ public class Login extends AppCompatActivity implements OnFragmentInteractionLis
                 if (user != null) {
                     Log.i(TAG_CLASS, "onAuthStateChanged:signed_in:" + user.getUid());
                     if(!mLogin){
-                        uploadPhoto(user.getUid());
+                        new RegisterUserTask(mUser, mPassword, mFirebaseRef, mAuth, mAvtivity, OnPutImageListener).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR ,mIimageUri);
                     }
                 } else {
                     Log.e(TAG_CLASS, "onAuthStateChanged:signed_out");
@@ -121,7 +123,7 @@ public class Login extends AppCompatActivity implements OnFragmentInteractionLis
     }
 
     private void saveUserOnProperties() {
-        SharedPreferences.Editor editor = getApplicationContext().getSharedPreferences(SplashScreen.PREFS_NAME, Context.MODE_PRIVATE).edit();
+        SharedPreferences.Editor editor = getApplicationContext().getSharedPreferences(getString(R.string.preference_file_key), Context.MODE_PRIVATE).edit();
         //Write user data to shared preferences
         Gson gson = new Gson();
         String json = gson.toJson(mUser);
@@ -209,13 +211,6 @@ public class Login extends AppCompatActivity implements OnFragmentInteractionLis
         mIimageUri = Uri.fromFile(imageFile);
         Bitmap media = BitmapFactory.decodeFile(imageFile.getPath());
         ProfilePictureFragment.setImage(media);
-    }
-
-    public void uploadPhoto(String uid) {
-        mUid = uid;
-        Long tsLong = System.currentTimeMillis() / 1000;
-        String pictureName = uid + "_" + tsLong.toString();
-        new PostImageTask(Login.this, OnPutImageListener, false).execute(mIimageUri);
     }
 
     private void signUpUser() {

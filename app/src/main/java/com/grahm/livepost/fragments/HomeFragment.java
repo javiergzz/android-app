@@ -21,6 +21,7 @@ import com.google.firebase.database.ValueEventListener;
 import com.grahm.livepost.R;
 import com.grahm.livepost.adapters.HomeListAdapter;
 
+import static com.grahm.livepost.util.Utilities.getUser;
 import static com.grahm.livepost.util.Utilities.mUser;
 
 /**

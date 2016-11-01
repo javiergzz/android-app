@@ -6,6 +6,7 @@ import android.content.SharedPreferences;
 import android.content.pm.ActivityInfo;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.provider.MediaStore;
 import android.support.v7.app.ActionBar;
@@ -176,6 +177,9 @@ public class NewStory extends ActionBarActivity implements OnPutImageListener{
                         mImageView.setImageBitmap(null);
                         mImageView.setMaxWidth(150);
                         mImageView.setMaxHeight(150);
+                        BitmapFactory.Options options;
+                        options = new BitmapFactory.Options();
+                        options.inSampleSize = 2;
                         mImageView.setImageBitmap(selectedImage);
                     } catch (IOException e) {
                         Log.e(TAG_CLASS, "Error: " + e);
