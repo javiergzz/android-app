@@ -90,6 +90,7 @@
     <!-- Profile -->
     <string name="my_posts">Created</string>
     <string name="contributed_posts">Contributed</string>
+    <string name="story_invites">Notifications</string>
     <!-- Categories -->
     <string-array name="array_categories">
         <item>News</item>
@@ -333,4 +334,10 @@
     <string name="view_empty_chat_msg_1">This story has no messages yet.</string>
     <string name="view_empty_chat_msg_2">Be the first to add one!</string>
     <string name="scroll_bottom">Scroll to bottom</string>
+
+    <string name="accept">Accept</string>
+    <string name="decline">Decline</string>
+
+    <string name="toast_declined">Invitation Declined</string>
+    <string name="toast_accepted">Invitation Accepted</string>
 </resources>

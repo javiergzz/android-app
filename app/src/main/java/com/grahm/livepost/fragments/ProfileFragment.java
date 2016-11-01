@@ -28,8 +28,10 @@ import com.google.firebase.database.Query;
 import com.grahm.livepost.R;
 import com.grahm.livepost.activities.EditProfile;
 import com.grahm.livepost.activities.MainActivity;
+import com.grahm.livepost.adapters.InvitesListAdapter;
 import com.grahm.livepost.adapters.StoryListAdapter;
 import com.grahm.livepost.interfaces.OnFragmentInteractionListener;
+import com.grahm.livepost.objects.Invite;
 import com.grahm.livepost.objects.MultipartFormField;
 import com.grahm.livepost.objects.User;
 import com.grahm.livepost.util.Utilities;
@@ -91,8 +93,7 @@ public class ProfileFragment extends Fragment {
 
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_profile, container, false);
         ButterKnife.bind(this, view);
 
@@ -127,6 +128,7 @@ public class ProfileFragment extends Fragment {
         mTabs.setupWithViewPager(mViewPager);
         mTabs.getTabAt(0).setText(getString(R.string.my_posts));
         mTabs.getTabAt(1).setText(getString(R.string.contributed_posts));
+        mTabs.getTabAt(2).setText(getString(R.string.story_invites));
     }
     private void switchMainActivityView(int state){
         Bundle b = new Bundle();
@@ -154,17 +156,18 @@ public class ProfileFragment extends Fragment {
         super.onDetach();
     }
 
-    public class ProfileViewsManager {
-        public List<MultipartFormField> list;
+    private class ProfileViewsManager {
+        private List<MultipartFormField> list;
 
-        public ProfileViewsManager() {
+        private ProfileViewsManager() {
             list = new ArrayList<MultipartFormField>();
             list.add(new CreatedPostsField());
             list.add(new ContributedPostsField());
+            list.add(new InvitesField());
         }
 
 
-        public class ContributedPostsField extends MultipartFormField {
+        private class ContributedPostsField extends MultipartFormField {
             public int getTitle() {
                 return R.string.contributed_posts;
             }
@@ -185,7 +188,7 @@ public class ProfileFragment extends Fragment {
             }
         }
 
-        public class CreatedPostsField extends MultipartFormField {
+        private class CreatedPostsField extends MultipartFormField {
             public int getTitle() {
                 return R.string.my_posts;
             }
@@ -203,6 +206,27 @@ public class ProfileFragment extends Fragment {
                 RecyclerView recyclerView = ButterKnife.findById(layout, R.id.profile_list);
                 recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
                 recyclerView.setAdapter(new StoryListAdapter(q, (AppCompatActivity) getActivity(), 0, false));
+            }
+        }
+
+        private class InvitesField extends MultipartFormField {
+            public int getTitle() {
+                return R.string.story_invites;
+            }
+
+            public int getLayout() {
+                return R.layout.profile_list;
+            }
+
+            public boolean onValidate() {
+                return true;
+            }
+
+            public void onSetup(ViewGroup layout) {
+                Query q = mFirebaseRef.child("users").child(mUser.getUserKey()).child("invites");
+                RecyclerView recyclerView = ButterKnife.findById(layout, R.id.profile_list);
+                recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
+                recyclerView.setAdapter(new InvitationRecyclerViewAdapter(q));
             }
         }
     }

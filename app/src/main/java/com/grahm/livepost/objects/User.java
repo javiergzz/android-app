@@ -22,6 +22,7 @@ public class User implements Serializable {
     private String name;
     private Map<String, Object> posts_contributed_to;
     private Map<String, Object> posts_created;
+    private Map<String, Invite> invites;
     private String profile_picture;
     private Long timestamp;
     private String username;
@@ -71,6 +72,14 @@ public class User implements Serializable {
 
     public void setPosts_contributed_to(Map<String, Object> posts_contributed_to) {
         this.posts_contributed_to = posts_contributed_to;
+    }
+
+    public Map<String, Invite> getInvites() {
+        return invites;
+    }
+
+    public void setInvites(Map<String, Invite> invites) {
+        this.invites = invites;
     }
 
     public Map<String, Object> getPosts_created() {

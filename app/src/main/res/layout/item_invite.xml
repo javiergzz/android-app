@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.v7.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:card_view="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/card_view"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_gravity="center"
+    android:padding="10dp"
+    card_view:cardCornerRadius="@dimen/card_corner_radius"
+    card_view:cardElevation="0dp">
+
+
+    <RelativeLayout
+        android:id="@+id/sel_area"
+        android:layout_width="fill_parent"
+        android:layout_height="match_parent">
+
+
+        <RelativeLayout
+            android:id="@+id/imageArea"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content">
+
+            <ImageView
+                android:id="@+id/i_imgProfile"
+                android:layout_width="@dimen/thumb_side"
+                android:layout_height="@dimen/thumb_side"
+                android:layout_marginBottom="5dp"
+                android:layout_marginLeft="5dp"
+                android:layout_marginRight="5dp"
+                android:layout_marginTop="5dp"
+                android:scaleType="centerCrop"
+                android:src="@drawable/ic_session" />
+
+            <ProgressBar
+                android:id="@+id/i_progress_img"
+                style="@android:style/Widget.Holo.ProgressBar.Small"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerInParent="true"
+                android:visibility="gone"
+                android:layout_marginRight="5dp" />
+        </RelativeLayout>
+
+        <RelativeLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_toRightOf="@id/imageArea"
+            android:padding="5dp">
+
+            <TextView
+                android:id="@+id/i_title"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="3dp"
+                android:textAllCaps="false"
+                android:textColor="#222"
+                android:textSize="16dp" />
+
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentTop="true"
+                android:layout_alignParentRight="true"
+                android:orientation="horizontal"
+                android:padding="2dp">
+
+                    <TextView
+                        android:id="@+id/i_datetime"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center_vertical"
+                        android:layout_margin="1dp"
+                        android:text="12:00 24/Feb/16"
+                        android:textColor="#666"
+                        android:textSize="@dimen/card_font_size" />
+            </LinearLayout>
+        </RelativeLayout>
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:layout_alignParentRight="true"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+            <Button
+                android:id="@+id/btn_accept"
+                android:layout_width="wrap_content"
+                android:background="@color/green_edit"
+                android:layout_margin="5dp"
+                android:text="@string/accept"
+                android:padding="5dp"
+                android:drawableRight="@drawable/ic_check_circle_black_24dp"
+                android:elevation="6dp"
+                android:clickable="true"
+                android:layout_height="30dp" />
+            <Button
+                android:id="@+id/btn_decline"
+                android:layout_width="wrap_content"
+                android:layout_height="30dp"
+                android:background="@color/red_delete"
+                android:layout_margin="5dp"
+                android:text="@string/decline"
+                android:clickable="true"
+                android:drawableRight="@drawable/ic_cancel_black_24dp" />
+
+        </LinearLayout>
+
+    </RelativeLayout>
+</android.support.v7.widget.CardView>
