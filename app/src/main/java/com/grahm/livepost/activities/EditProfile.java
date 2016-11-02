@@ -1,7 +1,10 @@
 package com.grahm.livepost.activities;
 
 
+import android.content.Intent;
 import android.graphics.Bitmap;
+import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.graphics.drawable.RoundedBitmapDrawable;
 import android.support.v4.graphics.drawable.RoundedBitmapDrawableFactory;
@@ -9,18 +12,28 @@ import android.support.v7.app.AppCompatActivity;
 import android.text.TextUtils;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.target.BitmapImageViewTarget;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.grahm.livepost.R;
+import com.grahm.livepost.asynctask.UploadImageTask;
+import com.grahm.livepost.interfaces.OnPutImageListener;
 import com.grahm.livepost.objects.User;
 import com.grahm.livepost.util.Utilities;
+
+import java.io.File;
+import java.util.HashMap;
+import java.util.Map;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
+import pl.aprilapps.easyphotopicker.DefaultCallback;
+import pl.aprilapps.easyphotopicker.EasyImage;
 
 public class EditProfile extends AppCompatActivity{
 
@@ -33,6 +46,15 @@ public class EditProfile extends AppCompatActivity{
     public EditText mTxtName;
     @BindView(R.id.txt_edit_user_email)
     public EditText mTxtEmail;
+    private Uri mIimageUri = null;
+    private String mImageUrl;
+    private OnPutImageListener mOnPutImageListener = new OnPutImageListener() {
+        @Override
+        public void onSuccess(String url) {
+            mImageUrl = url;
+            saveOnFirebase();
+        }
+    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -60,12 +82,69 @@ public class EditProfile extends AppCompatActivity{
 
     @OnClick(R.id.btn_save_user_data)
     public void saveDataUser(){
+        if(mIimageUri != null){
+            new UploadImageTask(EditProfile.this, mUser.getUserKey(), mOnPutImageListener, true).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, mIimageUri);
+        }else{
+            saveOnFirebase();
+        }
+
+    }
+
+    public void saveOnFirebase(){
+        boolean isValid = true;
+        Map<String, Object> user = new HashMap<String, Object>();
+        if(!TextUtils.isEmpty(mImageUrl)){
+            user.put("profile_picture", mImageUrl);
+        }
         if(!TextUtils.isEmpty(mTxtEmail.getText())){
-            mFirebaseRef.child("users").child(mUser.getUserKey()).child("email").setValue(mTxtEmail.getText().toString());
+            user.put("email", mTxtEmail.getText().toString());
         }
         if(!TextUtils.isEmpty(mTxtName.getText())){
-            mFirebaseRef.child("users").child(mUser.getUserKey()).child("name").setValue(mTxtName.getText().toString());
+            user.put("name", mTxtName.getText().toString());
         }
+        isValid = !TextUtils.isEmpty(mTxtEmail.getText()) && !TextUtils.isEmpty(mTxtName.getText()) && !TextUtils.isEmpty(mImageUrl);
+        if(isValid){
+            mFirebaseRef.child("users").child(mUser.getUserKey()).updateChildren(user, new DatabaseReference.CompletionListener() {
+                @Override
+                public void onComplete(DatabaseError databaseError, DatabaseReference databaseReference) {
+                    Toast.makeText(EditProfile.this, "Data saved!", Toast.LENGTH_SHORT).show();
+                }
+            });
+        }
+    }
+
+    @OnClick(R.id.img_edit_profile_pic)
+    public void selectNewProfilePicture(){
+        EasyImage.openChooserWithDocuments(EditProfile.this, "Choose a profile picture", 1);
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        EasyImage.handleActivityResult(requestCode, resultCode, data, EditProfile.this, new DefaultCallback() {
+            @Override
+            public void onImagePickerError(Exception e, EasyImage.ImageSource source, int type) {}
+
+            @Override
+            public void onImagePicked(File imageFile, EasyImage.ImageSource source, int type) {
+                //Handle the image
+                onPhotoReturned(imageFile);
+            }
+        });
+    }
+
+    private void onPhotoReturned(File imageFile) {
+        mIimageUri = Uri.fromFile(imageFile);
+        Glide.with(this).load(mIimageUri).asBitmap().centerCrop().into(new BitmapImageViewTarget(mImageView) {
+            @Override
+            protected void setResource(Bitmap resource) {
+                RoundedBitmapDrawable circularBitmapDrawable =
+                        RoundedBitmapDrawableFactory.create(getResources(), resource);
+                circularBitmapDrawable.setCircular(true);
+                mImageView.setImageDrawable(circularBitmapDrawable);
+            }
+        });
     }
 }
 
