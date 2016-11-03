@@ -12,20 +12,26 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.design.widget.TextInputLayout;
 import android.support.v4.app.Fragment;
+import android.support.v4.graphics.drawable.RoundedBitmapDrawable;
+import android.support.v4.graphics.drawable.RoundedBitmapDrawableFactory;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.text.TextUtils;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.EditorInfo;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.ListView;
@@ -33,6 +39,8 @@ import android.widget.ProgressBar;
 import android.widget.Spinner;
 import android.widget.TextView;
 
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.request.target.BitmapImageViewTarget;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.grahm.livepost.R;
@@ -54,6 +62,7 @@ import java.util.List;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
+import butterknife.OnEditorAction;
 import pl.aprilapps.easyphotopicker.DefaultCallback;
 import pl.aprilapps.easyphotopicker.EasyImage;
 
@@ -306,7 +315,19 @@ public class NewStoryFragment extends Fragment implements OnPutImageListener {
             }
 
             public void onSetup(ViewGroup layout) {
-                ButterKnife.findById(layout, R.id.new_session_story_name).requestFocus();
+                final EditText storyName = ButterKnife.findById(layout, R.id.new_session_story_name);
+                storyName.setOnEditorActionListener(new EditText.OnEditorActionListener(){
+                    public boolean onEditorAction(TextView exampleView, int actionId, KeyEvent event){
+                        if (actionId == EditorInfo.IME_ACTION_DONE) {
+                            InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
+                            imm.hideSoftInputFromWindow(storyName.getWindowToken(), 0);
+                            nextButton(storyName);
+                            return true;
+                        }
+                        return false;
+                    }
+                });
+                storyName.requestFocus();
             }
         }
 
@@ -361,12 +382,8 @@ public class NewStoryFragment extends Fragment implements OnPutImageListener {
                     ButterKnife.findById(layout, R.id.new_session_avatar_layout).setVisibility(View.GONE);
                     ImageView resultView = (ImageView) layout.findViewById(R.id.new_session_selected_img);
                     resultView.setVisibility(View.VISIBLE);
-//                    resultView.setImageResource(R.drawable.ic_add_a_photo_black_48dp);
                     Bitmap media = BitmapFactory.decodeFile(mFile.getPath());
                     resultView.setImageBitmap(media);
-//                    resultView.setImageURI(mUri);
-
-
                     resultView.setOnClickListener(new View.OnClickListener() {
                         @Override
                         public void onClick(View v) {
@@ -422,19 +439,23 @@ public class NewStoryFragment extends Fragment implements OnPutImageListener {
     private void onPhotoReturned(File imageFile) {
         mFile = imageFile;
         mUri = Uri.fromFile(imageFile);
+        Log.e(TAG, mUri.toString());
+        mStory.setPosts_picture(mUri.toString());
         ButterKnife.findById(mViewPager, R.id.new_session_avatar_layout).setVisibility(View.GONE);
-        ImageView resultView = ButterKnife.findById(mViewPager, R.id.new_session_selected_img);
+        final ImageView resultView = ButterKnife.findById(mViewPager, R.id.new_session_selected_img);
         resultView.setVisibility(View.VISIBLE);
-        resultView.setImageResource(R.drawable.ic_add_a_photo_black_48dp);
-        resultView.setImageURI(mUri);
         resultView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 EasyImage.openChooserWithDocuments(NewStoryFragment.this, mStory.getTitle(), 1);
             }
         });
-        Log.e(TAG, mUri.toString());
-        mStory.setPosts_picture(mUri.toString());
+        Glide.with(this).load(mUri).asBitmap().centerCrop().into(new BitmapImageViewTarget(resultView) {
+            @Override
+            protected void setResource(Bitmap resource) {
+                resultView.setImageBitmap(resource);
+            }
+        });
     }
 
     @Override

@@ -1,20 +1,24 @@
 package com.grahm.livepost.fragments;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.design.widget.TextInputEditText;
+import android.support.design.widget.TextInputLayout;
 import android.support.v4.app.Fragment;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.TextView;
+import android.widget.Toast;
 
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
@@ -32,6 +36,10 @@ import com.grahm.livepost.activities.SplashScreen;
 import com.grahm.livepost.objects.User;
 import com.grahm.livepost.ui.Controls;
 
+import butterknife.BindView;
+import butterknife.ButterKnife;
+import butterknife.OnClick;
+
 public class LPLoginFragment extends Fragment {
 
     private UserLoginTask mAuthTask = null;
@@ -40,20 +48,18 @@ public class LPLoginFragment extends Fragment {
     private FirebaseAuth mAuth = null;
     private static final String TAG_CLASS = "LPLoginFragment";
     private static final int PASS_MIN_LENGTH = 6;
-    private EditText txtEmail;
-    private EditText txtPassword;
+    @BindView(R.id.txt_email)
+    public EditText txtEmail;
+    @BindView(R.id.txt_password)
+    public EditText txtPassword;
+    @BindView(R.id.btn_login)
+    public Button mBtnLogin;
+    @BindView(R.id.txt_header)
+    public TextView mTxtHeader;
+    @BindView(R.id.view_password)
+    public TextInputLayout mViewPassword;
     private String mPassword = "";
     private User mUser = new User();
-    private OnClickListener loginListener = new OnClickListener() {
-        @Override
-        public void onClick(View v) {
-            if(!attemptLogin()){
-                Log.i(TAG_CLASS, txtEmail.getText().toString() + " ::: " +  txtPassword.getText().toString());
-                mAuthTask = new UserLoginTask(txtEmail.getText().toString(), txtPassword.getText().toString());
-                mAuthTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR ,(Void) null);
-            }
-        }
-    };
 
     public LPLoginFragment() {
 
@@ -72,13 +78,11 @@ public class LPLoginFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_lplogin, container, false);
-        txtEmail = (EditText) view.findViewById(R.id.txt_email);
-        txtPassword = (EditText) view.findViewById(R.id.txt_password);
-        Button btnLogin = (Button) view.findViewById(R.id.btn_login);
-        btnLogin.setOnClickListener(loginListener);
+        ButterKnife.bind(this, view);
         mFirebaseDB = FirebaseDatabase.getInstance();
         mFirebaseRef = mFirebaseDB.getReference();
         mAuth = FirebaseAuth.getInstance();
+        resetLayout();
         return view;
     }
 
@@ -94,14 +98,20 @@ public class LPLoginFragment extends Fragment {
         // Check for a valid email address.
         if (TextUtils.isEmpty(email)) {
             txtEmail.setError("This field is required");
+            focusView = txtEmail;
+            cancel = true;
         } else if (!isEmailValid(email)) {
             txtEmail.setError("This email address is invalid");
             focusView = txtEmail;
             cancel = true;
         }
 
-        // Check for a valid password, if the user entered one.
-        if (!TextUtils.isEmpty(password) && !isPasswordValid(password)) {
+        // Check for a valid password
+        if (TextUtils.isEmpty(password)) {
+            txtPassword.setError("This field is required");
+            focusView = txtPassword;
+            cancel = true;
+        } else if (!TextUtils.isEmpty(password) && !isPasswordValid(password)) {
             txtPassword.setError("This password is too short");
             focusView = txtPassword;
             cancel = true;
@@ -121,6 +131,77 @@ public class LPLoginFragment extends Fragment {
         }
     }
 
+    private boolean hasEmail(){
+        txtEmail.setError(null);
+
+        String email = txtEmail.getText().toString();
+        boolean next = true;
+
+        // Check for a valid email address.
+        if (TextUtils.isEmpty(email)) {
+            txtEmail.setError("This field is required");
+            next = false;
+        } else if (!isEmailValid(email)) {
+            txtEmail.setError("This email address is invalid");
+            next = false;
+        }
+
+        if (next) {
+            txtEmail.requestFocus();
+        }
+        return next;
+    }
+
+    @OnClick(R.id.btn_forgot_password)
+    public void forgotPassword(View v){
+        v.setVisibility(View.GONE);
+        mViewPassword.setVisibility(View.GONE);
+        txtPassword.setVisibility(View.GONE);
+        mBtnLogin.setTag("1");
+        mBtnLogin.setText("Send Email");
+        mTxtHeader.setText("Type down your email so we can send you a temporary password");
+    }
+
+    public void resetLayout(){
+        mViewPassword.setVisibility(View.VISIBLE);
+        txtPassword.setVisibility(View.VISIBLE);
+        mBtnLogin.setTag("0");
+        mBtnLogin.setText("Login");
+        mTxtHeader.setText("Login");
+    }
+
+    @OnClick(R.id.btn_login)
+    public void login(View v) {
+        if(v.getTag() == "0"){
+            if(!attemptLogin()){
+                Log.i(TAG_CLASS, txtEmail.getText().toString() + " ::: " +  txtPassword.getText().toString());
+                mAuthTask = new UserLoginTask(txtEmail.getText().toString(), txtPassword.getText().toString(), getActivity());
+                mAuthTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR ,(Void) null);
+            }
+        }else{
+            sendEmail();
+        }
+    }
+
+    public void sendEmail(){
+        if(hasEmail()){
+            Controls.createDialog(getActivity(), "Sending email.", false);
+            FirebaseAuth auth = FirebaseAuth.getInstance();
+            auth.sendPasswordResetEmail(txtEmail.getText().toString())
+                    .addOnCompleteListener(new OnCompleteListener<Void>() {
+                        @Override
+                        public void onComplete(@NonNull Task<Void> task) {
+                            Controls.dismissDialog();
+                            if (task.isSuccessful()) {
+                                Toast.makeText(getActivity(),"Email sent", Toast.LENGTH_LONG).show();
+                            }else{
+                                Toast.makeText(getActivity(), task.getException().getMessage(), Toast.LENGTH_LONG).show();
+                            }
+                        }
+                    });
+        }
+    }
+
     private boolean isPasswordValid(String password) {
         return password.length() > PASS_MIN_LENGTH;
     }
@@ -130,12 +211,14 @@ public class LPLoginFragment extends Fragment {
         private final String mEmail;
         private final String mPassword;
         private static final String TAG = "UserLoginTask";
+        private Activity mActivity;
 
         private String mUid;
 
-        UserLoginTask(String email, String password) {
+        UserLoginTask(String email, String password, Activity activity) {
             mEmail = email;
             mPassword = password;
+            mActivity = activity;
         }
 
         protected void loginAction() {
@@ -147,7 +230,7 @@ public class LPLoginFragment extends Fragment {
                     User u = dataSnapshot.getValue(User.class);
                     Gson gson = new Gson();
                     String json = gson.toJson(u);
-                    SharedPreferences sharedPref = getActivity().getSharedPreferences(getString(R.string.preference_file_key), Context.MODE_PRIVATE);
+                    SharedPreferences sharedPref = mActivity.getSharedPreferences(getString(R.string.preference_file_key), Context.MODE_PRIVATE);
                     SharedPreferences.Editor editor = sharedPref.edit();
                     editor.putString("user", json);
                     editor.putString("uid", mUid);
@@ -156,9 +239,9 @@ public class LPLoginFragment extends Fragment {
                     editor.putString(SplashScreen.PREFS_AUTH, SplashScreen.PREFS_LIVEPOST);
                     editor.commit();
                     Log.i(TAG, TAG + ": Login successful!");
-                    Intent mainIntent = new Intent(getActivity(), MainActivity.class);
+                    Intent mainIntent = new Intent(mActivity, MainActivity.class);
                     startActivity(mainIntent);
-                    getActivity().finish();
+                    mActivity.finish();
                 }
 
                 @Override
@@ -173,7 +256,7 @@ public class LPLoginFragment extends Fragment {
         @Override
         protected void onPreExecute() {
             super.onPreExecute();
-            Controls.createDialog(getActivity(), "Loading", false);
+            Controls.createDialog(mActivity, "Loading", false);
         }
 
         @Override
@@ -184,6 +267,7 @@ public class LPLoginFragment extends Fragment {
                     public void onComplete(@NonNull Task<AuthResult> task) {
                         if(!task.isSuccessful()){
                             Log.i(TAG, "== !task::isSuccessful :) ==");
+                            Toast.makeText(mActivity, task.getException().getMessage(), Toast.LENGTH_LONG).show();
                             return;
                         }
                         Log.i(TAG, "== task::isSuccessful :) ==");

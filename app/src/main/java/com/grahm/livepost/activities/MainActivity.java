@@ -90,7 +90,6 @@ public class MainActivity extends FirebaseActivity implements OnFragmentInteract
             Fragment f = getSupportFragmentManager().getFragment(savedInstanceState, FRAG_KEY);
             mSectionsFragmentManager.setCurrentFragment(f);
         }
-        getSupportActionBar().setTitle(mCurrentPage.getTitle(this));
 
         mStateLayout.setContentViewResId(R.id.container)
                 .setErrorViewResId(R.id.v_error)
@@ -244,7 +243,6 @@ public class MainActivity extends FirebaseActivity implements OnFragmentInteract
             }
 
             mCurrentFragment = page.getInstance(args);
-            getSupportActionBar().setTitle(page.getTitle(mContext));
             mFragmentManager.beginTransaction()
                     .setCustomAnimations(R.anim.abc_popup_enter, R.anim.abc_fade_out)
                     .add(mContainerId, mCurrentFragment, page.getTag())
@@ -267,7 +265,6 @@ public class MainActivity extends FirebaseActivity implements OnFragmentInteract
         if (getSupportFragmentManager().getBackStackEntryCount() > 1) {
             super.onBackPressed();
             mSectionsFragmentManager.setCurrentFragment(getSupportFragmentManager().findFragmentById(R.id.container));
-            getSupportActionBar().setTitle(mCurrentPage.getTitle(this));
         }
     }
 

@@ -59,7 +59,7 @@
     <string name="reg_next_button">Next</string>
     <string name="reg_creating_text">Creating User</string>
     <!-- New Session -->
-    <string name="ns_story_name">Your story</string>
+    <string name="ns_story_name">Give your story a title</string>
     <string name="ns_category">Pick a category</string>
     <string name="ns_image">Add an image</string>
     <string name="ns_creating_text">Posting...</string>
@@ -85,7 +85,7 @@
     <string name="lbl_warn">All fields are required to be completed</string>
     <string name="lbl_title">Notice:</string>
     <string name="lbl_err">An error occurred while uploading your image: Your image is too large or has an incompatible format</string>
-    <string name="prompt_story_title">Story Title</string>
+    <string name="prompt_story_title">Title</string>
 
     <!-- Profile -->
     <string name="my_posts">Created</string>

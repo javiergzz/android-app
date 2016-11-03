@@ -12,11 +12,15 @@
         android:background="#ffffff">
 
         <TextView
+            android:id="@+id/txt_header"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_centerHorizontal="true"
             android:layout_marginTop="29dp"
+            android:layout_marginLeft="15dp"
+            android:layout_marginRight="15dp"
             android:text="Login"
+            android:textAlignment="center"
             android:textColor="#364457"
             android:textSize="18dp" />
 
@@ -44,6 +48,7 @@
             </android.support.design.widget.TextInputLayout>
 
             <android.support.design.widget.TextInputLayout
+                android:id="@+id/view_password"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content">
 
@@ -65,6 +70,7 @@
             </android.support.design.widget.TextInputLayout>
 
             <Button
+                android:id="@+id/btn_forgot_password"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_above="@+id/btn_done"
@@ -89,6 +95,7 @@
             android:background="@color/first_dark"
             android:text="Login"
             android:textAllCaps="false"
+            android:tag="0"
             android:textColor="#FFFFFF" />
 
     </RelativeLayout>
