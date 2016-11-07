@@ -46,6 +46,7 @@ import java.util.regex.Pattern;
  */
 public class Util {
     private static final String TAG = Util.class.getCanonicalName();
+
     public static String getPrefix(Context context) {
         return System.currentTimeMillis() + "/";
     }
@@ -356,13 +357,14 @@ public class Util {
         }
 
     }
-    public static Bitmap loadBitmapFromUri(Context context,Uri uri){
+
+    public static Bitmap loadBitmapFromUri(Context context, Uri uri) {
         Bitmap bitmap = null;
-        try{
+        try {
             bitmap = MediaStore.Images.Media.getBitmap(context.getContentResolver(), uri);
-        }catch (Exception e){
-            if(e!=null)
-                Log.e(TAG,e.getMessage());
+        } catch (Exception e) {
+            if (e != null)
+                Log.e(TAG, e.getMessage());
         }
         return bitmap;
     }

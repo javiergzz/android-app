@@ -1,13 +1,11 @@
 package com.grahm.livepost.application;
 
-import android.app.Application;
 import android.content.pm.PackageInfo;
 import android.util.Log;
 
 import com.alipay.euler.andfix.patch.PatchManager;
 import com.facebook.FacebookSdk;
 import com.facebook.appevents.AppEventsLogger;
-import com.flurry.android.FlurryAgent;
 import com.google.firebase.database.FirebaseDatabase;
 import com.jcmore2.appcrash.AppCrash;
 import com.percolate.foam.FoamApiKeys;

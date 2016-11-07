@@ -1,11 +1,9 @@
 package com.grahm.livepost.util;
 
-import android.content.ContentResolver;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.media.MediaMetadataRetriever;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
@@ -26,12 +24,8 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.google.gson.Gson;
 import com.grahm.livepost.R;
-import com.grahm.livepost.activities.SplashScreen;
 import com.grahm.livepost.objects.User;
 
-import java.sql.Timestamp;
-import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -171,21 +165,23 @@ public class Utilities {
     }
 
     public static int deduceMessageType(String messageString) {
-        if(TextUtils.isEmpty(messageString)) return MSG_TYPE_TEXT;
+        if (TextUtils.isEmpty(messageString)) return MSG_TYPE_TEXT;
         String mimeString = Util.getMimeTypeFromUrl(messageString);
-        if(TextUtils.isEmpty(mimeString)) {
-            if(videoMessagePattern.matcher(messageString).matches()) return MSG_TYPE_VIDEO_W_THUMBNAIL;
+        if (TextUtils.isEmpty(mimeString)) {
+            if (videoMessagePattern.matcher(messageString).matches())
+                return MSG_TYPE_VIDEO_W_THUMBNAIL;
             return MSG_TYPE_TEXT;
         }
         if (mimeString.contains("image")) return MSG_TYPE_IMAGE;
         if (mimeString.contains("video")) return MSG_TYPE_VIDEO;
         return MSG_TYPE_TEXT;
     }
+
     public static String getRealPathFromUri(Context context, Uri contentUri) {
         Cursor cursor = null;
         try {
-            String[] proj = { MediaStore.Images.Media.DATA };
-            cursor = context.getContentResolver().query(contentUri,  proj, null, null, null);
+            String[] proj = {MediaStore.Images.Media.DATA};
+            cursor = context.getContentResolver().query(contentUri, proj, null, null, null);
             int column_index = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA);
             cursor.moveToFirst();
             return cursor.getString(column_index);
@@ -196,11 +192,11 @@ public class Utilities {
         }
     }
 
-    public static String replaceExtension(String srcUrl, String newExtension)
-    {
+    public static String replaceExtension(String srcUrl, String newExtension) {
         int extdotIndex = srcUrl.lastIndexOf(".");
-        return srcUrl.substring(0,extdotIndex)+newExtension;
+        return srcUrl.substring(0, extdotIndex) + newExtension;
     }
+
     public static User readUser(Context ctx) {
         if (FirebaseAuth.getInstance().getCurrentUser() == null) {
             return null;
@@ -235,7 +231,7 @@ public class Utilities {
     }
 
     public static String cleanUrl(String url) {
-        if(TextUtils.isEmpty(url)) return url;
+        if (TextUtils.isEmpty(url)) return url;
         String[] parts = url.split("\\?");
         return parts[0];
     }

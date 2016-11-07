@@ -1,6 +1,5 @@
 package com.grahm.livepost.asynctask;
 
-import android.app.ProgressDialog;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.SharedPreferences;
@@ -8,9 +7,7 @@ import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.AsyncTask;
-import android.os.SystemClock;
 import android.support.annotation.NonNull;
-import android.text.TextUtils;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.util.TypedValue;
@@ -24,9 +21,8 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.ServerValue;
 import com.google.gson.Gson;
-import com.grahm.livepost.activities.Login;
-import com.grahm.livepost.interfaces.OnPutImageListener;
 import com.grahm.livepost.R;
+import com.grahm.livepost.interfaces.OnPutImageListener;
 import com.grahm.livepost.objects.ImageSize;
 import com.grahm.livepost.objects.User;
 import com.grahm.livepost.ui.Controls;
@@ -36,9 +32,6 @@ import com.grahm.livepost.util.Util;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import java.net.URL;
-import java.util.Date;
-import java.util.Map;
 
 public class RegisterUserTask extends AsyncTask<Uri, String, String> {
     public static final String TAG = "RegisterUserTask";
@@ -54,17 +47,18 @@ public class RegisterUserTask extends AsyncTask<Uri, String, String> {
     FirebaseAuth mFirebaseAuth;
     SharedPreferences mSharedPref;
 
-    public RegisterUserTask(User user, String password, DatabaseReference ref, FirebaseAuth auth, Context context, OnPutImageListener listener){
+    public RegisterUserTask(User user, String password, DatabaseReference ref, FirebaseAuth auth, Context context, OnPutImageListener listener) {
         mUid = null;
         mContext = context;
         mListener = listener;
-        mUser=user;
+        mUser = user;
         mPassword = password;
         mFirebaseRef = ref;
         mFirebaseAuth = auth;
         mSharedPref = context.getSharedPreferences(context.getString(R.string.preference_file_key), Context.MODE_PRIVATE);
 
     }
+
     protected void onPreExecute() {
         Controls.createDialog(mContext, mContext.getString(R.string.reg_creating_text), false);
     }
@@ -76,12 +70,13 @@ public class RegisterUserTask extends AsyncTask<Uri, String, String> {
         }
         // The file location of the image selected.
         Uri selectedImage = uris[0];
-        if(selectedImage!= null)
+        if (selectedImage != null)
             mUser.setProfile_picture(uploadImages(selectedImage));
-        Log.d(TAG,"Adding Entry");
+        Log.d(TAG, "Adding Entry");
         addFirebaseEntry();
         return url;
     }
+
     protected void onPostExecute(String result) {
         Controls.dismissDialog();
     }
@@ -91,18 +86,19 @@ public class RegisterUserTask extends AsyncTask<Uri, String, String> {
         super.onCancelled();
         Controls.dismissDialog();
     }
-    protected String uploadImages(Uri srcUri){
+
+    protected String uploadImages(Uri srcUri) {
         String url = "";
         Resources r = mContext.getResources();
-        DisplayMetrics d =r.getDisplayMetrics();
+        DisplayMetrics d = r.getDisplayMetrics();
         int picSide = Math.round(TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, r.getDimension(R.dimen.profile_pic_w), d));
-        mPictureName = "avatar_"+mUser.getName().trim()+ System.currentTimeMillis()/1000L+".jpg";
-        url = uploadImage(mPictureName,srcUri,picSide,picSide);
+        mPictureName = "avatar_" + mUser.getName().trim() + System.currentTimeMillis() / 1000L + ".jpg";
+        url = uploadImage(mPictureName, srcUri, picSide, picSide);
         return url;
     }
 
     private Bitmap getScaledBitmap(Uri srcUri, int mDstWidth, int mDstHeight) {
-        Bitmap unscaledBitmap = Util.loadBitmapFromUri(mContext,srcUri);
+        Bitmap unscaledBitmap = Util.loadBitmapFromUri(mContext, srcUri);
 
         Bitmap scaledBitmap;
         ImageSize srcSize = new ImageSize(unscaledBitmap.getWidth(), unscaledBitmap.getHeight());
@@ -114,11 +110,11 @@ public class RegisterUserTask extends AsyncTask<Uri, String, String> {
         else {
             unscaledBitmap.recycle();
             ImageSize s = getScaledDimension(srcSize, boundarySize);
-            return Bitmap.createScaledBitmap(Util.loadBitmapFromUri(mContext,srcUri), s.getWidth(), s.getHeight(), false);
+            return Bitmap.createScaledBitmap(Util.loadBitmapFromUri(mContext, srcUri), s.getWidth(), s.getHeight(), false);
         }
     }
 
-    private synchronized void addFirebaseEntry(){
+    private synchronized void addFirebaseEntry() {
         try {
             mFirebaseAuth.createUserWithEmailAndPassword(mUser.getEmail(), mPassword).addOnCompleteListener(new OnCompleteListener<AuthResult>() {
                 @Override
@@ -127,16 +123,17 @@ public class RegisterUserTask extends AsyncTask<Uri, String, String> {
                     // the auth state listener will be notified and logic to handle the
                     // signed in user can be handled in the listener.
                     if (!task.isSuccessful()) {
-                        Log.e(TAG,"User creation failed");
-                        Controls.setDialogMessage(mContext.getString(R.string.user_reg_failed) +task.getException().getMessage());
+                        Log.e(TAG, "User creation failed");
+//                      Controls.setDialogMessage(mContext.getString(R.string.user_reg_failed) + " " + task.getException().getMessage());
                         Controls.dismissDialog();
+                        Toast.makeText(mContext, mContext.getString(R.string.user_reg_failed) + " " + task.getException().getMessage(), Toast.LENGTH_LONG).show();
                         return;
                     }
                     //If user creation was successful, store extra data object
                     mUid = mFirebaseAuth.getCurrentUser().getUid();
                     mUser.setUid(mUid);
-                    mFirebaseRef.child("users/"+mUid).setValue(mUser);
-                    mFirebaseRef.child("users/"+mUid+"/timestamp").setValue(ServerValue.TIMESTAMP);
+                    mFirebaseRef.child("users/" + mUid).setValue(mUser);
+                    mFirebaseRef.child("users/" + mUid + "/timestamp").setValue(ServerValue.TIMESTAMP);
                     SharedPreferences.Editor editor = mSharedPref.edit();
                     //Write user data to shared preferences
                     Gson gson = new Gson();
@@ -146,24 +143,21 @@ public class RegisterUserTask extends AsyncTask<Uri, String, String> {
                     editor.putString("username", mUser.getEmail());
                     editor.commit();
                     Log.i(TAG, "User " + mUser.getEmail() + " was registerd successfully!");
-                    Controls.dismissDialog();
-                    if(mListener != null){
+//                    Controls.dismissDialog();
+                    if (mListener != null) {
                         mListener.onSuccess(mPictureName);
                     }
                 }
-            }
-            );
+            });
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
 
-
-
-    private String uploadImage(String pictureName,Uri srcUri,int mDstWidth, int mDstHeight){
+    private String uploadImage(String pictureName, Uri srcUri, int mDstWidth, int mDstHeight) {
         String url = "";
-        Bitmap scaledBitmap = getScaledBitmap(srcUri,mDstWidth, mDstHeight);
+        Bitmap scaledBitmap = getScaledBitmap(srcUri, mDstWidth, mDstHeight);
         ContentResolver resolver = mContext.getContentResolver();
         /* Get byte stream */
         ByteArrayOutputStream bos = new ByteArrayOutputStream();
@@ -171,16 +165,17 @@ public class RegisterUserTask extends AsyncTask<Uri, String, String> {
         scaledBitmap.compress(Bitmap.CompressFormat.JPEG, 80, bos);
         byte[] bitmapdata = bos.toByteArray();
         ByteArrayInputStream bs = new ByteArrayInputStream(bitmapdata);
-    try {
-        if (bs != null) {
-            url = AzureUtils.uploadBlob(pictureName, bs, GV.PICTURE_BUCKET);
+        try {
+            if (bs != null) {
+                url = AzureUtils.uploadBlob(pictureName, bs, GV.PICTURE_BUCKET);
+            }
+        } catch (Exception exception) {
+            Log.e("AsyncTask", "Error: " + exception);
         }
-    } catch (Exception exception) {
-        Log.e("AsyncTask", "Error: " + exception);
-    }
         return url;
 
     }
+
     public static ImageSize getScaledDimension(ImageSize imgSize, ImageSize boundary) {
 
         int original_width = imgSize.getWidth();

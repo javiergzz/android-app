@@ -3,8 +3,6 @@ package com.grahm.livepost.activities;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -26,7 +24,6 @@ import com.google.gson.Gson;
 import com.grahm.livepost.R;
 import com.grahm.livepost.adapters.ProfilePagerAdapter;
 import com.grahm.livepost.asynctask.RegisterUserTask;
-import com.grahm.livepost.fragments.ProfilePictureFragment;
 import com.grahm.livepost.interfaces.OnFragmentInteractionListener;
 import com.grahm.livepost.interfaces.OnPutImageListener;
 import com.grahm.livepost.objects.User;
@@ -66,14 +63,13 @@ public class Login extends AppCompatActivity implements OnFragmentInteractionLis
             Login.this.finish();
         }
     };
-    private Uri mIimageUri;
+    public static Uri mIimageUri;
     private User mUser = new User();
     private String mPassword;
     private DatabaseReference mFirebaseRef;
     private RegisterUserTask mAuthTask = null;
     private boolean mLogin = false;
     FirebaseAuth mAuth;
-    private FirebaseAuth.AuthStateListener mAuthListener;
     private String mUid;
     private AppCompatActivity mAvtivity;
 
@@ -90,21 +86,6 @@ public class Login extends AppCompatActivity implements OnFragmentInteractionLis
         mListener = this;
         mPagerAdapter = new ProfilePagerAdapter(getSupportFragmentManager(), NUM_PAGES, mListener);
         mPager.setAdapter(mPagerAdapter);
-
-        mAuthListener = new FirebaseAuth.AuthStateListener() {
-            @Override
-            public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
-                FirebaseUser user = firebaseAuth.getCurrentUser();
-                if (user != null) {
-                    Log.i(TAG_CLASS, "onAuthStateChanged:signed_in:" + user.getUid());
-                    if(!mLogin){
-                        new RegisterUserTask(mUser, mPassword, mFirebaseRef, mAuth, mAvtivity, OnPutImageListener).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR ,mIimageUri);
-                    }
-                } else {
-                    Log.e(TAG_CLASS, "onAuthStateChanged:signed_out");
-                }
-            }
-        };
 
     }
 
@@ -166,15 +147,11 @@ public class Login extends AppCompatActivity implements OnFragmentInteractionLis
     @Override
     public void onStart() {
         super.onStart();
-        mAuth.addAuthStateListener(mAuthListener);
     }
 
     @Override
     public void onStop() {
         super.onStop();
-        if (mAuthListener != null) {
-            mAuth.removeAuthStateListener(mAuthListener);
-        }
     }
 
     @Override
@@ -203,34 +180,14 @@ public class Login extends AppCompatActivity implements OnFragmentInteractionLis
             }
         });
 
-
-
     }
 
     private void onPhotoReturned(File imageFile) {
         mIimageUri = Uri.fromFile(imageFile);
-        Bitmap media = BitmapFactory.decodeFile(imageFile.getPath());
-        ProfilePictureFragment.setImage(media);
     }
 
     private void signUpUser() {
-        Controls.createDialog(Login.this, "Loading...", false);
-        mAuth.createUserWithEmailAndPassword(mUser.getEmail().toString().toLowerCase(), mPassword)
-                .addOnFailureListener(this, new OnFailureListener() {
-                    @Override
-                    public void onFailure(@NonNull Exception e) {
-                        Controls.dismissDialog();
-                        if(e != null){
-                            Log.e(TAG_CLASS, "createUserWithEmail:onFailure:" + e.getMessage());
-                        }
-                    }
-                })
-                .addOnSuccessListener(this, new OnSuccessListener<AuthResult>() {
-                    @Override
-                    public void onSuccess(AuthResult authResult) {
-                        Log.d(TAG_CLASS, "createUserWithEmail:onComplete:" + authResult.getUser().getUid());
-                    }
-                });
+        new RegisterUserTask(mUser, mPassword, mFirebaseRef, mAuth, mAvtivity, OnPutImageListener).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR ,mIimageUri);
     }
 
 }

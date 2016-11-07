@@ -21,35 +21,25 @@ import com.grahm.livepost.interfaces.OnFragmentInteractionListener;
 import com.grahm.livepost.objects.User;
 import com.grahm.livepost.util.Utilities;
 
+import butterknife.BindView;
+import butterknife.ButterKnife;
+import butterknife.OnClick;
 import pl.aprilapps.easyphotopicker.EasyImage;
 
 
 public class SignUpFragment extends Fragment {
 
     private static final int PASS_MIN_LENGTH = 6;
-    private RegisterUserTask mAuthTask = null;
     private OnFragmentInteractionListener mListener;
-    private EditText txtEmail;
-    private EditText txtPassword;
+    @BindView(R.id.txt_email)
+    public EditText txtEmail;
+    @BindView(R.id.txt_password)
+    public EditText txtPassword;
     private String mPassword;
     private DatabaseReference mFirebaseRef;
 
     private User mUser = new User();
     private static final boolean signup = true;
-    private OnClickListener doneListener = new OnClickListener() {
-        @Override
-        public void onClick(View v) {
-            mPassword = txtPassword.getText().toString();
-            if(!attemptLogin()){
-                mUser.setEmail(txtEmail.getText().toString());
-                Bundle args = new Bundle();
-                args.putSerializable("user",mUser);
-                args.putBoolean("signup",signup);
-                args.putString("password",mPassword);
-                mListener.onFragmentInteraction(Login.SIGNUP_FRAGMENT_IDX, args);
-            }
-        }
-    };
 
     public static SignUpFragment newInstance(OnFragmentInteractionListener listener) {
         SignUpFragment fragment = new SignUpFragment();
@@ -64,8 +54,8 @@ public class SignUpFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         mFirebaseRef = FirebaseDatabase.getInstance().getReference();
-        mUser = Utilities.getUser(mFirebaseRef,getActivity(),savedInstanceState);
-        mUser = mUser==null?new User():mUser;
+        mUser = Utilities.getUser(mFirebaseRef, getActivity(), savedInstanceState);
+        mUser = mUser == null ? new User() : mUser;
         super.onCreate(savedInstanceState);
         AppCompatActivity activity = (AppCompatActivity) getActivity();
         EasyImage.configuration(activity)
@@ -77,13 +67,22 @@ public class SignUpFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_sign_up, container, false);
-        Button btnDone = (Button) view.findViewById(R.id.btn_done);
-        txtEmail = (EditText) view.findViewById(R.id.txt_email);
-        txtPassword = (EditText) view.findViewById(R.id.txt_password);
-        btnDone.setOnClickListener(doneListener);
+        ButterKnife.bind(this, view);
         return view;
     }
 
+    @OnClick(R.id.btn_done)
+    public void doneListener(){
+        mPassword = txtPassword.getText().toString();
+        if (!attemptLogin()) {
+            mUser.setEmail(txtEmail.getText().toString());
+            Bundle args = new Bundle();
+            args.putSerializable("user", mUser);
+            args.putBoolean("signup", signup);
+            args.putString("password", mPassword);
+            mListener.onFragmentInteraction(Login.SIGNUP_FRAGMENT_IDX, args);
+        }
+    }
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
@@ -94,7 +93,7 @@ public class SignUpFragment extends Fragment {
         super.onDetach();
     }
 
-    private boolean attemptLogin(){
+    private boolean attemptLogin() {
         txtEmail.setError(null);
         txtPassword.setError(null);
 
@@ -106,6 +105,8 @@ public class SignUpFragment extends Fragment {
         // Check for a valid email address.
         if (TextUtils.isEmpty(email)) {
             txtEmail.setError("This field is required");
+            focusView = txtEmail;
+            cancel = true;
         } else if (!isEmailValid(email)) {
             txtEmail.setError("This email address is invalid");
             focusView = txtEmail;
@@ -113,7 +114,11 @@ public class SignUpFragment extends Fragment {
         }
 
         // Check for a valid password, if the user entered one.
-        if (!TextUtils.isEmpty(mPassword) && !isPasswordValid(mPassword)) {
+        if (TextUtils.isEmpty(mPassword)) {
+            txtEmail.setError("This field is required");
+            focusView = txtPassword;
+            cancel = true;
+        } else if (!TextUtils.isEmpty(mPassword) && !isPasswordValid(mPassword)) {
             txtPassword.setError("This password is too short");
             focusView = txtPassword;
             cancel = true;

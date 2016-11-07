@@ -1,13 +1,11 @@
 package com.grahm.livepost.fragments;
 
-import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
-import android.support.design.widget.TextInputEditText;
 import android.support.design.widget.TextInputLayout;
 import android.support.v4.app.Fragment;
 import android.text.TextUtils;
@@ -211,14 +209,14 @@ public class LPLoginFragment extends Fragment {
         private final String mEmail;
         private final String mPassword;
         private static final String TAG = "UserLoginTask";
-        private Activity mActivity;
+        private Context mContext;
 
         private String mUid;
 
-        UserLoginTask(String email, String password, Activity activity) {
+        UserLoginTask(String email, String password, Context context) {
             mEmail = email;
             mPassword = password;
-            mActivity = activity;
+            mContext = context;
         }
 
         protected void loginAction() {
@@ -230,7 +228,7 @@ public class LPLoginFragment extends Fragment {
                     User u = dataSnapshot.getValue(User.class);
                     Gson gson = new Gson();
                     String json = gson.toJson(u);
-                    SharedPreferences sharedPref = mActivity.getSharedPreferences(getString(R.string.preference_file_key), Context.MODE_PRIVATE);
+                    SharedPreferences sharedPref = mContext.getSharedPreferences(getString(R.string.preference_file_key), Context.MODE_PRIVATE);
                     SharedPreferences.Editor editor = sharedPref.edit();
                     editor.putString("user", json);
                     editor.putString("uid", mUid);
@@ -239,9 +237,10 @@ public class LPLoginFragment extends Fragment {
                     editor.putString(SplashScreen.PREFS_AUTH, SplashScreen.PREFS_LIVEPOST);
                     editor.commit();
                     Log.i(TAG, TAG + ": Login successful!");
-                    Intent mainIntent = new Intent(mActivity, MainActivity.class);
+                    Intent mainIntent = new Intent(getActivity(), MainActivity.class);
+                    Controls.dismissDialog();
                     startActivity(mainIntent);
-                    mActivity.finish();
+                    getActivity().finish();
                 }
 
                 @Override
@@ -256,7 +255,7 @@ public class LPLoginFragment extends Fragment {
         @Override
         protected void onPreExecute() {
             super.onPreExecute();
-            Controls.createDialog(mActivity, "Loading", false);
+            Controls.createDialog(mContext, "Loading", false);
         }
 
         @Override
@@ -267,7 +266,8 @@ public class LPLoginFragment extends Fragment {
                     public void onComplete(@NonNull Task<AuthResult> task) {
                         if(!task.isSuccessful()){
                             Log.i(TAG, "== !task::isSuccessful :) ==");
-                            Toast.makeText(mActivity, task.getException().getMessage(), Toast.LENGTH_LONG).show();
+                            Controls.dismissDialog();
+                            Toast.makeText(mContext, task.getException().getMessage(), Toast.LENGTH_LONG).show();
                             return;
                         }
                         Log.i(TAG, "== task::isSuccessful :) ==");
@@ -283,7 +283,6 @@ public class LPLoginFragment extends Fragment {
 
         @Override
         protected void onPostExecute(final Boolean success) {
-            Controls.dismissDialog();
             mAuthTask = null;
         }
 

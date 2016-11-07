@@ -16,8 +16,7 @@
         android:layout_centerVertical="true"
         android:adjustViewBounds="true"
         android:alpha="0.6"
-        android:scaleType="fitXY"
-        android:src="@drawable/background_login_01" />
+        android:scaleType="fitXY" />
 
     <android.support.percent.PercentRelativeLayout
         android:layout_width="match_parent"
