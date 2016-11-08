@@ -43,6 +43,7 @@ public class CreateStoryTask extends AsyncTask<Uri, String, String> {
     private Story mStory;
     private String mUid;
     private User mUser;
+    private String mKey;
     DatabaseReference mFirebaseRef;
     SharedPreferences mSharedPref;
 
@@ -95,7 +96,7 @@ public class CreateStoryTask extends AsyncTask<Uri, String, String> {
             dialog.dismiss();
         }
         if (mListener != null) {
-            mListener.onSuccess(null);
+            mListener.onSuccess(mKey);
         }
     }
 
@@ -153,20 +154,20 @@ public class CreateStoryTask extends AsyncTask<Uri, String, String> {
             mStory.setIsLive(true);
             DatabaseReference ref = mFirebaseRef.push();
             ref.setValue(mStory);
-            String key = ref.getKey();
+            mKey = ref.getKey();
             //Set Timestamps
             ref.child("timestamp").setValue(ServerValue.TIMESTAMP);
             //Set Timestamps
             ref.child("last_time").setValue(ServerValue.TIMESTAMP);
             //(int count_likes, Map<String, Integer> likes, String message, String profile_picture, String sender, String sender_key, long timestamp)
             Log.e(TAG,"FirebaseEntrying: "+ref.toString());
-            DatabaseReference r = mFirebaseRef.getRoot().child("updates/" + key).push();
+            DatabaseReference r = mFirebaseRef.getRoot().child("updates/" + mKey).push();
             r.setValue(new Update(0, null, mStory.getPosts_picture(), mUser.getProfile_picture(), mStory.getAuthor_name(), mStory.getAuthor()));
             r.child(Story.TIMESTAMP_FIELD_STR).setValue(ServerValue.TIMESTAMP);
 
             //Add post to "posts created"
             Map<String, Object> posts = new HashMap<String, Object>();
-            posts.put(key, mStory);
+            posts.put(mKey, mStory);
             mFirebaseRef.getRoot().child("users/"+mUser.getUserKey()).child("/posts_created").updateChildren(posts);
 
         } catch (Exception e) {

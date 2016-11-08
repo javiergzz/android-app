@@ -38,6 +38,7 @@ import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.Spinner;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.target.BitmapImageViewTarget;
@@ -86,6 +87,7 @@ public class NewStoryFragment extends Fragment implements OnPutImageListener {
     private int mCurrentItem;
     private User mUser;
     private NewSessionViewsManager mNewSessionViewsManager;
+    private Boolean mIsLive = null;
 
     // UI references.
     @BindView(R.id.new_story_pager)
@@ -235,6 +237,7 @@ public class NewStoryFragment extends Fragment implements OnPutImageListener {
                 mViewPager.setCurrentItem(current + 1, true);
                 updateProgressViews();
                 v.setVisibility(current == 0 ? View.INVISIBLE : View.VISIBLE);
+                mBtnNext.setText(current == 2 ? "Publish" : "Next");
             }
         }
     }
@@ -281,6 +284,7 @@ public class NewStoryFragment extends Fragment implements OnPutImageListener {
             list.add(new StoryNameField());
             list.add(new CategoryField());
             list.add(new ImageField());
+            list.add(new PublishIn());
         }
 
         public class NewSessionErrors {
@@ -402,17 +406,58 @@ public class NewStoryFragment extends Fragment implements OnPutImageListener {
             }
 
             public boolean onValidate() {
-//                if (mUri == null) {
-//                    TextInputLayout t = ButterKnife.findById(mViewPager, R.id.new_session_avatar_input);
-//                    if (t != null)
-//                        t.setError(mNewSessionErrors.ERROR_NO_IMG);
-//                    return false;
-//                }
-//                return true;
-                return mUri != null;
+                if (mUri == null) {
+                    TextInputLayout t = ButterKnife.findById(mViewPager, R.id.new_session_avatar_input);
+                    if (t != null)
+                        t.setError(mNewSessionErrors.ERROR_NO_IMG);
+                    Toast.makeText(getActivity(), "Please add an image", Toast.LENGTH_LONG).show();
+                    return false;
+                }
+                return true;
+//                return mUri != null;
             }
         }
 
+        public class PublishIn extends MultipartFormField {
+
+            public int getTitle() {
+                return R.string.ns_publish_in;
+            }
+
+            public int getLayout() {
+                return R.layout.new_session_publish_in;
+            }
+
+            public void onSetup(ViewGroup layout) {
+                final ImageButton imgPublishLivePost = (ImageButton) layout.findViewById(R.id.img_publish_livepost);
+                final ImageButton imgPublishSite = (ImageButton) layout.findViewById(R.id.img_publish_site);
+
+                imgPublishLivePost.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        imgPublishLivePost.setColorFilter(Color.rgb(54, 68, 87));
+                        imgPublishSite.setColorFilter(Color.rgb(230,230,230));
+                        mIsLive = true;
+                        mStory.setIsLive(true);
+                    }
+                });
+
+                imgPublishSite.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        imgPublishLivePost.setColorFilter(Color.rgb(230,230,230));
+                        imgPublishSite.setColorFilter(Color.rgb(54, 68, 87));
+                        mIsLive = false;
+                        mStory.setIsLive(false);
+                    }
+                });
+            }
+
+            public boolean onValidate() {
+                Toast.makeText(getActivity(), "Select an option beafore publish your story", Toast.LENGTH_LONG).show();
+                return mIsLive != null;
+            }
+        }
 
     }
 
@@ -458,9 +503,24 @@ public class NewStoryFragment extends Fragment implements OnPutImageListener {
         });
     }
 
+    public void resetViews(){
+        mUri = null;
+        mIsLive = null;
+        mViewPager.setCurrentItem(0, true);
+        updateProgressViews();
+        TextView storyNameView = ButterKnife.findById(mViewPager, R.id.new_session_story_name);
+        if(storyNameView != null){
+            storyNameView.setText("");
+        }
+    }
+
     @Override
-    public void onSuccess(String url) {
-        mListener.onFragmentInteraction(MainActivity.HOME_IDX, null);
+    public void onSuccess(String key) {
+        Bundle args = new Bundle();
+        args.putString("key", key);
+        args.putSerializable("story", mStory);
+        mListener.onFragmentInteraction(MainActivity.CHAT_IDX, args);
+        resetViews();
     }
 
     private class NewSessionPagerAdapter extends PagerAdapter {

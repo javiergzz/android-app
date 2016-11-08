@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.design.widget.TextInputLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/new_session_publish_input"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:gravity="center"
+    android:layout_centerInParent="true"
+    android:paddingLeft="@dimen/activity_horizontal_margin"
+    android:paddingRight="@dimen/activity_horizontal_margin">
+
+    <LinearLayout
+        android:id="@+id/new_session_publish"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:orientation="horizontal">
+
+        <View
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight=".1" />
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight=".3"
+            android:orientation="vertical">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textAlignment="center"
+                android:text="@string/ns_publish_livepost"/>
+
+            <ImageButton
+                android:id="@+id/img_publish_livepost"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:background="#FFF"
+                android:scaleType="fitCenter"
+                android:src="@drawable/ic_livepost_p" />
+
+        </LinearLayout>
+
+        <RelativeLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight=".2"
+            android:layout_centerVertical="true"
+            android:layout_centerHorizontal="true"
+            android:orientation="vertical">
+
+            <View
+                android:layout_width="1dp"
+                android:layout_height="150dp"
+                android:layout_centerInParent="true"
+                android:background="@color/transparent_gray" />
+
+        </RelativeLayout>
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight=".3"
+            android:orientation="vertical">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textAlignment="center"
+                android:text="@string/ns_publish_site"/>
+
+            <ImageButton
+                android:id="@+id/img_publish_site"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="#FFF"
+                android:scaleType="fitCenter"
+                android:src="@drawable/ic_site" />
+        </LinearLayout>
+
+
+        <View
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight=".1" />
+
+    </LinearLayout>
+
+</android.support.design.widget.TextInputLayout>
+
+

@@ -62,10 +62,14 @@
     <string name="ns_story_name">Give your story a title</string>
     <string name="ns_category">Pick a category</string>
     <string name="ns_image">Add an image</string>
+    <string name="ns_publish_in">Ready to publish your story?</string>
     <string name="ns_creating_text">Posting...</string>
     <!-- New Session Errors-->
     <string name="ns_story_name_error">Your story name must have at least 2 characters!</string>
     <string name="ns_story_no_img_error">You need an image to create a story</string>
+
+    <string name="ns_publish_livepost">Publish on LivePost</string>
+    <string name="ns_publish_site">Publish on your site</string>
 
     <!-- Asynctasks stuff-->
     <string name="at_deleting">Deleting...</string>

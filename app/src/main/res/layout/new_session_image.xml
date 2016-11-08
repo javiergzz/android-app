@@ -20,6 +20,7 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:scaleType="fitCenter"
+            android:background="@color/white"
             android:src="@drawable/ic_add_a_photo_black_48dp" />
     </LinearLayout>
 
