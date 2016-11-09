@@ -17,8 +17,6 @@
     <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
 
 
-
-
     <application
         android:name=".application.LoadData"
         android:allowBackup="true"
@@ -85,6 +83,7 @@
             android:name=".activities.StorySettingsActivity"
             android:label="@string/title_activity_contributors"
             android:parentActivityName=".activities.ChatActivity"
+            android:windowSoftInputMode="stateHidden|adjustPan"
             android:theme="@style/AppTheme.NoActionBar">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
@@ -99,17 +98,21 @@
             android:name=".activities.EditProfile"
             android:label="@string/title_activity_edit_profile"
             android:parentActivityName=".activities.MainActivity" />
+
         <meta-data
             android:name="com.google.android.gms.version"
             android:value="@integer/google_play_services_version" />
         <meta-data
             android:name="io.fabric.ApiKey"
             android:value="26cd4c486e5b2d52ff9e916670ef1dbbd5d89c30" />
-        <meta-data android:name="com.facebook.sdk.ApplicationId" android:value="@string/facebook_app_id"/>
+        <meta-data
+            android:name="com.facebook.sdk.ApplicationId"
+            android:value="@string/facebook_app_id" />
 
-        <provider android:authorities="com.facebook.app.FacebookContentProvider1509780745996760"
+        <provider
             android:name="com.facebook.FacebookContentProvider"
-            android:exported="true"/>
+            android:authorities="com.facebook.app.FacebookContentProvider1509780745996760"
+            android:exported="true" />
     </application>
 
 </manifest>

@@ -3,21 +3,22 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:gravity="center_vertical">
-<ImageView
-    android:id="@+id/contributor_image"
-    android:layout_width="32dp"
-    android:layout_height="32dp"
-    android:layout_alignParentLeft="true"
-    android:layout_marginLeft="15dp"
-    android:layout_marginRight="15dp"
-    />
+
+    <ImageView
+        android:id="@+id/contributor_image"
+        android:layout_width="32dp"
+        android:layout_height="32dp"
+        android:layout_alignParentLeft="true"
+        android:layout_marginLeft="15dp"
+        android:layout_marginRight="15dp" />
+
     <TextView
         android:id="@+id/contributor_text"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_toRightOf="@id/contributor_image"
         android:layout_centerInParent="true"
-        android:textColor="@color/grey"/>
+        android:layout_toRightOf="@id/contributor_image"
+        android:textColor="@color/grey" />
 
 
     <Button
@@ -26,17 +27,18 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentRight="true"
-        android:lines="1"
-        android:text="@string/story_settings_contributors_delete_btn"
-        android:textAllCaps="false"
         android:layout_centerInParent="true"
         android:layout_gravity="end"
+        android:lines="1"
+        android:text="@string/story_settings_contributors_delete_btn"
         android:textAlignment="textEnd"
+        android:textAllCaps="false"
         android:textColor="@android:color/holo_red_light"
         tools:ignore="RelativeOverlap" />
+
     <View
         android:layout_width="match_parent"
         android:layout_height="1dp"
-        android:background="#EAEAEA"
-        android:layout_alignParentBottom="true"/>
+        android:layout_alignParentBottom="true"
+        android:background="#EAEAEA" />
 </RelativeLayout>

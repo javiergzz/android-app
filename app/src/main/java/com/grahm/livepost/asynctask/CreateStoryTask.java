@@ -151,7 +151,6 @@ public class CreateStoryTask extends AsyncTask<Uri, String, String> {
     private synchronized void addFirebaseEntry() {
 
         try {
-            mStory.setIsLive(true);
             DatabaseReference ref = mFirebaseRef.push();
             ref.setValue(mStory);
             mKey = ref.getKey();

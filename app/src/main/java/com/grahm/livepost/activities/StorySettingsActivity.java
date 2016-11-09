@@ -2,21 +2,24 @@ package com.grahm.livepost.activities;
 
 import android.content.ClipData;
 import android.content.ClipboardManager;
+import android.content.DialogInterface;
+import android.os.Build;
 import android.os.Bundle;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.text.TextUtils;
+import android.text.util.Linkify;
 import android.util.Log;
 import android.view.View;
+import android.view.WindowManager;
 import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -27,22 +30,17 @@ import com.google.firebase.database.Transaction;
 import com.google.firebase.database.ValueEventListener;
 import com.grahm.livepost.R;
 import com.grahm.livepost.adapters.ContributorsAdapter;
-import com.grahm.livepost.adapters.UsersAdapter;
 import com.grahm.livepost.objects.FirebaseActivity;
 import com.grahm.livepost.objects.Invite;
 import com.grahm.livepost.objects.Story;
 import com.grahm.livepost.objects.User;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
-
-import static com.flurry.sdk.fs.a.e;
 
 public class StorySettingsActivity extends FirebaseActivity {
     private static final String TAG = "StorySettingsActivity";
@@ -60,6 +58,9 @@ public class StorySettingsActivity extends FirebaseActivity {
     @BindView(R.id.edit_story_layout)
     public LinearLayout mEditStoryLayout;
 
+    @BindView(R.id.txt_story_settings_title)
+    public TextView mTxtTitle;
+
     private Story mStory;
     private String mId;
     private User mContributor;
@@ -71,16 +72,24 @@ public class StorySettingsActivity extends FirebaseActivity {
         Bundle b = savedInstanceState == null ? getIntent().getExtras() : savedInstanceState;
         mStory = (Story) b.getSerializable(ChatActivity.TAG_STORY);
         mId = b.getString(ChatActivity.TAG_ID);
-        String url = "<iframe width=\"100%\" height=\"900\" src=\"" + getString(R.string.embed_url) + mId + "\" frameborder=\"0\" allowfullscreen></iframe>";
+        String url = getString(R.string.embed_url) + mId;
+        String embed = "<iframe width=\"100%\" height=\"900\" src=\"" + url + "\" frameborder=\"0\" allowfullscreen></iframe>";
 
 
-        mTextStoryCode.setText(url);
-        mTextStoryCode.setEnabled(false);
+        mTxtTitle.setText(mStory.getIsLive() ? getString(R.string.story_settings_url_title) : getString(R.string.story_settings_code_title));
+        mTextStoryCode.setText(mStory.getIsLive() ? url : embed);
+        mTextStoryCode.setEnabled(mStory.getIsLive());
+
+        if(!mStory.getIsLive()){
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
+                mTextStoryCode.setTextAlignment(View.TEXT_ALIGNMENT_TEXT_START);
+            }
+        }
+
         //TODO Uncomment this
         mEditStoryLayout.setVisibility(View.VISIBLE);
 
-
-    }
+     }
 
     @Override
     protected void onRestoreInstanceState(Bundle savedInstanceState) {
@@ -164,10 +173,10 @@ public class StorySettingsActivity extends FirebaseActivity {
         ClipboardManager clipboard = (ClipboardManager) getSystemService(CLIPBOARD_SERVICE);
         ClipData clip = ClipData.newPlainText(getString(R.string.story_code), mTextStoryCode.getText());
         clipboard.setPrimaryClip(clip);
+        Toast.makeText(StorySettingsActivity.this, "Copied to Clipboard", Toast.LENGTH_SHORT).show();
     }
 
-    @OnClick(R.id.btn_story_delete)
-    public void deleteStoryButton(View v) {
+    private void deleteStory(){
         //Delete post
         mFirebaseRef.child("posts/" + mId).removeValue();
 
@@ -204,52 +213,76 @@ public class StorySettingsActivity extends FirebaseActivity {
         onBackPressed();
     }
 
+    @OnClick(R.id.btn_story_delete)
+    public void deleteStoryButton(View v) {
+        AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(
+                StorySettingsActivity.this);
+        alertDialogBuilder
+                .setTitle(R.string.story_settings_delete)
+                .setCancelable(false)
+                .setPositiveButton("Delete",
+                        new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int id) {
+                                deleteStory();
+                            }
+                        })
+                .setNegativeButton("Cancel",
+                        new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int id) {
+                                dialog.cancel();
+                            }
+                        });
+        AlertDialog alertDialog = alertDialogBuilder.create();
+        alertDialog.show();
+    }
+
     @OnClick(R.id.invite_contributor_button)
     public void addContributor(final View v) {
-
         //Search based on user email
         String q = mTextContributor.getText().toString();
-        mFirebaseRef.child("users").orderByChild("email").equalTo(q).addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                if (dataSnapshot != null && dataSnapshot.getValue() != null) {
-                    User u = dataSnapshot.getChildren().iterator().next().getValue(User.class);
-                    String userKey =  u.getUserKey();
+        if(!TextUtils.isEmpty(q)){
+            mFirebaseRef.child("users").orderByChild("email").equalTo(q).addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(DataSnapshot dataSnapshot) {
+                    if (dataSnapshot != null && dataSnapshot.getValue() != null) {
+                        User u = dataSnapshot.getChildren().iterator().next().getValue(User.class);
+                        String userKey =  u.getUserKey();
 
-                    Log.e(TAG,userKey);
-                    if (userKey != null)
-                        addContributorQuery(u);
-                    else
                         Log.e(TAG,userKey);
+                        if (userKey != null)
+                            addContributorQuery(u);
+                        else
+                            Log.e(TAG,userKey);
+                    }
                 }
-            }
 
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-                Toast.makeText(getApplicationContext(), getString(R.string.story_settings_invalid_user_error), Toast.LENGTH_LONG).show();
-            }
-        });
-        //Search based on Twitter handle
-        mFirebaseRef.child("users").orderByKey().equalTo(q).addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                if (dataSnapshot != null && dataSnapshot.getValue() != null) {
-                    User u = dataSnapshot.getChildren().iterator().next().getValue(User.class);
-                    String userKey =  u.getUserKey();
+                @Override
+                public void onCancelled(DatabaseError databaseError) {
+                    Toast.makeText(getApplicationContext(), getString(R.string.story_settings_invalid_user_error), Toast.LENGTH_LONG).show();
+                }
+            });
+            //Search based on Twitter handle
+            mFirebaseRef.child("users").orderByKey().equalTo(q).addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(DataSnapshot dataSnapshot) {
+                    if (dataSnapshot != null && dataSnapshot.getValue() != null) {
+                        User u = dataSnapshot.getChildren().iterator().next().getValue(User.class);
+                        String userKey =  u.getUserKey();
 
-                    Log.e(TAG,userKey);
-                    if (userKey != null)
-                        addContributorQuery(u);
-                    else
                         Log.e(TAG,userKey);
+                        if (userKey != null)
+                            addContributorQuery(u);
+                        else
+                            Log.e(TAG,userKey);
+                    }
                 }
-            }
 
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-                Toast.makeText(getApplicationContext(), getString(R.string.story_settings_invalid_user_error), Toast.LENGTH_LONG).show();
-            }
-        });
+                @Override
+                public void onCancelled(DatabaseError databaseError) {
+                    Toast.makeText(getApplicationContext(), getString(R.string.story_settings_invalid_user_error), Toast.LENGTH_LONG).show();
+                }
+            });
+        }
 
 
     }

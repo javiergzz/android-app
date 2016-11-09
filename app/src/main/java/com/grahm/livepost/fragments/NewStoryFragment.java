@@ -67,6 +67,8 @@ import butterknife.OnEditorAction;
 import pl.aprilapps.easyphotopicker.DefaultCallback;
 import pl.aprilapps.easyphotopicker.EasyImage;
 
+import static com.grahm.livepost.util.Utilities.isOnline;
+
 /**
  * A simple {@link Fragment} subclass.
  * Activities that contain this fragment must implement the
@@ -232,7 +234,11 @@ public class NewStoryFragment extends Fragment implements OnPutImageListener {
             MultipartFormField r = mNewSessionViewsManager.list.get(current);
             if (r.onValidate()) {
                 if (current + 1 == vCount) {//Send Registration Form
-                    attemptSessionCreation();
+                    if(isOnline(getActivity())){
+                        attemptSessionCreation();
+                    }else{
+                        Toast.makeText(getActivity(), "We're not detected any internet conection", Toast.LENGTH_LONG).show();
+                    }
                 }
                 mViewPager.setCurrentItem(current + 1, true);
                 updateProgressViews();
@@ -454,8 +460,11 @@ public class NewStoryFragment extends Fragment implements OnPutImageListener {
             }
 
             public boolean onValidate() {
-                Toast.makeText(getActivity(), "Select an option beafore publish your story", Toast.LENGTH_LONG).show();
-                return mIsLive != null;
+                if(mIsLive == null){
+                    Toast.makeText(getActivity(), "Select an option beafore publish your story", Toast.LENGTH_LONG).show();
+                    return false;
+                }
+                return true;
             }
         }
 

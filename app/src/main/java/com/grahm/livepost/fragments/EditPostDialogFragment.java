@@ -26,8 +26,6 @@ import com.grahm.livepost.asynctask.PostImageTask;
 import com.grahm.livepost.interfaces.OnPutImageListener;
 import com.grahm.livepost.objects.Update;
 import com.grahm.livepost.objects.VideoMessageObject;
-import com.grahm.livepost.util.GV;
-import com.grahm.livepost.util.Util;
 import com.grahm.livepost.util.Utilities;
 
 import java.io.File;
@@ -94,12 +92,12 @@ public class EditPostDialogFragment extends DialogFragment {
         // Inflate and set the layout for the dialog
         // Pass null as the parent view because its going in the dialog layout
         builder.setView(v)
-                .setPositiveButton(getString(R.string.edit_confirm), new DialogInterface.OnClickListener() {
+                .setPositiveButton(getString(R.string.dialog_edit), new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int id) {
                         editAction();
                     }
                 })
-                .setNegativeButton(getString(R.string.edit_delete), new DialogInterface.OnClickListener() {
+                .setNegativeButton(getString(R.string.dialog_delete), new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int id) {
                         deleteAction();
                     }
