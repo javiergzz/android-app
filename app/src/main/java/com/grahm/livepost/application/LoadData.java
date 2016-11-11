@@ -7,6 +7,8 @@ import com.alipay.euler.andfix.patch.PatchManager;
 import com.facebook.FacebookSdk;
 import com.facebook.appevents.AppEventsLogger;
 import com.google.firebase.database.FirebaseDatabase;
+import com.grahm.livepost.R;
+import com.grahm.livepost.activities.InitActivity;
 import com.jcmore2.appcrash.AppCrash;
 import com.percolate.foam.FoamApiKeys;
 import com.percolate.foam.FoamMultiDexApplication;
@@ -26,6 +28,9 @@ public class LoadData extends FoamMultiDexApplication {
         AppEventsLogger.activateApp(this);
         //App crash catcher
         AppCrash.init(this);
+        AppCrash.get().withInitActivity(InitActivity.class)
+                .withBackgroundColor(android.R.color.white)
+                .withView(R.layout.custom_error_view);
         //Quick patcher
         try {
             PatchManager patchManager = new PatchManager(this);
