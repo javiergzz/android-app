@@ -17,7 +17,13 @@ import java.io.InputStream;
 public class DownloadImageTask extends AsyncTask<String, Void, Bitmap> {
     private ImageView bmImage;
     private OnCallbackImageListener image;
+
     public DownloadImageTask(ImageView bmImage, OnCallbackImageListener callback) {
+        this.bmImage = bmImage;
+        this.image = callback;
+    }
+
+    public DownloadImageTask(OnCallbackImageListener callback) {
         this.bmImage = bmImage;
         this.image = callback;
     }
@@ -37,7 +43,9 @@ public class DownloadImageTask extends AsyncTask<String, Void, Bitmap> {
 
     protected void onPostExecute(Bitmap result) {
         if(result != null) {
-            bmImage.setImageBitmap(result);
+            if(bmImage != null){
+                bmImage.setImageBitmap(result);
+            }
             image.callback(result);
         }
     }

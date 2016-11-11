@@ -22,6 +22,7 @@ import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.target.BitmapImageViewTarget;
+import com.google.firebase.analytics.FirebaseAnalytics;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
@@ -64,6 +65,7 @@ public class ProfileFragment extends Fragment {
     private User mUser;
     private ProfileViewsManager mProfileViewsManager;
     private DatabaseReference mFirebaseRef;
+    private FirebaseAnalytics mFirebaseAnalytics;
 
     private ProfileSectionsPagerAdapter mSectionsPagerAdapter;
 
@@ -113,6 +115,8 @@ public class ProfileFragment extends Fragment {
 
         setupNavigation(view, inflater);
         switchMainActivityView(StateLayout.VIEW_CONTENT);
+        mFirebaseAnalytics = FirebaseAnalytics.getInstance(getContext());
+        mFirebaseAnalytics.setCurrentScreen(getActivity(), "Profile Screen", "Fragment");
         return view;
 
     }

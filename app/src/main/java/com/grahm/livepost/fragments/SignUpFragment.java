@@ -12,6 +12,7 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
 
+import com.google.firebase.analytics.FirebaseAnalytics;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.grahm.livepost.R;
@@ -37,6 +38,7 @@ public class SignUpFragment extends Fragment {
     public EditText txtPassword;
     private String mPassword;
     private DatabaseReference mFirebaseRef;
+    private FirebaseAnalytics mFirebaseAnalytics;
 
     private User mUser = new User();
     private static final boolean signup = true;
@@ -68,11 +70,13 @@ public class SignUpFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_sign_up, container, false);
         ButterKnife.bind(this, view);
+        mFirebaseAnalytics = FirebaseAnalytics.getInstance(getContext());
+        mFirebaseAnalytics.setCurrentScreen(getActivity(), "SignUp Screen", "Fragment");
         return view;
     }
 
     @OnClick(R.id.btn_done)
-    public void doneListener(){
+    public void doneListener() {
         mPassword = txtPassword.getText().toString();
         if (!attemptLogin()) {
             mUser.setEmail(txtEmail.getText().toString());
@@ -83,6 +87,7 @@ public class SignUpFragment extends Fragment {
             mListener.onFragmentInteraction(Login.SIGNUP_FRAGMENT_IDX, args);
         }
     }
+
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);

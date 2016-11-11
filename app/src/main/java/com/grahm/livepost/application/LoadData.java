@@ -11,16 +11,13 @@ import com.jcmore2.appcrash.AppCrash;
 import com.percolate.foam.FoamApiKeys;
 import com.percolate.foam.FoamMultiDexApplication;
 
-
-/**
- * Created by javiergonzalez on 6/21/16.
- */
 @FoamApiKeys(
         papertrail = "logs4.papertrailapp.com:50563",
         flurry = "CM4JRYJJMR4XM24KTRHZ"
 )
 public class LoadData extends FoamMultiDexApplication {
     private static final String TAG = "LoadData";
+
     @Override
     public void onCreate() {
         super.onCreate();

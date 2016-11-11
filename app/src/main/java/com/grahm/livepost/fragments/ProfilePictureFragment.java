@@ -22,6 +22,7 @@ import android.widget.ImageView;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.target.BitmapImageViewTarget;
+import com.google.firebase.analytics.FirebaseAnalytics;
 import com.grahm.livepost.R;
 import com.grahm.livepost.activities.Login;
 import com.grahm.livepost.interfaces.OnFragmentInteractionListener;
@@ -49,6 +50,7 @@ public class ProfilePictureFragment extends Fragment {
     public ImageView imgProfile;
     private static final boolean signup = false;
     private User mUser = new User();
+    private FirebaseAnalytics mFirebaseAnalytics;
 
     public static ProfilePictureFragment newInstance(OnFragmentInteractionListener listener) {
         ProfilePictureFragment fragment = new ProfilePictureFragment();
@@ -71,6 +73,10 @@ public class ProfilePictureFragment extends Fragment {
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_profile_picture, container, false);
         ButterKnife.bind(this, view);
+        // Obtain the FirebaseAnalytics instance.
+        mFirebaseAnalytics = FirebaseAnalytics.getInstance(getContext());
+        // Track Screen
+        mFirebaseAnalytics.setCurrentScreen(getActivity(), "SignUp profile picture Screen", "Fragment");
         return view;
     }
 
@@ -124,12 +130,18 @@ public class ProfilePictureFragment extends Fragment {
 
     @OnClick(R.id.img_profile)
     public void showAlertMedia(){
+        Bundle bundle = new Bundle();
+        bundle.putString(FirebaseAnalytics.Param.ITEM_NAME, "Select profile picture sign up");
+        mFirebaseAnalytics.logEvent(FirebaseAnalytics.Event.SELECT_CONTENT, bundle);
         EasyImage.openChooserWithDocuments(ProfilePictureFragment.this, "Choose a profile picture", 1);
     }
 
     private void onPhotoReturned(File imageFile) {
         Log.i(TAG_CLASS, "onPhotoReturned");
         Login.mIimageUri = Uri.fromFile(imageFile);
+        Bundle bundle = new Bundle();
+        bundle.putString(FirebaseAnalytics.Param.ITEM_NAME, "Set profile picture sign up");
+        mFirebaseAnalytics.logEvent(FirebaseAnalytics.Event.SIGN_UP, bundle);
         setImage(Uri.fromFile(imageFile));
     }
 

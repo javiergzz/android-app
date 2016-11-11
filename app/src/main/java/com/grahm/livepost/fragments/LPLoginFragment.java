@@ -201,7 +201,7 @@ public class LPLoginFragment extends Fragment {
     }
 
     private boolean isPasswordValid(String password) {
-        return password.length() > PASS_MIN_LENGTH;
+        return password.length() >= PASS_MIN_LENGTH;
     }
 
     public class UserLoginTask extends AsyncTask<Void, Void, Boolean> {

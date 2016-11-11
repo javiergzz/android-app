@@ -3,7 +3,12 @@ package com.grahm.livepost.adapters;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
+import android.graphics.drawable.LayerDrawable;
 import android.net.Uri;
+import android.os.AsyncTask;
+import android.os.Environment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
 import android.support.v7.widget.RecyclerView;
@@ -30,6 +35,8 @@ import com.facebook.FacebookCallback;
 import com.facebook.FacebookException;
 import com.facebook.share.Sharer;
 import com.facebook.share.model.ShareLinkContent;
+import com.facebook.share.model.SharePhoto;
+import com.facebook.share.model.SharePhotoContent;
 import com.facebook.share.widget.ShareDialog;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -39,12 +46,15 @@ import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 import com.grahm.livepost.R;
 import com.grahm.livepost.activities.PlayerActivity;
+import com.grahm.livepost.asynctask.DownloadImageTask;
 import com.grahm.livepost.asynctask.UploadVideoThumbTask;
 import com.grahm.livepost.fragments.EditPostDialogFragment;
+import com.grahm.livepost.interfaces.OnCallbackImageListener;
 import com.grahm.livepost.interfaces.OnFragmentInteractionListener;
 import com.grahm.livepost.objects.Update;
 import com.grahm.livepost.objects.User;
 import com.grahm.livepost.specialViews.SwipeLayout;
+import com.grahm.livepost.ui.Controls;
 import com.grahm.livepost.util.GV;
 import com.grahm.livepost.util.Util;
 import com.grahm.livepost.util.Utilities;
@@ -154,19 +164,13 @@ public class ChatAdapter extends FirebaseListAdapter<Update> {
             h.mBtnShareFacebook.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    shareOnFacebook();
+                    shareOnFacebook(h.mImgChatView);
                 }
             });
             h.mBtnShareTwitter.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    try {
-                        tweetPhoto(msg);
-                    } catch (MalformedURLException e) {
-                        Log.e("TW_MalformedURL", e.getMessage());
-                    } catch (URISyntaxException e) {
-                        Log.e("TW_URISyntax", e.getMessage());
-                    }
+                tweetPhoto(h.mImgChatView);
                 }
             });
         } else {
@@ -261,35 +265,16 @@ public class ChatAdapter extends FirebaseListAdapter<Update> {
 
     }
 
-    private void shareOnFacebook() {
-        ShareLinkContent linkContent = new ShareLinkContent.Builder()
-                .setContentTitle("Hello Facebook")
-                .setContentDescription(
-                        "The 'Hello Facebook' sample  showcases simple Facebook integration")
-                .setContentUrl(Uri.parse("http://developers.facebook.com/android"))
+    private void shareOnFacebook(ImageView img) {
+        img.buildDrawingCache();
+        Bitmap bitmap = img.getDrawingCache();
+        SharePhoto photo = new SharePhoto.Builder()
+                .setBitmap(bitmap)
                 .build();
-
-        shareDialog.show(linkContent);
-    }
-
-    public Uri getImageUri(Context inContext, Bitmap inImage, String title) throws IOException {
-
-        File f = new File(inContext.getCacheDir(), title);
-        f.createNewFile();
-
-        //Convert bitmap to byte array
-        Bitmap bitmap = inImage;
-        ByteArrayOutputStream bos = new ByteArrayOutputStream();
-        bitmap.compress(Bitmap.CompressFormat.JPEG, 0 /*ignored for PNG*/, bos);
-        byte[] bitmapdata = bos.toByteArray();
-
-        //write the bytes in file
-        FileOutputStream fos = new FileOutputStream(f);
-        fos.write(bitmapdata);
-        fos.flush();
-        fos.close();
-
-        return Uri.fromFile(f);
+        SharePhotoContent content = new SharePhotoContent.Builder()
+                .addPhoto(photo)
+                .build();
+        shareDialog.show(content);
     }
 
     private void tweet(String message) {
@@ -298,24 +283,31 @@ public class ChatAdapter extends FirebaseListAdapter<Update> {
         builder.show();
     }
 
-    private void tweetPhoto(String url) throws MalformedURLException, URISyntaxException {
+    private void tweetPhoto(ImageView img) {
+        img.buildDrawingCache();
+        Bitmap bitmap = img.getDrawingCache();
+        Uri imageUri = getLocalBitmapUri(bitmap);
         TweetComposer.Builder builder = new TweetComposer.Builder(mActivity);
-        Log.i("URL IMAGE: ", Utilities.trimPicture(url));
+        builder.text("@LivePostApp");
+        builder.image(imageUri);
+        builder.show();
+    }
+
+    public Uri getLocalBitmapUri(Bitmap bmp) {
+        // Store image to default external storage directory
+        Uri bmpUri = null;
         try {
-            Bitmap bitmap = Glide.
-                    with(mActivity).
-                    load(Utilities.trimPicture(url)).
-                    asBitmap().
-                    into(-1, -1).
-                    get();
-            String title = mChatKey + "_" + (System.currentTimeMillis() / 1000L);
-            Uri uri = getImageUri(mActivity, bitmap, title);
-            builder.text("@LivePostApp");
-            builder.image(uri);
-            builder.show();
-        } catch (Exception e) {
-            Log.e("TW_PHOTO", e.getMessage());
+            File file =  new File(Environment.getExternalStoragePublicDirectory(
+                    Environment.DIRECTORY_DOWNLOADS), "share_image_" + System.currentTimeMillis() + ".png");
+            file.getParentFile().mkdirs();
+            FileOutputStream out = new FileOutputStream(file);
+            bmp.compress(Bitmap.CompressFormat.PNG, 90, out);
+            out.close();
+            bmpUri = Uri.fromFile(file);
+        } catch (IOException e) {
+            e.printStackTrace();
         }
+        return bmpUri;
     }
 
     private void swipeLayout(ChatViewHolder iholder) {

@@ -42,6 +42,7 @@ import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.target.BitmapImageViewTarget;
+import com.google.firebase.analytics.FirebaseAnalytics;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.grahm.livepost.R;
@@ -104,6 +105,7 @@ public class NewStoryFragment extends Fragment implements OnPutImageListener {
     public Button mBtnNext;
 
     private OnFragmentInteractionListener mListener;
+    private FirebaseAnalytics mFirebaseAnalytics;
 
     public NewStoryFragment() {
         // Required empty public constructor
@@ -161,6 +163,11 @@ public class NewStoryFragment extends Fragment implements OnPutImageListener {
         switchMainActivityView(StateLayout.VIEW_CONTENT);
 
         updateProgressViews();
+
+        // Obtain the FirebaseAnalytics instance.
+        mFirebaseAnalytics = FirebaseAnalytics.getInstance(getContext());
+        // Track Screen
+        mFirebaseAnalytics.setCurrentScreen(getActivity(), "New Story Screen", "Fragment");
         return view;
     }
 
@@ -342,7 +349,6 @@ public class NewStoryFragment extends Fragment implements OnPutImageListener {
         }
 
         public class CategoryField extends MultipartFormField {
-            private Spinner mSpinner;
             private ListView mList;
 
             public int getTitle() {
@@ -358,7 +364,6 @@ public class NewStoryFragment extends Fragment implements OnPutImageListener {
             }
 
             public void onSetup(ViewGroup layout) {
-
                 ArrayAdapter adapter = new ArrayAdapter(getActivity().getApplicationContext(), R.layout.item_category,
                         R.id.txt_category, getActivity().getResources().getStringArray(R.array.categories));
                 mList = ButterKnife.findById(layout, R.id.list_categories);
@@ -510,6 +515,9 @@ public class NewStoryFragment extends Fragment implements OnPutImageListener {
                 resultView.setImageBitmap(resource);
             }
         });
+        Bundle bundle = new Bundle();
+        bundle.putString(FirebaseAnalytics.Param.ITEM_NAME, "Set story picture New Story");
+        mFirebaseAnalytics.logEvent(FirebaseAnalytics.Event.SELECT_CONTENT, bundle);
     }
 
     public void resetViews(){
