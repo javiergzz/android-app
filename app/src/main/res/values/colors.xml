@@ -25,4 +25,5 @@
     <color name="action_bar_color">#E34D2E</color>
     <color name="img_gray">#EAEAEA</color>
     <color name="transparent_white">#F1F1F1</color>
+    <color name="transparent_blue">#10364457</color>
 </resources>

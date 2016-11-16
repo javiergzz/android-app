@@ -348,4 +348,5 @@
 
     <string name="toast_declined">Invitation Declined</string>
     <string name="toast_accepted">Invitation Accepted</string>
+    <string name="chat_txt_hint">What\'s happening?</string>
 </resources>

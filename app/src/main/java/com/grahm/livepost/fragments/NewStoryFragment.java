@@ -233,8 +233,14 @@ public class NewStoryFragment extends Fragment implements OnPutImageListener {
         //Leave Empty
     }
 
+    private void hideKeyBoard(){
+        InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
+        imm.hideSoftInputFromWindow(getView().getWindowToken(), 0);
+    }
+
     @OnClick(R.id.new_story_btn_next)
     public void nextButton(View v) {
+        hideKeyBoard();
         if(mViewPager != null && mViewPager.getAdapter() != null){
             int vCount = mViewPager.getAdapter().getCount();
             int current = mViewPager.getCurrentItem();
@@ -344,7 +350,7 @@ public class NewStoryFragment extends Fragment implements OnPutImageListener {
                         return false;
                     }
                 });
-                storyName.requestFocus();
+//                storyName.requestFocus();
             }
         }
 

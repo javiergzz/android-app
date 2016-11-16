@@ -217,7 +217,7 @@ public class ChatAdapter extends FirebaseListAdapter<Update> {
                 .load(msg)
                 .diskCacheStrategy(DiskCacheStrategy.RESULT)
                 .placeholder(R.drawable.default_placeholder)
-                .fitCenter()
+                .centerCrop()
                 .into(h.mImgChatView);
 
     }

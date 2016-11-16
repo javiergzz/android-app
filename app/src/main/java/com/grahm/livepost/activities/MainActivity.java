@@ -18,6 +18,7 @@ import com.grahm.livepost.fragments.NewStoryFragment;
 import com.grahm.livepost.fragments.ProfileFragment;
 import com.grahm.livepost.interfaces.OnFragmentInteractionListener;
 import com.grahm.livepost.objects.FirebaseActivity;
+import com.grahm.livepost.util.KeyboardUtil;
 import com.objectlife.statelayout.StateLayout;
 
 import java.io.Serializable;
@@ -71,6 +72,8 @@ public class MainActivity extends FirebaseActivity implements OnFragmentInteract
         setSupportActionBar(toolbar);
         setupNavigation(savedInstanceState);
         setupTabs();
+        KeyboardUtil keyboardUtil = new KeyboardUtil(this, findViewById(R.id.main_content));
+        keyboardUtil.enable();
     }
 
 

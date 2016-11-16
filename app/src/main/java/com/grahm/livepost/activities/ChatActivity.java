@@ -17,11 +17,11 @@ import android.view.View;
 import android.view.inputmethod.EditorInfo;
 import android.widget.AbsListView;
 import android.widget.AdapterView;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
-import android.widget.Button;
 
 import com.bumptech.glide.Glide;
 import com.facebook.FacebookSdk;
@@ -37,6 +37,7 @@ import com.grahm.livepost.interfaces.OnPutImageListener;
 import com.grahm.livepost.objects.FirebaseActivity;
 import com.grahm.livepost.objects.Story;
 import com.grahm.livepost.objects.Update;
+import com.grahm.livepost.util.KeyboardUtil;
 import com.grahm.livepost.objects.User;
 import com.grahm.livepost.util.Util;
 import com.grahm.livepost.util.Utilities;
@@ -147,8 +148,10 @@ public class ChatActivity extends FirebaseActivity implements AbsListView.OnItem
                 .setEmptyViewResId(R.id.v_empty)
                 .setLoadingViewResId(R.id.v_loading)
                 .initWithState(StateLayout.VIEW_LOADING);
-    }
 
+        KeyboardUtil keyboardUtil = new KeyboardUtil(this, findViewById(R.id.chat_container));
+        keyboardUtil.enable();
+    }
 
     @OnTextChanged(R.id.messageInput)
     void onTextChanged(CharSequence text) {
