@@ -26,6 +26,7 @@ public class SplashScreen extends AppCompatActivity {
     public static final String PREFS_TWITTER = "twitter";
     public static final String PREFS_ONBOARDING = "onboarding";
     private Class mForwardActivity;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);

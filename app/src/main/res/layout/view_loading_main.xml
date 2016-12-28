@@ -2,16 +2,17 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
 
-    android:orientation="vertical"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
     <com.crystal.crystalpreloaders.widgets.CrystalPreloader
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        app:crs_pl_style="ball_spin_fade"
-        app:crs_pl_size="medium"
-        app:crs_pl_fg_color="@color/colorAccent"
+        android:layout_centerInParent="true"
         app:crs_pl_bg_color="#fff"
-        android:layout_centerInParent="true"/>
+        app:crs_pl_fg_color="@color/colorAccent"
+        app:crs_pl_size="small"
+        app:crs_pl_style="circular" />
 
 </RelativeLayout>

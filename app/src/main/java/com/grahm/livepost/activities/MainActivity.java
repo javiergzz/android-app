@@ -2,15 +2,25 @@ package com.grahm.livepost.activities;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
+import android.graphics.Color;
+import android.graphics.Point;
 import android.os.Bundle;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v7.widget.Toolbar;
+import android.view.Display;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.RelativeLayout;
 
+import com.braunster.tutorialview.object.Tutorial;
+import com.braunster.tutorialview.object.TutorialBuilder;
+import com.braunster.tutorialview.object.TutorialIntentBuilder;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 import com.grahm.livepost.R;
 import com.grahm.livepost.fragments.FragmentChatClass;
 import com.grahm.livepost.fragments.HomeFragment;
@@ -19,12 +29,14 @@ import com.grahm.livepost.fragments.ProfileFragment;
 import com.grahm.livepost.interfaces.OnFragmentInteractionListener;
 import com.grahm.livepost.objects.FirebaseActivity;
 import com.grahm.livepost.util.KeyboardUtil;
+import com.grahm.livepost.util.Utilities;
 import com.objectlife.statelayout.StateLayout;
 
 import java.io.Serializable;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import butterknife.OnClick;
 
 public class MainActivity extends FirebaseActivity implements OnFragmentInteractionListener, TabLayout.OnTabSelectedListener {
 
@@ -50,6 +62,7 @@ public class MainActivity extends FirebaseActivity implements OnFragmentInteract
     public static final String NEW_STORY_TAG = "new";
     public static final String PROFILE_TAG = "profile";
     public static final String CHAT_TAG = "notifications";
+    public static final String PREFS_TUTORIAL = "tutorial";
     /*Bundle Keys*/
     public static final String PAGE_KEY = "page";
     public static final String FRAG_ARGS = "frag_args";
@@ -62,20 +75,69 @@ public class MainActivity extends FirebaseActivity implements OnFragmentInteract
     public StateLayout mStateLayout;
     @BindView(R.id.toolbar)
     public Toolbar toolbar;
+    @BindView(R.id.v_empty)
+    public RelativeLayout mViewEmpty;
 
+    private DatabaseReference mFirebaseRef;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         ButterKnife.bind(this);
+        Bundle args = savedInstanceState == null ? getIntent().getExtras() : savedInstanceState;
         setSupportActionBar(toolbar);
         setupNavigation(savedInstanceState);
         setupTabs();
         KeyboardUtil keyboardUtil = new KeyboardUtil(this, findViewById(R.id.main_content));
         keyboardUtil.enable();
+        mFirebaseRef = FirebaseDatabase.getInstance().getReference("posts");
+        mUser = Utilities.getUser(mFirebaseRef, this, args);
+        SharedPreferences settings = getSharedPreferences(getString(R.string.preference_file_key), MODE_PRIVATE);
+        if (!settings.getBoolean(PREFS_TUTORIAL, false)) {
+            loadTutorial();
+        }
     }
 
+    private boolean hasStories() {
+        return mUser.getPosts_created() != null && mUser.getPosts_created().size() > 0 || mUser.getPosts_contributed_to() != null && mUser.getPosts_contributed_to().size() > 0;
+    }
+
+    private void loadTutorial() {
+        if (!hasStories()) {
+            TutorialIntentBuilder builder = new TutorialIntentBuilder(MainActivity.this);
+            builder.changeSystemUiColor(false);
+            Display display = getWindowManager().getDefaultDisplay();
+            Point size = new Point();
+            display.getSize(size);
+            int centerX = (size.x / 2) - 100;
+            int centerY = size.y / 2;
+            TutorialBuilder tBuilder = new TutorialBuilder();
+            tBuilder.setTitle("Welcome!")
+                    .setmPositionToSurroundY(centerY)
+                    .setPositionToSurroundX(centerX)
+                    .setPositionToSurroundHeight(200)
+                    .setPositionToSurroundWidth(200)
+                    .setInfoText("You can create a new story by clicking on the icon.")
+                    .setBackgroundColor(randomColor())
+                    .setTutorialTextColor(Color.WHITE)
+                    .setTutorialTextTypeFaceName("fonts/Roboto-Regular.ttf")
+                    .setTutorialTextSize(20)
+                    .setTutorialGotItPosition(Tutorial.GotItPosition.BOTTOM)
+                    .setAnimationDuration(500);
+            builder.setTutorial(tBuilder.build());
+            SharedPreferences sharedPref = getSharedPreferences(getString(R.string.preference_file_key), Context.MODE_PRIVATE);
+            SharedPreferences.Editor editor = sharedPref.edit();
+            editor.putBoolean(PREFS_TUTORIAL, true);
+            editor.commit();
+            startActivity(builder.getIntent());
+            overridePendingTransition(R.anim.dummy, R.anim.dummy);
+        }
+    }
+
+    private int randomColor() {
+        return Color.argb(255, 54, 68, 87);
+    }
 
     private void setupTabs() {
         TabLayout tabLayout = (TabLayout) findViewById(R.id.tabs);
@@ -107,7 +169,6 @@ public class MainActivity extends FirebaseActivity implements OnFragmentInteract
         return super.onCreateOptionsMenu(menu);
     }
 
-
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
@@ -120,6 +181,10 @@ public class MainActivity extends FirebaseActivity implements OnFragmentInteract
         return super.onOptionsItemSelected(item);
     }
 
+    @OnClick(R.id.btn_new_story_h)
+    public void newStory() {
+        onFragmentInteraction(NEW_STORY_IDX, null);
+    }
 
     @Override
     public void onFragmentInteraction(int id, Bundle args) {
@@ -142,8 +207,8 @@ public class MainActivity extends FirebaseActivity implements OnFragmentInteract
                 this.startActivity(mainIntent);
                 break;
             case VIEW_INTERACTIONS:
-                int state = args.getInt(STATE_KEY,StateLayout.VIEW_CONTENT);
-                if(mStateLayout.getState()!=state)
+                int state = args.getInt(STATE_KEY, StateLayout.VIEW_CONTENT);
+                if (mStateLayout.getState() != state)
                     mStateLayout.setState(state);
         }
     }

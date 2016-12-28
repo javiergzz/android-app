@@ -3,11 +3,7 @@ package com.grahm.livepost.adapters;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
-import android.graphics.drawable.BitmapDrawable;
-import android.graphics.drawable.Drawable;
-import android.graphics.drawable.LayerDrawable;
 import android.net.Uri;
-import android.os.AsyncTask;
 import android.os.Environment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
@@ -34,7 +30,6 @@ import com.facebook.CallbackManager;
 import com.facebook.FacebookCallback;
 import com.facebook.FacebookException;
 import com.facebook.share.Sharer;
-import com.facebook.share.model.ShareLinkContent;
 import com.facebook.share.model.SharePhoto;
 import com.facebook.share.model.SharePhotoContent;
 import com.facebook.share.widget.ShareDialog;
@@ -46,28 +41,22 @@ import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 import com.grahm.livepost.R;
 import com.grahm.livepost.activities.PlayerActivity;
-import com.grahm.livepost.asynctask.DownloadImageTask;
 import com.grahm.livepost.asynctask.UploadVideoThumbTask;
 import com.grahm.livepost.fragments.EditPostDialogFragment;
-import com.grahm.livepost.interfaces.OnCallbackImageListener;
 import com.grahm.livepost.interfaces.OnFragmentInteractionListener;
 import com.grahm.livepost.objects.Update;
 import com.grahm.livepost.objects.User;
 import com.grahm.livepost.specialViews.SwipeLayout;
-import com.grahm.livepost.ui.Controls;
-import com.grahm.livepost.util.GV;
 import com.grahm.livepost.util.Util;
 import com.grahm.livepost.util.Utilities;
 import com.objectlife.statelayout.StateLayout;
+import com.stfalcon.frescoimageviewer.ImageViewer;
 import com.twitter.sdk.android.tweetcomposer.TweetComposer;
 
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.Serializable;
-import java.net.MalformedURLException;
-import java.net.URISyntaxException;
 import java.sql.Timestamp;
 import java.util.regex.Matcher;
 
@@ -144,10 +133,24 @@ public class ChatAdapter extends FirebaseListAdapter<Update> {
             h.mMessageView.setVisibility(View.GONE);
             h.mImgChatView.setVisibility(View.VISIBLE);
             if (mimeString.contains("image")) {
-                if(mimeString.contains("gif"))
+                if(mimeString.contains("gif")){
                     setupGifMessage(h,Utilities.cleanUrl(msg));
-                else
+                } else{
                     setupImageMessage(h, Utilities.cleanUrl(msg));
+
+                    View.OnClickListener openGallery = new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            String [] list = { msg };
+                            new ImageViewer.Builder(mActivity, list)
+                                    .setStartPosition(0)
+                                    .show();
+                        }
+                    };
+
+
+                    h.mImgChatView.setOnClickListener(openGallery);
+                }
             } else if (mimeString.contains("video")) {
                 Matcher matcher = videoMessagePattern.matcher(msg);
                 if(matcher.matches())

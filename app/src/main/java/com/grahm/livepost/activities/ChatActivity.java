@@ -1,15 +1,22 @@
 package com.grahm.livepost.activities;
 
+import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
+import android.graphics.Color;
+import android.graphics.Point;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.support.design.widget.AppBarLayout;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.text.TextUtils;
 import android.util.Log;
+import android.view.Display;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -23,6 +30,9 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.braunster.tutorialview.object.Tutorial;
+import com.braunster.tutorialview.object.TutorialBuilder;
+import com.braunster.tutorialview.object.TutorialIntentBuilder;
 import com.bumptech.glide.Glide;
 import com.facebook.FacebookSdk;
 import com.google.firebase.database.DatabaseReference;
@@ -37,8 +47,8 @@ import com.grahm.livepost.interfaces.OnPutImageListener;
 import com.grahm.livepost.objects.FirebaseActivity;
 import com.grahm.livepost.objects.Story;
 import com.grahm.livepost.objects.Update;
-import com.grahm.livepost.util.KeyboardUtil;
 import com.grahm.livepost.objects.User;
+import com.grahm.livepost.util.KeyboardUtil;
 import com.grahm.livepost.util.Util;
 import com.grahm.livepost.util.Utilities;
 import com.objectlife.statelayout.StateLayout;
@@ -56,6 +66,7 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 import butterknife.OnEditorAction;
+import butterknife.OnFocusChange;
 import butterknife.OnTextChanged;
 import io.fabric.sdk.android.Fabric;
 
@@ -64,6 +75,9 @@ public class ChatActivity extends FirebaseActivity implements AbsListView.OnItem
     public static final String TAG_ID = "key";
     public static final String TAG_USER = "user";
     public static final String TAG_STORY = "story";
+    public static final String PREFS_TUTORIAL = "tutorial_chat";
+
+    public static Activity mChat;
 
     @BindView(R.id.messageInput)
     public EditText mInputText;
@@ -79,6 +93,8 @@ public class ChatActivity extends FirebaseActivity implements AbsListView.OnItem
     public Button mBtnBottom;
     @BindView(R.id.sl_layout_state)
     public StateLayout mStateLayout;
+    @BindView(R.id.main_appbar)
+    public AppBarLayout mAppBar;
 
     public static MainActivity.FragmentsEnum page = MainActivity.FragmentsEnum.CHAT;
     private DatabaseReference mFirebaseRef;
@@ -133,6 +149,7 @@ public class ChatActivity extends FirebaseActivity implements AbsListView.OnItem
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_chat);
+        mChat = this;
         ButterKnife.bind(this);
         TwitterAuthConfig authConfig = new TwitterAuthConfig(TWITTER_KEY, TWITTER_SECRET);
         Fabric.with(this, new TwitterCore(authConfig), new TweetUi(), new Twitter(authConfig), new TweetUi(), new TweetComposer());
@@ -151,6 +168,41 @@ public class ChatActivity extends FirebaseActivity implements AbsListView.OnItem
 
         KeyboardUtil keyboardUtil = new KeyboardUtil(this, findViewById(R.id.chat_container));
         keyboardUtil.enable();
+        SharedPreferences settings = getSharedPreferences(getString(R.string.preference_file_key), MODE_PRIVATE);
+        if (!settings.getBoolean(PREFS_TUTORIAL, false)) {
+            loadTutorial();
+        }
+    }
+
+    private void loadTutorial() {
+            TutorialIntentBuilder builder = new TutorialIntentBuilder(ChatActivity.this);
+            builder.changeSystemUiColor(false);
+            Display display = getWindowManager().getDefaultDisplay();
+            Point size = new Point();
+            display.getSize(size);
+            int centerX = size.x  - 60;
+            int centerY = 40;
+            TutorialBuilder tBuilder = new TutorialBuilder();
+            tBuilder.setTitle("Settings")
+                    .setmPositionToSurroundY(centerY)
+                    .setPositionToSurroundX(centerX)
+                    .setPositionToSurroundHeight(100)
+                    .setPositionToSurroundWidth(100)
+                    .setInfoText("You can view your story settings here.")
+                    .setTutorialInfoTextPosition(Tutorial.InfoPosition.BELOW)
+                    .setBackgroundColor(Color.argb(255, 54, 68, 87))
+                    .setTutorialTextColor(Color.WHITE)
+                    .setTutorialTextTypeFaceName("fonts/Roboto-Regular.ttf")
+                    .setTutorialTextSize(20)
+                    .setTutorialGotItPosition(Tutorial.GotItPosition.BOTTOM)
+                    .setAnimationDuration(500);
+            builder.setTutorial(tBuilder.build());
+            SharedPreferences sharedPref = getSharedPreferences(getString(R.string.preference_file_key), Context.MODE_PRIVATE);
+            SharedPreferences.Editor editor = sharedPref.edit();
+            editor.putBoolean(PREFS_TUTORIAL, true);
+            editor.commit();
+            startActivity(builder.getIntent());
+            overridePendingTransition(R.anim.dummy, R.anim.dummy);
     }
 
     @OnTextChanged(R.id.messageInput)
@@ -244,6 +296,12 @@ public class ChatActivity extends FirebaseActivity implements AbsListView.OnItem
 
     }
 
+    @OnFocusChange(R.id.messageInput)
+    public void collapse(){
+        mAppBar.setExpanded(false);
+        gotoBottom(null);
+    }
+
     @OnClick(R.id.btnSend)
     public void sendMessage() {
         String input = mInputText.getText().toString();
@@ -251,7 +309,7 @@ public class ChatActivity extends FirebaseActivity implements AbsListView.OnItem
         if (TextUtils.isEmpty(input)) {
             Log.d(TAG_CLASS, "Choosing Image");
             Long l = System.currentTimeMillis() / 1000L;
-            com.grahm.livepost.util.EasyImage.openChooserWithDocuments(this, mId + "_" + l, 1);
+            com.grahm.livepost.util.EasyImage.openChooserWithDocuments(this, mStory.getTitle(), 1);
         } else {
             mFirebaseRef.getRoot().child("posts/" + mId + "/last_message").setValue(input);
             Update m = new Update(0, null, input, Utilities.trimProfilePic(mUser), mUser.getName(), mUser.getUserKey());
@@ -284,7 +342,7 @@ public class ChatActivity extends FirebaseActivity implements AbsListView.OnItem
                 intent.putExtra(TAG_STORY, mStory);
                 intent.putExtra(TAG_ID, mId);
                 startActivityForResult(intent, 1);
-                ChatActivity.this.finish();
+//                ChatActivity.this.finish();
                 return true;
         }
         getSupportActionBar().setTitle(mStory.getTitle());

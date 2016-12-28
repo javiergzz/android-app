@@ -46,7 +46,7 @@
     <com.objectlife.statelayout.StateLayout xmlns:android="http://schemas.android.com/apk/res/android"
         android:id="@+id/sl_layout_state"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="match_parent"
         android:background="@color/white"
         android:focusable="true"
         android:focusableInTouchMode="true"
@@ -58,7 +58,7 @@
 
         <include
             android:id="@+id/v_empty"
-            layout="@layout/view_empty_main" />
+            layout="@layout/view_empty_story" />
 
         <include
             android:id="@+id/v_error"
@@ -106,20 +106,20 @@
             android:background="@drawable/rounded_edittext"
             android:hint="@string/chat_txt_hint"
             android:inputType="textMultiLine"
-            android:maxHeight="80dp"
+            android:maxHeight="100dp"
             android:nextFocusLeft="@id/messageInput"
             android:nextFocusUp="@id/messageInput"
-            android:padding="10dp"
-            android:paddingBottom="15dp" />
+            android:padding="12dp"/>
 
         <android.support.design.widget.FloatingActionButton
             android:id="@+id/btnSend"
-            android:layout_width="50dp"
-            android:layout_height="50dp"
+            android:layout_width="55dp"
+            android:layout_height="55dp"
             android:layout_alignParentRight="true"
-            android:layout_centerVertical="true"
-            android:src="@android:drawable/ic_menu_camera"
-            app:layout_anchorGravity="bottom|right|end" />
+            app:borderWidth="0dp"
+            app:elevation="6dp"
+            android:clipChildren="false"
+            android:src="@android:drawable/ic_menu_camera" />
 
     </RelativeLayout>
 </android.support.design.widget.CoordinatorLayout>

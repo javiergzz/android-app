@@ -22,6 +22,7 @@
         android:allowBackup="true"
         android:hardwareAccelerated="true"
         android:icon="@mipmap/ic_launcher"
+        tools:replace="android:icon"
         android:label="@string/app_name"
         android:largeHeap="true"
         android:supportsRtl="true"
@@ -76,16 +77,20 @@
                 android:value="com.grahm.livepost.activities.MainActivity" />
         </activity>
         <activity android:name="com.soundcloud.android.crop.CropImageActivity" />
+        <activity android:name="com.braunster.tutorialview.TutorialActivity"
+            android:theme="@android:style/Theme.Translucent.NoTitleBar.Fullscreen"
+            android:screenOrientation="portrait"/>
         <activity
             android:name=".activities.ChatActivity"
+            android:hardwareAccelerated="false"
             android:parentActivityName=".activities.MainActivity"
-            android:theme="@style/AppTheme.NoActionBar" />
+            android:theme="@style/AppTheme.NoActionBar"/>
         <activity
             android:name=".activities.StorySettingsActivity"
             android:label="@string/title_activity_contributors"
             android:parentActivityName=".activities.ChatActivity"
-            android:theme="@style/AppTheme.NoActionBar"
-            android:windowSoftInputMode="stateHidden|adjustPan">
+            android:windowSoftInputMode="stateHidden|adjustPan"
+            android:theme="@style/AppTheme.NoActionBar">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="com.grahm.livepost.activities.ChatActivity" />

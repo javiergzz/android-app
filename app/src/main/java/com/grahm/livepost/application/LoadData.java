@@ -6,6 +6,7 @@ import android.util.Log;
 import com.alipay.euler.andfix.patch.PatchManager;
 import com.facebook.FacebookSdk;
 import com.facebook.appevents.AppEventsLogger;
+import com.facebook.drawee.backends.pipeline.Fresco;
 import com.google.firebase.database.FirebaseDatabase;
 import com.grahm.livepost.R;
 import com.grahm.livepost.activities.InitActivity;
@@ -41,6 +42,7 @@ public class LoadData extends FoamMultiDexApplication {
             Log.e(TAG,e.getMessage());
         }
         FirebaseDatabase.getInstance().setPersistenceEnabled(true);
+        Fresco.initialize(this);
     }
 
 }

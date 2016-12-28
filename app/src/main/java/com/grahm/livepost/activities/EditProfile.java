@@ -53,7 +53,7 @@ public class EditProfile extends AppCompatActivity{
     @BindView(R.id.txt_edit_user_email)
     public EditText mTxtEmail;
     private Uri mIimageUri = null;
-    private String mImageUrl;
+    private String mImageUrl = null;
     private OnPutImageListener mOnPutImageListener = new OnPutImageListener() {
         @Override
         public void onSuccess(String url) {
@@ -89,7 +89,7 @@ public class EditProfile extends AppCompatActivity{
     @OnClick(R.id.btn_save_user_data)
     public void saveDataUser(){
         if(mIimageUri != null){
-            new UploadImageTask(EditProfile.this, mUser.getUserKey(), mOnPutImageListener, true).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, mIimageUri);
+            new UploadImageTask(EditProfile.this, mUser.getUserKey() + "_" + System.currentTimeMillis() / 1000L, mOnPutImageListener, true).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, mIimageUri);
         }else{
             saveOnFirebase();
         }

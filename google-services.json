@@ -1,35 +1,27 @@
 {
   "project_info": {
-    "project_number": "655970032844",
-    "firebase_url": "https://livepost-dev-30ad0.firebaseio.com",
-    "project_id": "livepost-dev-30ad0",
-    "storage_bucket": "livepost-dev-30ad0.appspot.com"
+    "project_number": "191198007413",
+    "firebase_url": "https://sandbox-lp.firebaseio.com",
+    "project_id": "sandbox-lp",
+    "storage_bucket": "sandbox-lp.appspot.com"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:655970032844:android:1ab65b4ee6ff448d",
+        "mobilesdk_app_id": "1:191198007413:android:1ab65b4ee6ff448d",
         "android_client_info": {
           "package_name": "com.grahm.livepost"
         }
       },
       "oauth_client": [
         {
-          "client_id": "655970032844-s14ueb7vckrvcvhbgpga4ptptf2k4oog.apps.googleusercontent.com",
-          "client_type": 1,
-          "android_info": {
-            "package_name": "com.grahm.livepost",
-            "certificate_hash": "653FD5C6CE48DD6EB1D60194D04849FD84B91BB2"
-          }
-        },
-        {
-          "client_id": "655970032844-q6k1i239nejge6g7u609f954r439tcn4.apps.googleusercontent.com",
+          "client_id": "191198007413-3e2e57pkr9krigqaut8vgrf8qdpnuobi.apps.googleusercontent.com",
           "client_type": 3
         }
       ],
       "api_key": [
         {
-          "current_key": "AIzaSyCnNsky_ldneE-bg1ZN2CAZ7BxFjC-qVfc"
+          "current_key": "AIzaSyAX8ZyIRt_cHdPmusz7W8O1P_2TaG9JlTU"
         }
       ],
       "services": {
@@ -37,13 +29,8 @@
           "status": 1
         },
         "appinvite_service": {
-          "status": 2,
-          "other_platform_oauth_client": [
-            {
-              "client_id": "655970032844-q6k1i239nejge6g7u609f954r439tcn4.apps.googleusercontent.com",
-              "client_type": 3
-            }
-          ]
+          "status": 1,
+          "other_platform_oauth_client": []
         },
         "ads_service": {
           "status": 2

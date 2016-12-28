@@ -350,7 +350,6 @@ public class NewStoryFragment extends Fragment implements OnPutImageListener {
                         return false;
                     }
                 });
-//                storyName.requestFocus();
             }
         }
 

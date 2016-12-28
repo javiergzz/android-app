@@ -10,13 +10,12 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.text.TextUtils;
-import android.text.util.Linkify;
 import android.util.Log;
 import android.view.View;
-import android.view.WindowManager;
 import android.widget.AdapterView;
 import android.widget.AutoCompleteTextView;
 import android.widget.LinearLayout;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -25,7 +24,6 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.MutableData;
-import com.google.firebase.database.ServerValue;
 import com.google.firebase.database.Transaction;
 import com.google.firebase.database.ValueEventListener;
 import com.grahm.livepost.R;
@@ -61,6 +59,9 @@ public class StorySettingsActivity extends FirebaseActivity {
     @BindView(R.id.txt_story_settings_title)
     public TextView mTxtTitle;
 
+    @BindView(R.id.progressLoading)
+    public ProgressBar mLoading;
+
     private Story mStory;
     private String mId;
     private User mContributor;
@@ -80,7 +81,7 @@ public class StorySettingsActivity extends FirebaseActivity {
         mTextStoryCode.setText(mStory.getIsLive() ? url : embed);
         mTextStoryCode.setEnabled(mStory.getIsLive());
 
-        if(!mStory.getIsLive()){
+        if (!mStory.getIsLive()) {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
                 mTextStoryCode.setTextAlignment(View.TEXT_ALIGNMENT_TEXT_START);
             }
@@ -89,7 +90,7 @@ public class StorySettingsActivity extends FirebaseActivity {
         //TODO Uncomment this
         mEditStoryLayout.setVisibility(View.VISIBLE);
 
-     }
+    }
 
     @Override
     protected void onRestoreInstanceState(Bundle savedInstanceState) {
@@ -151,6 +152,7 @@ public class StorySettingsActivity extends FirebaseActivity {
 
     private void setupContributors() {
         mFirebaseRef.child("members/" + mId).orderByChild("role").addValueEventListener(new ValueEventListener() {
+
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 Map<String, Object> map = (Map<String, Object>) dataSnapshot.getValue();
@@ -158,6 +160,8 @@ public class StorySettingsActivity extends FirebaseActivity {
                     mContributorsAdapter = new ContributorsAdapter(getApplicationContext(), FirebaseDatabase.getInstance().getReference("users"), mId, map);
                     mListContributors.setLayoutManager(new LinearLayoutManager(StorySettingsActivity.this));
                     mListContributors.setAdapter(mContributorsAdapter);
+                } else {
+                    mListContributors.removeAllViewsInLayout();
                 }
             }
 
@@ -176,7 +180,7 @@ public class StorySettingsActivity extends FirebaseActivity {
         Toast.makeText(StorySettingsActivity.this, "Copied to Clipboard", Toast.LENGTH_SHORT).show();
     }
 
-    private void deleteStory(){
+    private void deleteStory() {
         //Delete post
         mFirebaseRef.child("posts/" + mId).removeValue();
 
@@ -210,6 +214,7 @@ public class StorySettingsActivity extends FirebaseActivity {
         //Delete entry from creator
         mFirebaseRef.child("users/" + mStory.getAuthor() + "/posts_created/" + mId).removeValue();
         mFirebaseRef.child("updates/" + mId).removeValue();
+        ChatActivity.mChat.finish();
         onBackPressed();
     }
 
@@ -238,103 +243,80 @@ public class StorySettingsActivity extends FirebaseActivity {
 
     @OnClick(R.id.invite_contributor_button)
     public void addContributor(final View v) {
+        mLoading.setVisibility(View.VISIBLE);
         //Search based on user email
-        String q = mTextContributor.getText().toString();
-        if(!TextUtils.isEmpty(q)){
+        final String q = mTextContributor.getText().toString();
+        if (!TextUtils.isEmpty(q)) {
             mFirebaseRef.child("users").orderByChild("email").equalTo(q).addListenerForSingleValueEvent(new ValueEventListener() {
                 @Override
                 public void onDataChange(DataSnapshot dataSnapshot) {
                     if (dataSnapshot != null && dataSnapshot.getValue() != null) {
                         User u = dataSnapshot.getChildren().iterator().next().getValue(User.class);
-                        String userKey =  u.getUserKey();
-
-                        Log.e(TAG,userKey);
+                        String userKey = u.getUserKey();
+                        Log.e(TAG, userKey);
                         if (userKey != null)
                             addContributorQuery(u);
-                        else
-                            Log.e(TAG,userKey);
+                    }else{
+                        addUserByTwitter(q);
                     }
                 }
 
                 @Override
                 public void onCancelled(DatabaseError databaseError) {
+                    mLoading.setVisibility(View.GONE);
                     Toast.makeText(getApplicationContext(), getString(R.string.story_settings_invalid_user_error), Toast.LENGTH_LONG).show();
                 }
             });
             //Search based on Twitter handle
-            mFirebaseRef.child("users").orderByKey().equalTo(q).addListenerForSingleValueEvent(new ValueEventListener() {
-                @Override
-                public void onDataChange(DataSnapshot dataSnapshot) {
-                    if (dataSnapshot != null && dataSnapshot.getValue() != null) {
-                        User u = dataSnapshot.getChildren().iterator().next().getValue(User.class);
-                        String userKey =  u.getUserKey();
-
-                        Log.e(TAG,userKey);
-                        if (userKey != null)
-                            addContributorQuery(u);
-                        else
-                            Log.e(TAG,userKey);
-                    }
-                }
-
-                @Override
-                public void onCancelled(DatabaseError databaseError) {
-                    Toast.makeText(getApplicationContext(), getString(R.string.story_settings_invalid_user_error), Toast.LENGTH_LONG).show();
-                }
-            });
         }
 
 
     }
 
-    private void adddContributorQuery() {
-        if (mContributor == null) {
-            Toast.makeText(getApplicationContext(), getString(R.string.story_settings_invalid_user_error), Toast.LENGTH_LONG).show();
-            return;
-        }
+    private void addUserByTwitter(String q){
+        mFirebaseRef.child("users").orderByChild("screenName").equalTo(q).addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                if (dataSnapshot != null && dataSnapshot.getValue() != null) {
+                    Log.i(TAG, dataSnapshot.getValue().toString());
+                    User u = dataSnapshot.getChildren().iterator().next().getValue(User.class);
+                    String userKey = u.getUserKey();
+                    if (userKey != null)
+                        addContributorQuery(u);
+                }else {
+                    mLoading.setVisibility(View.GONE);
+                    Toast.makeText(getApplicationContext(), getString(R.string.story_settings_invalid_user_error), Toast.LENGTH_SHORT).show();
+                }
+            }
 
-        Map<String, Object> map = new HashMap<String, Object>();
-        Map<String, Object> k = new HashMap<String, Object>();
-        k.put("role", "contributor");
-        k.put("uid", mContributor.getUserKey());
-        map.put(mContributor.getUserKey(), k);
-        mFirebaseRef.child("members/" + mId).updateChildren(map);
-
-
-        Log.d(TAG, "users/" + mContributor.getUserKey() + "/posts_contributed_to/" + map.toString());
-        mFirebaseRef.child("users/" + mContributor.getUserKey() + "/posts_contributed_to/" + mId).setValue(mStory);
-
-        mTextContributor.setText("");
-        mTextContributor.clearListSelection();
-        mTextContributor.clearFocus();
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+                Toast.makeText(getApplicationContext(), getString(R.string.story_settings_invalid_user_error), Toast.LENGTH_LONG).show();
+            }
+        });
     }
+
 
     private void addContributorQuery(final User user) {
-        if(user==null) {
+        if (user == null) {
+            mLoading.setVisibility(View.GONE);
             Toast.makeText(this, getString(R.string.toast_declined), Toast.LENGTH_SHORT).show();
             return;
         }
+
         final String userKey = user.getUserKey();
         //Members Query
         final Map<String, Object> map = new HashMap<String, Object>();
         final Map<String, Object> k = new HashMap<String, Object>();
-        Log.e(TAG, "User key:" + userKey);
         k.put("role", "pending");
         k.put("uid", userKey);
-        k.put("name",TextUtils.isEmpty(user.getEmail())?user.getEmail():user.getTwitter());
+        k.put("name", user.getName());
         map.put(userKey, k);
 
         mFirebaseRef.child("members/" + mId).runTransaction(new Transaction.Handler() {
             @Override
             public Transaction.Result doTransaction(MutableData mutableData) {
-                Map<String, Object> oldMembers = (HashMap<String, Object>) mutableData.getValue();
-                if (oldMembers == null || mutableData.getValue() == null || mutableData.getChildrenCount() < 1) {
-                    oldMembers = map;
-                } else {
-                    oldMembers.put(userKey, k);
-
-                }
-                mutableData.setValue(oldMembers);
+                mutableData.setValue(map);
                 return Transaction.success(mutableData);
             }
 
@@ -345,22 +327,15 @@ public class StorySettingsActivity extends FirebaseActivity {
         });
 
         //Invites Query
-        final Invite i = new Invite(mId, mStory.getTitle(), mUser.getUserKey(), mUser.getProfile_picture());
+        final Invite i = new Invite(mId, mStory.getTitle(), mUser.getName(), mUser.getProfile_picture());
         final Map<String, Object> invitesMap = new HashMap<String, Object>();
         invitesMap.put(mId, i);
 
         mFirebaseRef.child("users/" + userKey + "/invites").runTransaction(new Transaction.Handler() {
             @Override
             public Transaction.Result doTransaction(MutableData mutableData) {
-                Map<String, Object> oldInvites = (HashMap<String, Object>) mutableData.getValue();
-
-                if (oldInvites == null || mutableData.getValue() == null || mutableData.getChildrenCount() < 1) {
-                    mutableData.setValue(invitesMap);
-                } else {
-                    oldInvites.put(mId, i);
-                    mutableData.setValue(oldInvites);
-                    mFirebaseRef.child("users/" + userKey + "/invites/" + mId + "/timestamp").setValue(ServerValue.TIMESTAMP);
-                }
+                mutableData.setValue(invitesMap);
+                mLoading.setVisibility(View.GONE);
                 return Transaction.success(mutableData);
             }
 
@@ -374,25 +349,4 @@ public class StorySettingsActivity extends FirebaseActivity {
         mTextContributor.clearListSelection();
         mTextContributor.clearFocus();
     }
-    /*private void addContributorQuery() {
-        if (mContributor == null) {
-            Toast.makeText(getApplicationContext(), getString(R.string.story_settings_invalid_user_error), Toast.LENGTH_LONG).show();
-            return;
-        }
-
-        Map<String, Object> map = new HashMap<String, Object>();
-        Map<String, Object> k = new HashMap<String, Object>();
-        k.put("role", "contributor");
-        k.put("uid", mContributor.getUserKey());
-        map.put(mContributor.getUserKey(), k);
-        mFirebaseRef.child("members/" + mId).updateChildren(map);
-
-
-        Log.d(TAG, "users/" + mContributor.getUserKey() + "/posts_contributed_to/" + map.toString());
-        mFirebaseRef.child("users/" + mContributor.getUserKey() + "/posts_contributed_to/" + mId).setValue(mStory);
-
-        mTextContributor.setText("");
-        mTextContributor.clearListSelection();
-        mTextContributor.clearFocus();
-    }*/
 }

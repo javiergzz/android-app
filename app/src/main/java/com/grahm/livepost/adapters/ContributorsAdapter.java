@@ -1,14 +1,10 @@
 package com.grahm.livepost.adapters;
 
-import android.app.Activity;
 import android.content.Context;
 import android.graphics.Bitmap;
-import android.os.Handler;
 import android.support.v4.graphics.drawable.RoundedBitmapDrawable;
 import android.support.v4.graphics.drawable.RoundedBitmapDrawableFactory;
-import android.support.v4.text.TextUtilsCompat;
 import android.support.v7.widget.RecyclerView;
-import android.text.TextUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -20,17 +16,15 @@ import android.widget.TextView;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.request.target.BitmapImageViewTarget;
-import com.google.firebase.database.ChildEventListener;
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
-import com.google.firebase.database.ValueEventListener;
 import com.grahm.livepost.R;
-import com.grahm.livepost.objects.FirebaseActivity;
 import com.grahm.livepost.objects.User;
-import com.grahm.livepost.util.Utilities;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.util.Map;
 
@@ -42,13 +36,14 @@ public class ContributorsAdapter extends FirebaseListFilteredAdapter<User> {
     DatabaseReference mFirebaseRef;
     String mStoryId;
     Context mContext;
-
+    Map<String, Object> mMap;
+    private static final String TAG_PENDING = "pending";
     public ContributorsAdapter(Context context, Query query, String storyId, Map<String, Object> filter) {
         super(query.getRef(), User.class, filter);
-        //(DatabaseReference mRef, Class<T> mModelClass, Activity activity, final Map<String,Object> filter)
         mFirebaseRef = FirebaseDatabase.getInstance().getReference();
         mStoryId = storyId;
         mContext = context;
+        mMap = filter;
     }
 
     @Override
@@ -59,21 +54,28 @@ public class ContributorsAdapter extends FirebaseListFilteredAdapter<User> {
     @Override
     public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
         final User user = getItem(position);
-        if(user==null){return;}
+        if (user == null) {
+            return;
+        }
         final UserViewHolder h = (UserViewHolder) holder;
         String postfix = "";
-        if(user.getInvites()!=null && user.getInvites().containsKey(mStoryId)){
+
+        Map<String, Object> contributor = (Map<String, Object>) mMap.values().toArray()[position];
+        String role = contributor.get("role").toString();
+        Log.i(TAG, "role: " + role);
+        if (role.equals(TAG_PENDING)) {
             postfix = "(Pending)";
             h.mTextView.setTextColor(mContext.getResources().getColor(R.color.light_grey));
         }
-        h.mTextView.setText(user.getName()+postfix);
+
+        h.mTextView.setText(user.getName() + postfix);
         h.mButtonView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 deleteContributor(user.getUserKey());
             }
         });
-        if(user.getProfile_picture()!=null){
+        if (user.getProfile_picture() != null) {
             Glide.with(mContext)
                     .load(user.getProfile_picture()).asBitmap()
                     .diskCacheStrategy(DiskCacheStrategy.RESULT)
