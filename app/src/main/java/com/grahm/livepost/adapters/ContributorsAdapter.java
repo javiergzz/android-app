@@ -22,10 +22,6 @@ import com.google.firebase.database.Query;
 import com.grahm.livepost.R;
 import com.grahm.livepost.objects.User;
 
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-
 import java.util.Map;
 
 /**

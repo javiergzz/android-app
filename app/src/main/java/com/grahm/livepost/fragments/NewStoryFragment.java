@@ -48,6 +48,7 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.grahm.livepost.R;
 import com.grahm.livepost.activities.MainActivity;
 import com.grahm.livepost.asynctask.CreateStoryTask;
+import com.grahm.livepost.interfaces.FragmentOnBackClickInterface;
 import com.grahm.livepost.interfaces.OnFragmentInteractionListener;
 import com.grahm.livepost.interfaces.OnPutImageListener;
 import com.grahm.livepost.objects.MultipartFormField;
@@ -76,7 +77,7 @@ import static com.grahm.livepost.util.Utilities.isOnline;
  * to handle interaction events.
  * create an instance of this fragment.
  */
-public class NewStoryFragment extends Fragment implements OnPutImageListener {
+public class NewStoryFragment extends Fragment implements OnPutImageListener, FragmentOnBackClickInterface {
     public static final String SESSION_KEY = "session";
     public static final String PAGE_KEY = "page";
     public static final String URI_KEY = "uri";
@@ -89,7 +90,7 @@ public class NewStoryFragment extends Fragment implements OnPutImageListener {
     private File mFile;
     private int mCurrentItem;
     private User mUser;
-    private NewSessionViewsManager mNewSessionViewsManager;
+    private static NewSessionViewsManager mNewSessionViewsManager;
     private Boolean mIsLive = null;
 
     // UI references.
@@ -106,6 +107,7 @@ public class NewStoryFragment extends Fragment implements OnPutImageListener {
 
     private OnFragmentInteractionListener mListener;
     private FirebaseAnalytics mFirebaseAnalytics;
+    public static int V_POSITION = 0;
 
     public NewStoryFragment() {
         // Required empty public constructor
@@ -254,6 +256,7 @@ public class NewStoryFragment extends Fragment implements OnPutImageListener {
                     }
                 }
                 mViewPager.setCurrentItem(current + 1, true);
+                V_POSITION = mViewPager.getCurrentItem();
                 updateProgressViews();
                 v.setVisibility(current == 0 ? View.INVISIBLE : View.VISIBLE);
                 mBtnNext.setText(current == 2 ? "Publish" : "Next");
@@ -281,6 +284,20 @@ public class NewStoryFragment extends Fragment implements OnPutImageListener {
         b.putInt(MainActivity.STATE_KEY, state);
         ((OnFragmentInteractionListener)getActivity()).onFragmentInteraction(MainActivity.VIEW_INTERACTIONS,b);
     }
+
+    @Override
+    public void onClick() {
+        int currentItem = mViewPager.getCurrentItem();
+        if (currentItem > 0) {
+            if(currentItem == 1){
+                mBtnNext.setVisibility(View.VISIBLE);
+            }
+            mViewPager.setCurrentItem(Math.max(currentItem - 1, 0), true);
+            updateProgressViews();
+            V_POSITION = mViewPager.getCurrentItem();
+        }
+    }
+
     /**
      * This interface must be implemented by activities that contain this
      * fragment to allow an interaction in this fragment to be communicated

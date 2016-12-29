@@ -35,6 +35,7 @@ import com.braunster.tutorialview.object.TutorialBuilder;
 import com.braunster.tutorialview.object.TutorialIntentBuilder;
 import com.bumptech.glide.Glide;
 import com.facebook.FacebookSdk;
+import com.google.firebase.analytics.FirebaseAnalytics;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ServerValue;
@@ -172,6 +173,9 @@ public class ChatActivity extends FirebaseActivity implements AbsListView.OnItem
         if (!settings.getBoolean(PREFS_TUTORIAL, false)) {
             loadTutorial();
         }
+
+        FirebaseAnalytics mFirebaseAnalytics = FirebaseAnalytics.getInstance(this);
+        mFirebaseAnalytics.setCurrentScreen(this, "Story Screen", "onCreate");
     }
 
     private void loadTutorial() {

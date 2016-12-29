@@ -85,7 +85,6 @@ public class Login extends AppCompatActivity implements OnFragmentInteractionLis
         mPager.setAdapter(mPagerAdapter);
         // Obtain the FirebaseAnalytics instance.
         mFirebaseAnalytics = FirebaseAnalytics.getInstance(this);
-        // Track Screen
         mFirebaseAnalytics.setCurrentScreen(this, "Login Screen", "onCreate");
     }
 

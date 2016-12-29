@@ -11,6 +11,7 @@ import android.os.Bundle;
 import android.util.Log;
 import android.widget.ProgressBar;
 
+import com.google.firebase.analytics.FirebaseAnalytics;
 import com.grahm.livepost.R;
 import com.grahm.livepost.util.Utilities;
 
@@ -83,6 +84,8 @@ public class PlayerActivity extends AppCompatActivity {
             Log.e(TAG,"Exception:"+e);
             Toast.makeText(this, "Error connecting", Toast.LENGTH_LONG).show();
         }
+        FirebaseAnalytics mFirebaseAnalytics = FirebaseAnalytics.getInstance(this);
+        mFirebaseAnalytics.setCurrentScreen(this, "Player", "onCreate");
     }
 
     class fetchVideoTask extends AsyncTask<String,Integer,Boolean>{

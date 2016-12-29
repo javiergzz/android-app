@@ -9,8 +9,8 @@ import android.os.Bundle;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
-import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.Display;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -26,6 +26,7 @@ import com.grahm.livepost.fragments.FragmentChatClass;
 import com.grahm.livepost.fragments.HomeFragment;
 import com.grahm.livepost.fragments.NewStoryFragment;
 import com.grahm.livepost.fragments.ProfileFragment;
+import com.grahm.livepost.interfaces.FragmentOnBackClickInterface;
 import com.grahm.livepost.interfaces.OnFragmentInteractionListener;
 import com.grahm.livepost.objects.FirebaseActivity;
 import com.grahm.livepost.util.KeyboardUtil;
@@ -40,14 +41,6 @@ import butterknife.OnClick;
 
 public class MainActivity extends FirebaseActivity implements OnFragmentInteractionListener, TabLayout.OnTabSelectedListener {
 
-    /**
-     * The {@link android.support.v4.view.PagerAdapter} that will provide
-     * fragments for each of the sections. We use a
-     * {@link FragmentPagerAdapter} derivative, which will keep every
-     * loaded fragment in memory. If this becomes too memory intensive, it
-     * may be best to switch to a
-     * {@link android.support.v4.app.FragmentStatePagerAdapter}.
-     */
     public static final String TAG = "MainActivity";
     public static final int HOME_IDX = 0;
     public static final int FAVORITES_IDX = 3;
@@ -77,6 +70,8 @@ public class MainActivity extends FirebaseActivity implements OnFragmentInteract
     public Toolbar toolbar;
     @BindView(R.id.v_empty)
     public RelativeLayout mViewEmpty;
+    @BindView(R.id.tabs)
+    public TabLayout mTabLayout;
 
     private DatabaseReference mFirebaseRef;
 
@@ -140,8 +135,7 @@ public class MainActivity extends FirebaseActivity implements OnFragmentInteract
     }
 
     private void setupTabs() {
-        TabLayout tabLayout = (TabLayout) findViewById(R.id.tabs);
-        tabLayout.setOnTabSelectedListener(this);
+        mTabLayout.addOnTabSelectedListener(this);
     }
 
     private void setupNavigation(Bundle savedInstanceState) {
@@ -316,7 +310,6 @@ public class MainActivity extends FirebaseActivity implements OnFragmentInteract
                     .add(mContainerId, mCurrentFragment, page.getTag())
                     .addToBackStack(page.getTag())
                     .commit();
-
         }
 
         public Fragment getCurrentFragment() {
@@ -330,15 +323,19 @@ public class MainActivity extends FirebaseActivity implements OnFragmentInteract
 
     @Override
     public void onBackPressed() {
+
         if (getSupportFragmentManager().getBackStackEntryCount() > 1) {
-            super.onBackPressed();
-            mSectionsFragmentManager.setCurrentFragment(getSupportFragmentManager().findFragmentById(R.id.container));
+            if(mSectionsFragmentManager.getCurrentFragment().getTag().equals("new") && NewStoryFragment.V_POSITION > 0){
+                ((FragmentOnBackClickInterface) mSectionsFragmentManager.getCurrentFragment()).onClick();
+            }else{
+                super.onBackPressed();
+                mSectionsFragmentManager.setCurrentFragment(getSupportFragmentManager().findFragmentById(R.id.container));
+            }
         }
     }
 
     protected void launchLogin() {
 //        startActivityForResult(new Intent(this, Login.class), 1);
     }
-
 
 }

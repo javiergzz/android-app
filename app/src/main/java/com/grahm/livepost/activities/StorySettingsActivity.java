@@ -19,6 +19,7 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.firebase.analytics.FirebaseAnalytics;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -115,7 +116,8 @@ public class StorySettingsActivity extends FirebaseActivity {
 
         setupContributors();
         setupAddButton();
-
+        FirebaseAnalytics mFirebaseAnalytics = FirebaseAnalytics.getInstance(this);
+        mFirebaseAnalytics.setCurrentScreen(this, "Story Settings", "onCreate");
     }
 
     private void setupAddButton() {

@@ -5,6 +5,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
 
+import com.google.firebase.analytics.FirebaseAnalytics;
 import com.grahm.livepost.R;
 
 public class SignUpPage extends AppCompatActivity {
@@ -21,5 +22,7 @@ public class SignUpPage extends AppCompatActivity {
                 SignUpPage.this.finish();
             }
         });
+        FirebaseAnalytics mFirebaseAnalytics = FirebaseAnalytics.getInstance(this);
+        mFirebaseAnalytics.setCurrentScreen(this, "SignUp", "onCreate");
     }
 }

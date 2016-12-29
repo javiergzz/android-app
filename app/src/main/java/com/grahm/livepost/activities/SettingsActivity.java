@@ -19,6 +19,7 @@ import android.widget.Toast;
 
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
+import com.google.firebase.analytics.FirebaseAnalytics;
 import com.google.firebase.auth.AuthCredential;
 import com.google.firebase.auth.EmailAuthProvider;
 import com.google.firebase.auth.FirebaseAuth;
@@ -54,6 +55,8 @@ public class SettingsActivity extends AppCompatActivity {
         ButterKnife.bind(this);
         mFirebaseRef = FirebaseDatabase.getInstance().getReference();
         mUser = Utilities.getUser(mFirebaseRef, SettingsActivity.this, savedInstanceState);
+        FirebaseAnalytics mFirebaseAnalytics = FirebaseAnalytics.getInstance(this);
+        mFirebaseAnalytics.setCurrentScreen(this, "Settings", "onCreate");
     }
 
     public void openContent(View v) {
