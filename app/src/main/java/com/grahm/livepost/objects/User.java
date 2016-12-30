@@ -17,6 +17,7 @@ public class User implements Serializable {
     public static final String PROFILE_PICTURE_FIELD_STR = "profile_picture";
     public static final String TIMESTAMP_FIELD_STR = "timestamp";
     public static final String UID_FIELD_STR = "uid";
+    public static final String ACTIVE_STR = "active";
     //Variables
     private String email;
     private String name;
@@ -27,7 +28,27 @@ public class User implements Serializable {
     private Long timestamp;
     private String username;
     private String twitter;
+
+    public String getScreenName() {
+        return screenName;
+    }
+
+    public void setScreenName(String screenName) {
+        this.screenName = screenName;
+    }
+
+    private String screenName;
+    private boolean active = false;
+
     private String uid;
+
+    public boolean isActive() {
+        return active;
+    }
+
+    public void setActive(boolean active) {
+        this.active = active;
+    }
     //Getters & setters
 
     public String getUserKey() {

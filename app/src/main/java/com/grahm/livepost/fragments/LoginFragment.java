@@ -12,6 +12,12 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
 
+import com.android.volley.Request;
+import com.android.volley.RequestQueue;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.StringRequest;
+import com.android.volley.toolbox.Volley;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthCredential;
@@ -19,10 +25,18 @@ import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.TwitterAuthProvider;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ServerValue;
+import com.google.firebase.database.ValueEventListener;
 import com.google.gson.Gson;
 import com.grahm.livepost.R;
+import com.grahm.livepost.activities.Login;
 import com.grahm.livepost.activities.MainActivity;
 import com.grahm.livepost.activities.SplashScreen;
+import com.grahm.livepost.ui.Controls;
 import com.twitter.sdk.android.core.Callback;
 import com.twitter.sdk.android.core.Result;
 import com.twitter.sdk.android.core.TwitterApiClient;
@@ -32,6 +46,12 @@ import com.twitter.sdk.android.core.TwitterSession;
 import com.twitter.sdk.android.core.identity.TwitterLoginButton;
 import com.twitter.sdk.android.core.models.User;
 
+import org.json.JSONObject;
+
+import java.util.HashMap;
+import java.util.Locale;
+import java.util.Map;
+
 import static com.facebook.FacebookSdk.getApplicationContext;
 import static com.grahm.livepost.util.Utilities.saveTwitterOnFirebase;
 
@@ -39,21 +59,16 @@ public class LoginFragment extends Fragment {
 
     private static final String TAG_CLASS = "LoginFragment";
     private FirebaseAuth mAuth;
+    private FirebaseDatabase mFirebaseDB;
+    private DatabaseReference mFirebaseRef;
     private FirebaseAuth.AuthStateListener mAuthListener;
     public static TwitterLoginButton loginButton;
     private Callback<TwitterSession> callbackTwitter = new Callback<TwitterSession>() {
         @Override
         public void success(Result<TwitterSession> result) {
-            TwitterSession session = result.data;
-            String msg = "@" + session.getUserName() + " logged in! (#" + session.getUserId() + ")";
-            Toast.makeText(getActivity().getApplicationContext(), msg, Toast.LENGTH_LONG).show();
-            SharedPreferences.Editor editor = sharedPref.edit();
-            editor.putString("username", "@" + session.getUserName().toLowerCase());
-            editor.putString(SplashScreen.PREFS_AUTH, SplashScreen.PREFS_TWITTER);
-            editor.putBoolean(SplashScreen.PREFS_LOGIN, true);
-            editor.commit();
-            handleTwitterSession(session);
+            handleTwitterSession(result.data);
         }
+
         @Override
         public void failure(TwitterException exception) {
             Log.d("TwitterKit", "Login with Twitter failure", exception);
@@ -95,6 +110,8 @@ public class LoginFragment extends Fragment {
                 }
             }
         };
+        mFirebaseDB = FirebaseDatabase.getInstance();
+        mFirebaseRef = mFirebaseDB.getReference();
         sharedPref = getActivity().getSharedPreferences(getString(R.string.preference_file_key), Context.MODE_PRIVATE);
         return view;
     }
@@ -123,9 +140,74 @@ public class LoginFragment extends Fragment {
         }
     }
 
+    private void transformUser(final String uid, final TwitterSession session) {
+        RequestQueue queue = Volley.newRequestQueue(getApplicationContext());
+        String url = "http://rest-livepost-dev.herokuapp.com/v1.1/twitter/transform";
+//        Controls.createDialog(getApplicationContext(), "Loading", true);
+        StringRequest stringRequest = new StringRequest(Request.Method.POST, url,
+                new Response.Listener<String>() {
+                    @Override
+                    public void onResponse(String response) {
+                        try {
+                            JSONObject json = new JSONObject(response);
+                            Log.d("My App", json.toString());
+                            Log.d("phonetype value ", json.getBoolean("success") + "");
+                            if (json.getBoolean("success")) {
+                                getProfilePicture(session);
+                            } else {
+                                Controls.dismissDialog();
+                                Toast.makeText(getApplicationContext(), (json.getJSONObject("msg")).getString(Locale.getDefault().getDisplayLanguage()), Toast.LENGTH_LONG).show();
+                            }
+                        } catch (Throwable tx) {
+                            Log.e("My App", "Could not parse malformed JSON: \"" + response + "\"");
+                        }
+                    }
+                }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                Toast.makeText(getApplicationContext(), error.getMessage(), Toast.LENGTH_LONG).show();
+            }
+        }) {
+            @Override
+            protected Map<String, String> getParams() {
+                Map<String, String> params = new HashMap<String, String>();
+                params.put("uid", uid);
+                params.put("screen_name", "@" + session.getUserName().toLowerCase());
+                return params;
+            }
+        };
+        queue.add(stringRequest);
+        queue.start();
+    }
+
+    private void twitterActions(final TwitterSession session) {
+        final String mUid = mAuth.getCurrentUser().getUid();
+        mFirebaseRef.child("users").child(mUid).addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                com.grahm.livepost.objects.User u = dataSnapshot.getValue(com.grahm.livepost.objects.User.class);
+                if (u != null && u.isActive()) {
+                    saveOnProperties(u);
+                    Intent mainIntent = new Intent(getActivity(), MainActivity.class);
+                    Controls.dismissDialog();
+                    startActivity(mainIntent);
+                    getActivity().finish();
+                } else {
+                    transformUser(mUid, session);
+                }
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+                Controls.dismissDialog();
+                Log.e(TAG_CLASS, databaseError.getMessage());
+            }
+        });
+
+    }
+
     private void handleTwitterSession(final TwitterSession session) {
         Log.d(TAG_CLASS, "handleTwitterSession:" + session);
-
         AuthCredential credential = TwitterAuthProvider.getCredential(
                 session.getAuthToken().token,
                 session.getAuthToken().secret);
@@ -134,35 +216,33 @@ public class LoginFragment extends Fragment {
                 .addOnCompleteListener(getActivity(), new OnCompleteListener<AuthResult>() {
                     @Override
                     public void onComplete(@NonNull Task<AuthResult> task) {
-                        Log.d(TAG_CLASS, "signInWithCredential:onComplete:" + task.isSuccessful());
                         if (!task.isSuccessful()) {
-                            Log.w(TAG_CLASS, "signInWithCredential", task.getException());
                             Toast.makeText(getActivity(), "Authentication failed.",
                                     Toast.LENGTH_SHORT).show();
-                        }else{
-                            getProfilePicture(session, task);
+                        } else {
+                            twitterActions(session);
                         }
                     }
                 });
     }
 
-    private void getProfilePicture(final TwitterSession session, final Task<AuthResult> task){
+    private void getProfilePicture(final TwitterSession session) {
         Callback<User> callbackUser = new Callback<User>() {
             @Override
             public void success(Result<User> userResult) {
+                Log.i("TWITTER", userResult.data.toString());
                 String name = userResult.data.name;
                 String email = userResult.data.email;
-                String photoUrlNormalSize   = userResult.data.profileImageUrl;
+                String photoUrlNormalSize = userResult.data.profileImageUrl;
                 com.grahm.livepost.objects.User _user = new com.grahm.livepost.objects.User();
                 _user.setEmail(email);
                 _user.setName(name);
                 _user.setProfile_picture(photoUrlNormalSize);
-                _user.setUid(task.getResult().getUser().getUid());
+                _user.setUid(mAuth.getCurrentUser().getUid());
                 _user.setTwitter(session.getUserName());
                 saveTwitterOnFirebase(_user);
-
                 saveOnProperties(_user);
-
+                Controls.dismissDialog();
                 Intent mainIntent = new Intent(getActivity(), MainActivity.class);
                 startActivity(mainIntent);
                 getActivity().finish();
@@ -177,13 +257,13 @@ public class LoginFragment extends Fragment {
         twitterApiClient.getAccountService().verifyCredentials(true, false, callbackUser);
     }
 
-    private void saveOnProperties(com.grahm.livepost.objects.User user){
+    private void saveOnProperties(com.grahm.livepost.objects.User user) {
         SharedPreferences.Editor editor = getApplicationContext().getSharedPreferences(getString(R.string.preference_file_key), Context.MODE_PRIVATE).edit();
         Gson gson = new Gson();
         String json = gson.toJson(user);
         editor.putString("user", json);
         editor.putString("uid", user.getUid());
-        editor.putString("username", user.getEmail());
+        editor.putString("username", user.getName());
         editor.putBoolean(SplashScreen.PREFS_LOGIN, true);
         editor.putString(SplashScreen.PREFS_AUTH, SplashScreen.PREFS_LIVEPOST);
         editor.commit();

@@ -132,6 +132,7 @@ public class RegisterUserTask extends AsyncTask<Uri, String, String> {
                     //If user creation was successful, store extra data object
                     mUid = mFirebaseAuth.getCurrentUser().getUid();
                     mUser.setUid(mUid);
+                    mUser.setActive(true);
                     mFirebaseRef.child("users/" + mUid).setValue(mUser);
                     mFirebaseRef.child("users/" + mUid + "/timestamp").setValue(ServerValue.TIMESTAMP);
                     SharedPreferences.Editor editor = mSharedPref.edit();

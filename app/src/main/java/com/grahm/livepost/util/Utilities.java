@@ -103,7 +103,7 @@ public class Utilities {
         DatabaseReference ref = database.getReference("users");
         DatabaseReference usersRef = ref.child(_user.getUid());
         Map<String, Object> user = new HashMap<String, Object>();
-        user.put("name", _user.getEmail());
+        user.put("name", _user.getName());
         user.put("profile_picture", _user.getProfile_picture());
         user.put("timestamp", ts);
         user.put("uid", _user.getUid());

@@ -7,9 +7,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.View.OnClickListener;
 import android.view.ViewGroup;
-import android.widget.Button;
 import android.widget.EditText;
 
 import com.google.firebase.analytics.FirebaseAnalytics;
@@ -17,7 +15,6 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.grahm.livepost.R;
 import com.grahm.livepost.activities.Login;
-import com.grahm.livepost.asynctask.RegisterUserTask;
 import com.grahm.livepost.interfaces.OnFragmentInteractionListener;
 import com.grahm.livepost.objects.User;
 import com.grahm.livepost.util.Utilities;
@@ -144,6 +141,6 @@ public class SignUpFragment extends Fragment {
     }
 
     private boolean isPasswordValid(String password) {
-        return password.length() > PASS_MIN_LENGTH;
+        return password.length() >= PASS_MIN_LENGTH;
     }
 }

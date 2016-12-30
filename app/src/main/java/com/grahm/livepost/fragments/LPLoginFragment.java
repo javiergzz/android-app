@@ -18,6 +18,12 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.android.volley.Request;
+import com.android.volley.RequestQueue;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.StringRequest;
+import com.android.volley.toolbox.Volley;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
@@ -28,11 +34,18 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.google.gson.Gson;
+import com.google.gson.JsonObject;
 import com.grahm.livepost.R;
 import com.grahm.livepost.activities.MainActivity;
 import com.grahm.livepost.activities.SplashScreen;
 import com.grahm.livepost.objects.User;
 import com.grahm.livepost.ui.Controls;
+
+import org.json.JSONObject;
+
+import java.util.HashMap;
+import java.util.Locale;
+import java.util.Map;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -219,6 +232,47 @@ public class LPLoginFragment extends Fragment {
             mContext = context;
         }
 
+        private void transformUser(){
+            RequestQueue queue = Volley.newRequestQueue(mContext);
+                        String url ="http://rest-livepost-dev.herokuapp.com/v1.1/login";
+
+            StringRequest stringRequest = new StringRequest(Request.Method.POST, url,
+                    new Response.Listener<String>() {
+                        @Override
+                        public void onResponse(String response) {
+                            try {
+                                JSONObject json = new JSONObject(response);
+                                Log.d("My App", json.toString());
+                                Log.d("phonetype value ", json.getBoolean("success") + "");
+                                if(json.getBoolean("success")){
+                                    loginAction();
+                                }else{
+                                    Toast.makeText(mContext, (json.getJSONObject("msg")).getString(Locale.getDefault().getDisplayLanguage()) , Toast.LENGTH_LONG).show();
+                                }
+                            } catch (Throwable tx) {
+                                Log.e("My App", "Could not parse malformed JSON: \"" + response + "\"");
+                            }
+                        }
+                    }, new Response.ErrorListener() {
+                        @Override
+                        public void onErrorResponse(VolleyError error) {
+                            Toast.makeText(mContext, error.getMessage() , Toast.LENGTH_LONG).show();
+                        }
+            }){
+                @Override
+                protected Map<String, String> getParams()
+                {
+                    Map<String, String>  params = new HashMap<String, String>();
+                    params.put("email", mEmail.toLowerCase());
+                    params.put("password", mPassword);
+
+                    return params;
+                }
+            };
+            queue.add(stringRequest);
+            queue.start();
+        }
+
         protected void loginAction() {
             mUid = mAuth.getCurrentUser().getUid();
             mFirebaseRef.child("users").child(mUid).addListenerForSingleValueEvent(new ValueEventListener() {
@@ -226,21 +280,25 @@ public class LPLoginFragment extends Fragment {
                 @Override
                 public void onDataChange(DataSnapshot dataSnapshot) {
                     User u = dataSnapshot.getValue(User.class);
-                    Gson gson = new Gson();
-                    String json = gson.toJson(u);
-                    SharedPreferences sharedPref = mContext.getSharedPreferences(getString(R.string.preference_file_key), Context.MODE_PRIVATE);
-                    SharedPreferences.Editor editor = sharedPref.edit();
-                    editor.putString("user", json);
-                    editor.putString("uid", mUid);
-                    editor.putString("username", mEmail);
-                    editor.putBoolean(SplashScreen.PREFS_LOGIN, true);
-                    editor.putString(SplashScreen.PREFS_AUTH, SplashScreen.PREFS_LIVEPOST);
-                    editor.commit();
-                    Log.i(TAG, TAG + ": Login successful!");
-                    Intent mainIntent = new Intent(getActivity(), MainActivity.class);
-                    Controls.dismissDialog();
-                    startActivity(mainIntent);
-                    getActivity().finish();
+                    if(u !=  null && u.isActive()){
+                        Gson gson = new Gson();
+                        String json = gson.toJson(u);
+                        SharedPreferences sharedPref = mContext.getSharedPreferences(getString(R.string.preference_file_key), Context.MODE_PRIVATE);
+                        SharedPreferences.Editor editor = sharedPref.edit();
+                        editor.putString("user", json);
+                        editor.putString("uid", mUid);
+                        editor.putString("username", mEmail);
+                        editor.putBoolean(SplashScreen.PREFS_LOGIN, true);
+                        editor.putString(SplashScreen.PREFS_AUTH, SplashScreen.PREFS_LIVEPOST);
+                        editor.commit();
+                        Log.i(TAG, TAG + ": Login successful!");
+                        Intent mainIntent = new Intent(getActivity(), MainActivity.class);
+                        Controls.dismissDialog();
+                        startActivity(mainIntent);
+                        getActivity().finish();
+                    }else{
+                        transformUser();
+                    }
                 }
 
                 @Override
