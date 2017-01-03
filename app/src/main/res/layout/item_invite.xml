@@ -38,11 +38,12 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_centerInParent="true"
-                android:visibility="gone"
-                android:layout_marginRight="5dp" />
+                android:layout_marginRight="5dp"
+                android:visibility="gone" />
         </RelativeLayout>
 
         <RelativeLayout
+            android:id="@+id/v_title_invites"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_toRightOf="@id/imageArea"
@@ -53,56 +54,61 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginLeft="3dp"
+                android:paddingTop="20dp"
                 android:textAllCaps="false"
                 android:textColor="#222"
-                android:textSize="16dp" />
+                android:textSize="14dp" />
 
 
             <LinearLayout
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_alignParentTop="true"
                 android:layout_alignParentRight="true"
+                android:layout_alignParentTop="true"
                 android:orientation="horizontal"
                 android:padding="2dp">
 
-                    <TextView
-                        android:id="@+id/i_datetime"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_gravity="center_vertical"
-                        android:layout_margin="1dp"
-                        android:text="12:00 24/Feb/16"
-                        android:textColor="#666"
-                        android:textSize="@dimen/card_font_size" />
+                <TextView
+                    android:id="@+id/i_datetime"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical"
+                    android:layout_margin="1dp"
+                    android:text="12:00 24/Feb/16"
+                    android:textColor="#666"
+                    android:textSize="@dimen/card_font_size" />
             </LinearLayout>
         </RelativeLayout>
+
         <LinearLayout
             android:layout_width="wrap_content"
-            android:layout_alignParentBottom="true"
-            android:layout_alignParentRight="true"
             android:layout_height="wrap_content"
+            android:layout_below="@+id/v_title_invites"
+            android:layout_alignParentRight="true"
             android:orientation="horizontal">
+
             <Button
                 android:id="@+id/btn_accept"
                 android:layout_width="wrap_content"
-                android:background="@color/green_edit"
+                android:layout_height="30dp"
                 android:layout_margin="5dp"
-                android:text="@string/accept"
-                android:padding="5dp"
-                android:drawableRight="@drawable/ic_check_circle_black_24dp"
-                android:elevation="6dp"
+                android:background="@color/green_edit"
                 android:clickable="true"
-                android:layout_height="30dp" />
+                android:elevation="6dp"
+                android:padding="5dp"
+                android:textAllCaps="false"
+                android:text="@string/accept" />
+
             <Button
                 android:id="@+id/btn_decline"
                 android:layout_width="wrap_content"
                 android:layout_height="30dp"
-                android:background="@color/red_delete"
                 android:layout_margin="5dp"
-                android:text="@string/decline"
+                android:background="@color/red_delete"
                 android:clickable="true"
-                android:drawableRight="@drawable/ic_cancel_black_24dp" />
+                android:elevation="6dp"
+                android:textAllCaps="false"
+                android:text="@string/decline" />
 
         </LinearLayout>
 

@@ -1,5 +1,8 @@
 package com.grahm.livepost.fragments;
 
+import android.graphics.Bitmap;
+import android.support.v4.graphics.drawable.RoundedBitmapDrawable;
+import android.support.v4.graphics.drawable.RoundedBitmapDrawableFactory;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -12,6 +15,7 @@ import android.widget.Button;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
+import com.bumptech.glide.request.target.BitmapImageViewTarget;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.FirebaseDatabase;
@@ -39,7 +43,7 @@ public class InvitationRecyclerViewAdapter extends FirebaseListAdapter {
     private User mUser;
 
     public InvitationRecyclerViewAdapter(Query ref) {
-        super(ref, Invite.class,true);
+        super(ref, Invite.class, true);
         mQuery = ref;
         mFirebaseDB = FirebaseDatabase.getInstance();
         mUser = Utilities.mUser;
@@ -56,48 +60,59 @@ public class InvitationRecyclerViewAdapter extends FirebaseListAdapter {
     @Override
     public void onBindViewHolder(final RecyclerView.ViewHolder holder, int position) {
         final InviteViewHolder h = (InviteViewHolder) holder;
-        final Invite i = (Invite)getItem(position);
+        final Invite i = (Invite) getItem(position);
         h.mItem = i;
-        h.mContentView.setText(i.getSenderKey()+" has invited you to "+i.getStoryTitle());
-        if(i.getTimestamp()!=null)
+        h.mContentView.setText(i.getSenderKey() + " has invited you to " + i.getStoryTitle());
+        if (i.getTimestamp() != null)
             h.mDateTimeView.setText(Utilities.getTimeMsg(i.getTimestamp()));
-        Glide.with(h.mView.getContext()).
-                load(i.getSenderProfilePicture())
+
+        Glide.with(h.mView.getContext())
+                .load(i.getSenderProfilePicture())
+                .asBitmap()
                 .diskCacheStrategy(DiskCacheStrategy.RESULT)
                 .placeholder(R.drawable.default_placeholder)
                 .fitCenter()
-                .into(h.mImageView);
+                .into(new BitmapImageViewTarget(h.mImageView) {
+                    @Override
+                    protected void setResource(Bitmap resource) {
+                        RoundedBitmapDrawable circularBitmapDrawable =
+                                RoundedBitmapDrawableFactory.create(h.mView.getContext().getResources(), resource);
+                        circularBitmapDrawable.setCircular(true);
+                        h.mImageView.setImageDrawable(circularBitmapDrawable);
+                    }
+                });
+
         h.mAcceptButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                mFirebaseDB.getReference("users/"+mUser.getUserKey()+"/invites/"+i.getStoryId()).removeValue();
-                mFirebaseDB.getReference("posts/"+i.getStoryId()).addListenerForSingleValueEvent(new ValueEventListener() {
+                mFirebaseDB.getReference("users/" + mUser.getUserKey() + "/invites/" + i.getStoryId()).removeValue();
+                mFirebaseDB.getReference("posts/" + i.getStoryId()).addListenerForSingleValueEvent(new ValueEventListener() {
                     @Override
                     public void onDataChange(DataSnapshot dataSnapshot) {
-                        if(dataSnapshot.getValue()!=null){
+                        if (dataSnapshot.getValue() != null) {
                             Story s = dataSnapshot.getValue(Story.class);
-                            if(s!=null){
-                                mFirebaseDB.getReference("users/"+mUser.getUserKey()+"/posts_contributed_to/"+i.getStoryId()).setValue(s);
+                            if (s != null) {
+                                mFirebaseDB.getReference("users/" + mUser.getUid() + "/posts_contributed_to/" + i.getStoryId()).setValue(s);
                             }
                         }
                     }
 
                     @Override
                     public void onCancelled(DatabaseError databaseError) {
-                        Log.e(TAG,"Error:"+databaseError.getDetails());
+                        Log.e(TAG, "Error:" + databaseError.getDetails());
                     }
                 });
 
-                mFirebaseDB.getReference("members/"+i.getStoryId()+"/"+mUser.getUserKey()+"/role").setValue("contributor");
-                Log.d(TAG,"Accepted");
+                mFirebaseDB.getReference("members/" + i.getStoryId() + "/" + mUser.getUserKey() + "/role").setValue("contributor");
+                Log.d(TAG, "Accepted");
             }
         });
         h.mDeclineButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                mFirebaseDB.getReference("users/"+mUser.getUserKey()+"/invites/"+i.getStoryId()).removeValue();
-                mFirebaseDB.getReference("members/"+i.getStoryId()+"/"+mUser.getUserKey()).removeValue();
-                Log.d(TAG,"Declined");
+                mFirebaseDB.getReference("users/" + mUser.getUserKey() + "/invites/" + i.getStoryId()).removeValue();
+                mFirebaseDB.getReference("members/" + i.getStoryId() + "/" + mUser.getUserKey()).removeValue();
+                Log.d(TAG, "Declined");
             }
         });
     }
@@ -118,7 +133,7 @@ public class InvitationRecyclerViewAdapter extends FirebaseListAdapter {
             mView = view;
             mContentView = (TextView) view.findViewById(R.id.i_title);
             mImageView = (ImageView) view.findViewById(R.id.i_imgProfile);
-            mProgressBar = (ProgressBar)view.findViewById(R.id.i_progress_img);
+            mProgressBar = (ProgressBar) view.findViewById(R.id.i_progress_img);
             mDateTimeView = (TextView) view.findViewById(R.id.i_datetime);
             mAcceptButton = (Button) view.findViewById(R.id.btn_accept);
             mDeclineButton = (Button) view.findViewById(R.id.btn_decline);

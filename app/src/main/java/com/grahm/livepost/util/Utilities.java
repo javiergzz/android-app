@@ -158,9 +158,6 @@ public class Utilities {
     }
 
     public static String getTimeMsg(Long t) {
-        // TODO validate date
-        // return new SimpleDateFormat("hh:mma MM/dd/yyyy").format(t);
-        //return new SimpleDateFormat("hh:mma").format(t);
         return (String) DateUtils.getRelativeTimeSpanString(t);
     }
 

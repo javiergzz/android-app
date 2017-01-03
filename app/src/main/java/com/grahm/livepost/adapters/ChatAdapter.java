@@ -202,6 +202,9 @@ public class ChatAdapter extends FirebaseListAdapter<Update> {
             Timestamp t = new Timestamp(timelong);
             timeMsg = Utilities.getTimeMsg(timelong);
             if (!TextUtils.isEmpty(timeMsg)) {
+                // TODO replace with strings.xml
+                String _str = "just posted";
+                timeMsg = timeMsg.equals("in 0 minutes") ? _str: timeMsg.equals("0 minutes ago") ? _str : timeMsg;
                 h.mDateView.setText(timeMsg);
             }
         }

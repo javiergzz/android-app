@@ -10,8 +10,8 @@
     <!--Home Fragment-->
     <color name="list_background">#ced2ce</color>
     <color name="transparent_gray">#E2E2E2</color>
-    <color name="red_delete">#FF5722</color>
-    <color name="green_edit">#009688</color>
+    <color name="red_delete">#FFCDD2</color>
+    <color name="green_edit">#C8E6C9</color>
     <dimen name="card_title_size_staggered">21dp</dimen>
     <color name="black">#000</color>
     <color name="dark_grey">#222</color>

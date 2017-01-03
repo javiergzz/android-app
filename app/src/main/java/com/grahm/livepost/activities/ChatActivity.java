@@ -356,7 +356,9 @@ public class ChatActivity extends FirebaseActivity implements AbsListView.OnItem
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.menu_chat, menu);
+        if(mUser.getUid().equals(mStory.getAuthor())){
+            getMenuInflater().inflate(R.menu.menu_chat, menu);
+        }
         return super.onCreateOptionsMenu(menu);
     }
 

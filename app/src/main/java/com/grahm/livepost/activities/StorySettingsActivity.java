@@ -258,7 +258,7 @@ public class StorySettingsActivity extends FirebaseActivity {
                         Log.e(TAG, userKey);
                         if (userKey != null)
                             addContributorQuery(u);
-                    }else{
+                    } else {
                         addUserByTwitter(q);
                     }
                 }
@@ -275,7 +275,7 @@ public class StorySettingsActivity extends FirebaseActivity {
 
     }
 
-    private void addUserByTwitter(String q){
+    private void addUserByTwitter(String q) {
         mFirebaseRef.child("users").orderByChild("screenName").equalTo(q).addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
@@ -285,7 +285,7 @@ public class StorySettingsActivity extends FirebaseActivity {
                     String userKey = u.getUserKey();
                     if (userKey != null)
                         addContributorQuery(u);
-                }else {
+                } else {
                     mLoading.setVisibility(View.GONE);
                     Toast.makeText(getApplicationContext(), getString(R.string.story_settings_invalid_user_error), Toast.LENGTH_SHORT).show();
                 }
@@ -306,7 +306,7 @@ public class StorySettingsActivity extends FirebaseActivity {
             return;
         }
 
-        final String userKey = user.getUserKey();
+        final String userKey = user.getUid();
         //Members Query
         final Map<String, Object> map = new HashMap<String, Object>();
         final Map<String, Object> k = new HashMap<String, Object>();
@@ -333,19 +333,22 @@ public class StorySettingsActivity extends FirebaseActivity {
         final Map<String, Object> invitesMap = new HashMap<String, Object>();
         invitesMap.put(mId, i);
 
-        mFirebaseRef.child("users/" + userKey + "/invites").runTransaction(new Transaction.Handler() {
-            @Override
-            public Transaction.Result doTransaction(MutableData mutableData) {
-                mutableData.setValue(invitesMap);
-                mLoading.setVisibility(View.GONE);
-                return Transaction.success(mutableData);
-            }
-
-            @Override
-            public void onComplete(DatabaseError databaseError, boolean b, DataSnapshot dataSnapshot) {
-                Log.d(TAG, "postTransaction:onComplete:" + databaseError);
-            }
-        });
+        mFirebaseRef.getRoot().child("users/" + userKey).child("/invites").updateChildren(invitesMap);
+        mLoading.setVisibility(View.GONE);
+//        mFirebaseRef.child("users/" + userKey + "/invites").runTransaction(new Transaction.Handler() {
+//            @Override
+//            public Transaction.Result doTransaction(MutableData mutableData) {
+//
+//                mLoading.setVisibility(View.GONE);
+//                mutableData.setValue(invitesMap);
+//                return Transaction.success(mutableData);
+//            }
+//
+//            @Override
+//            public void onComplete(DatabaseError databaseError, boolean b, DataSnapshot dataSnapshot) {
+//                Log.d(TAG, "postTransaction:onComplete:" + databaseError);
+//            }
+//        });
 
         mTextContributor.setText("");
         mTextContributor.clearListSelection();
