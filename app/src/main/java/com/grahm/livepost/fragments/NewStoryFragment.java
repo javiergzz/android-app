@@ -504,14 +504,17 @@ public class NewStoryFragment extends Fragment implements OnPutImageListener, Fr
             @Override
             public void onImagePickerError(Exception e, EasyImage.ImageSource source, int type) {
                 TextInputLayout t = ButterKnife.findById(mViewPager, R.id.new_session_avatar_input);
-                if (t != null)
-                    t.setError(e.getMessage());
+                if (t != null){
+                    // TODO replace strings
+                    t.setError("We can’t seem to find your camera. Please try again later.");
+                }
             }
 
             @Override
             public void onImagePicked(File imageFile, EasyImage.ImageSource source, int type) {
                 //Handle the image
-                onPhotoReturned(imageFile);
+                if(imageFile != null)
+                    onPhotoReturned(imageFile);
             }
         });
 
@@ -522,7 +525,8 @@ public class NewStoryFragment extends Fragment implements OnPutImageListener, Fr
         mUri = Uri.fromFile(imageFile);
         Log.e(TAG, mUri.toString());
         mStory.setPosts_picture(mUri.toString());
-        ButterKnife.findById(mViewPager, R.id.new_session_avatar_layout).setVisibility(View.GONE);
+        final ImageView defaultImage = ButterKnife.findById(mViewPager, R.id.new_session_avatar_layout);
+        defaultImage.setVisibility(View.GONE);
         final ImageView resultView = ButterKnife.findById(mViewPager, R.id.new_session_selected_img);
         resultView.setVisibility(View.VISIBLE);
         resultView.setOnClickListener(new View.OnClickListener() {
@@ -534,7 +538,12 @@ public class NewStoryFragment extends Fragment implements OnPutImageListener, Fr
         Glide.with(this).load(mUri).asBitmap().centerCrop().into(new BitmapImageViewTarget(resultView) {
             @Override
             protected void setResource(Bitmap resource) {
-                resultView.setImageBitmap(resource);
+                if(resource != null){
+                    resultView.setImageBitmap(resource);
+                }else{
+                    defaultImage.setVisibility(View.VISIBLE);
+                    resultView.setVisibility(View.GONE);
+                }
             }
         });
         Bundle bundle = new Bundle();

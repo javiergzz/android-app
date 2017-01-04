@@ -6,6 +6,7 @@ import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.graphics.Point;
 import android.os.Bundle;
+import android.support.design.widget.TabItem;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -14,6 +15,8 @@ import android.util.Log;
 import android.view.Display;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.view.ViewGroup;
 import android.widget.RelativeLayout;
 
 import com.braunster.tutorialview.object.Tutorial;
@@ -34,6 +37,7 @@ import com.grahm.livepost.util.Utilities;
 import com.objectlife.statelayout.StateLayout;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -98,29 +102,38 @@ public class MainActivity extends FirebaseActivity implements OnFragmentInteract
         return mUser.getPosts_created() != null && mUser.getPosts_created().size() > 0 || mUser.getPosts_contributed_to() != null && mUser.getPosts_contributed_to().size() > 0;
     }
 
+    private Tutorial getTutorial(int posX, int posY, String str){
+        Tutorial tutorial = new Tutorial();
+        tutorial.setPositionToSurroundX(posX);
+        tutorial.setPositionToSurroundY(posY);
+        tutorial.setPositionToSurroundHeight(200);
+        tutorial.setPositionToSurroundWidth(200);
+        tutorial.setTutorialInfoTextPosition(Tutorial.InfoPosition.BELOW);
+        tutorial.setTutorialText(str);
+        tutorial.setTutorialBackgroundColor(randomColor());
+        tutorial.setTutorialTextColor(Color.WHITE);
+        tutorial.setTutorialTextTypeFace("fonts/Roboto-Regular.ttf");
+        tutorial.setTutorialTextSize(20);
+        tutorial.setTutorialGotItPosition(Tutorial.GotItPosition.BOTTOM);
+        tutorial.setAnimationDuration(500);
+        return tutorial;
+    }
+
     private void loadTutorial() {
+        Display display = getWindowManager().getDefaultDisplay();
+        Point size = new Point();
+        display.getSize(size);
+        int centerX = (size.x / 2) - 100;
+        int rigthX = size.x - 150;
         if (!hasStories()) {
             TutorialIntentBuilder builder = new TutorialIntentBuilder(MainActivity.this);
             builder.changeSystemUiColor(false);
-            Display display = getWindowManager().getDefaultDisplay();
-            Point size = new Point();
-            display.getSize(size);
-            int centerX = (size.x / 2) - 100;
-            int centerY = size.y / 2;
-            TutorialBuilder tBuilder = new TutorialBuilder();
-            tBuilder.setTitle("Welcome!")
-                    .setmPositionToSurroundY(centerY)
-                    .setPositionToSurroundX(centerX)
-                    .setPositionToSurroundHeight(200)
-                    .setPositionToSurroundWidth(200)
-                    .setInfoText("You can create a new story by clicking on the icon.")
-                    .setBackgroundColor(randomColor())
-                    .setTutorialTextColor(Color.WHITE)
-                    .setTutorialTextTypeFaceName("fonts/Roboto-Regular.ttf")
-                    .setTutorialTextSize(20)
-                    .setTutorialGotItPosition(Tutorial.GotItPosition.BOTTOM)
-                    .setAnimationDuration(500);
-            builder.setTutorial(tBuilder.build());
+            ArrayList<Tutorial> tutorials = new ArrayList<>();
+            tutorials.add(getTutorial(50, 45, "This is where all your stories will live. When you create a New Story it will appear here."));
+            tutorials.add(getTutorial(centerX, 45, "Here you can create a new story and choose where to publish it."));
+            tutorials.add(getTutorial(rigthX, 45, "This is your profile, you'll be able to see the stories you've created and edit your profile information."));
+            builder.skipTutorialOnBackPressed(true);
+            builder.setWalkThroughList(tutorials);
             SharedPreferences sharedPref = getSharedPreferences(getString(R.string.preference_file_key), Context.MODE_PRIVATE);
             SharedPreferences.Editor editor = sharedPref.edit();
             editor.putBoolean(PREFS_TUTORIAL, true);
@@ -131,7 +144,7 @@ public class MainActivity extends FirebaseActivity implements OnFragmentInteract
     }
 
     private int randomColor() {
-        return Color.argb(255, 54, 68, 87);
+        return Color.argb(220, 54, 68, 87);
     }
 
     private void setupTabs() {
