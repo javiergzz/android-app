@@ -60,6 +60,7 @@ import com.twitter.sdk.android.tweetcomposer.TweetComposer;
 import com.twitter.sdk.android.tweetui.TweetUi;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -178,35 +179,48 @@ public class ChatActivity extends FirebaseActivity implements AbsListView.OnItem
         mFirebaseAnalytics.setCurrentScreen(this, "Story Screen", "onCreate");
     }
 
+
+    private Tutorial getTutorial(int posX, int posY, String str, int textPosition, int size, int goItPos){
+        Tutorial tutorial = new Tutorial();
+        tutorial.setPositionToSurroundX(posX);
+        tutorial.setPositionToSurroundY(posY);
+        tutorial.setPositionToSurroundHeight(size);
+        tutorial.setPositionToSurroundWidth(size);
+        tutorial.setTutorialInfoTextPosition(textPosition);
+        tutorial.setTutorialText(str);
+        tutorial.setTutorialBackgroundColor(randomColor());
+        tutorial.setTutorialTextColor(Color.WHITE);
+        tutorial.setTutorialTextTypeFace("fonts/Roboto-Regular.ttf");
+        tutorial.setTutorialTextSize(20);
+        tutorial.setTutorialGotItPosition(goItPos);
+        tutorial.setAnimationDuration(500);
+        return tutorial;
+    }
+
+    private int randomColor() {
+        return Color.argb(220, 54, 68, 87);
+    }
+
     private void loadTutorial() {
-            TutorialIntentBuilder builder = new TutorialIntentBuilder(ChatActivity.this);
-            builder.changeSystemUiColor(false);
-            Display display = getWindowManager().getDefaultDisplay();
-            Point size = new Point();
-            display.getSize(size);
-            int centerX = size.x  - 60;
-            int centerY = 40;
-            TutorialBuilder tBuilder = new TutorialBuilder();
-            tBuilder.setTitle("Settings")
-                    .setmPositionToSurroundY(centerY)
-                    .setPositionToSurroundX(centerX)
-                    .setPositionToSurroundHeight(100)
-                    .setPositionToSurroundWidth(100)
-                    .setInfoText("You can view your story settings here.")
-                    .setTutorialInfoTextPosition(Tutorial.InfoPosition.BELOW)
-                    .setBackgroundColor(Color.argb(255, 54, 68, 87))
-                    .setTutorialTextColor(Color.WHITE)
-                    .setTutorialTextTypeFaceName("fonts/Roboto-Regular.ttf")
-                    .setTutorialTextSize(20)
-                    .setTutorialGotItPosition(Tutorial.GotItPosition.BOTTOM)
-                    .setAnimationDuration(500);
-            builder.setTutorial(tBuilder.build());
-            SharedPreferences sharedPref = getSharedPreferences(getString(R.string.preference_file_key), Context.MODE_PRIVATE);
-            SharedPreferences.Editor editor = sharedPref.edit();
-            editor.putBoolean(PREFS_TUTORIAL, true);
-            editor.commit();
-            startActivity(builder.getIntent());
-            overridePendingTransition(R.anim.dummy, R.anim.dummy);
+        Display display = getWindowManager().getDefaultDisplay();
+        Point size = new Point();
+        display.getSize(size);
+        int rigthXMenu = size.x - 80;
+        int heightTextBar = size.y - 60;
+        int positionXTextBar = 75;
+        TutorialIntentBuilder builder = new TutorialIntentBuilder(ChatActivity.this);
+        builder.changeSystemUiColor(false);
+        ArrayList<Tutorial> tutorials = new ArrayList<>();
+        tutorials.add(getTutorial(positionXTextBar, heightTextBar, "This is your first story! You can start typing in the text bar at the bottom.", Tutorial.InfoPosition.ABOVE, 40, Tutorial.GotItPosition.BOTTOM));
+        tutorials.add(getTutorial(rigthXMenu, 60, "Here you'll be able to access the story's settings where you can invite others to help contribute in the story and access to the embed code or link where your story lives.", Tutorial.InfoPosition.BELOW, 60, Tutorial.GotItPosition.TOP));
+        builder.skipTutorialOnBackPressed(true);
+        builder.setWalkThroughList(tutorials);
+        SharedPreferences sharedPref = getSharedPreferences(getString(R.string.preference_file_key), Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = sharedPref.edit();
+        editor.putBoolean(PREFS_TUTORIAL, true);
+        editor.commit();
+        startActivity(builder.getIntent());
+        overridePendingTransition(R.anim.dummy, R.anim.dummy);
     }
 
     @OnTextChanged(R.id.messageInput)
