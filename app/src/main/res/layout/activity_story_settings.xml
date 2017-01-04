@@ -144,27 +144,36 @@
                         android:textColor="@android:color/holo_blue_light" />
                 </LinearLayout>
 
-                <android.support.v7.widget.RecyclerView
-                    android:id="@+id/list_contributors"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:layout_above="@+id/listFooter"
-                    android:layout_margin="15dp"
-                    android:background="@android:color/transparent"
-                    android:elevation="1dp"
-                    app:layout_behavior="@string/appbar_scrolling_view_behavior" />
-
-                <Button
-                    android:id="@+id/btn_story_delete"
+                <RelativeLayout
                     android:layout_width="wrap_content"
-                    android:layout_height="35dp"
-                    android:text="@string/story_settings_contributors_delete_post_btn"
-                    android:textColor="#FFF"
-                    android:textAllCaps="false"
-                    android:paddingLeft="20dp"
-                    android:paddingRight="20dp"
-                    android:textSize="16dp"
-                    android:background="#D44A3D"/>
+                    android:layout_height="match_parent"
+                    android:layout_marginBottom="25dp">
+
+                    <android.support.v7.widget.RecyclerView
+                        android:id="@+id/list_contributors"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:layout_margin="15dp"
+                        android:background="@android:color/transparent"
+                        android:elevation="1dp"
+                        android:layout_alignParentTop="true"
+                        android:layout_marginBottom="65dp"/>
+
+                    <Button
+                        android:id="@+id/btn_story_delete"
+                        android:layout_width="wrap_content"
+                        android:layout_height="35dp"
+                        android:text="@string/story_settings_contributors_delete_post_btn"
+                        android:textColor="#FFF"
+                        android:textAllCaps="false"
+                        android:paddingLeft="20dp"
+                        android:paddingRight="20dp"
+                        android:textSize="16dp"
+                        android:background="#D44A3D"
+                        android:layout_centerHorizontal="true"
+                        android:layout_alignParentBottom="true"
+                        android:layout_marginTop="10dp" />
+                </RelativeLayout>
             </LinearLayout>
         </LinearLayout>
     </LinearLayout>

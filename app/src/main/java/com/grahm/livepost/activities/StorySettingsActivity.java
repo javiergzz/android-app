@@ -45,8 +45,6 @@ public class StorySettingsActivity extends FirebaseActivity {
     private static final String TAG = "StorySettingsActivity";
     @BindView(R.id.list_contributors)
     public RecyclerView mListContributors;
-//    @BindView(R.id.settings_toolbar)
-//    public Toolbar mToolbar;
 
     @BindView(R.id.text_story_code)
     public TextView mTextStoryCode;
@@ -113,7 +111,6 @@ public class StorySettingsActivity extends FirebaseActivity {
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         restoreState(savedInstanceState);
-
         setupContributors();
         setupAddButton();
         FirebaseAnalytics mFirebaseAnalytics = FirebaseAnalytics.getInstance(this);
@@ -121,19 +118,14 @@ public class StorySettingsActivity extends FirebaseActivity {
     }
 
     private void setupAddButton() {
-        //String[] COUNTRIES = new String[] {"Belgium", "France", "Italy", "Germany", "Spain"};
-
         DatabaseReference usersRef = FirebaseDatabase.getInstance().getReference("users");
         mTextContributor.setThreshold(1);
-
-
         mTextContributor.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                 mContributor = (User) view.getTag();
                 Log.e(TAG, mContributor.toString());
             }
-
             @Override
             public void onNothingSelected(AdapterView<?> parent) {
 
@@ -146,15 +138,11 @@ public class StorySettingsActivity extends FirebaseActivity {
                 Log.e(TAG, mContributor.toString());
             }
         });
-
-
-        //UsersAdapter adapter = new UsersAdapter(FirebaseDatabase.getInstance().getReference("users"),getApplicationContext(), mId);
     }
 
 
     private void setupContributors() {
         mFirebaseRef.child("members/" + mId).orderByChild("role").addValueEventListener(new ValueEventListener() {
-
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 Map<String, Object> map = (Map<String, Object>) dataSnapshot.getValue();
@@ -185,7 +173,6 @@ public class StorySettingsActivity extends FirebaseActivity {
     private void deleteStory() {
         //Delete post
         mFirebaseRef.child("posts/" + mId).removeValue();
-
         //Delete from entry contributors
         mFirebaseRef.child("members/" + mId).addValueEventListener(new ValueEventListener() {
             @Override
@@ -253,12 +240,13 @@ public class StorySettingsActivity extends FirebaseActivity {
                 @Override
                 public void onDataChange(DataSnapshot dataSnapshot) {
                     if (dataSnapshot != null && dataSnapshot.getValue() != null) {
-                        User u = dataSnapshot.getChildren().iterator().next().getValue(User.class);
-                        String userKey = u.getUserKey();
-                        Log.e(TAG, userKey);
-                        if (userKey != null)
-                            addContributorQuery(u);
+                        for (DataSnapshot item : dataSnapshot.getChildren()) {
+                            User u = item.getValue(User.class);
+                            if (u.getUid() != null)
+                                addContributorQuery(u);
+                        }
                     } else {
+                        //Search based on Twitter handle
                         addUserByTwitter(q);
                     }
                 }
@@ -269,10 +257,7 @@ public class StorySettingsActivity extends FirebaseActivity {
                     Toast.makeText(getApplicationContext(), getString(R.string.story_settings_invalid_user_error), Toast.LENGTH_LONG).show();
                 }
             });
-            //Search based on Twitter handle
         }
-
-
     }
 
     private void addUserByTwitter(String q) {
@@ -300,9 +285,9 @@ public class StorySettingsActivity extends FirebaseActivity {
 
 
     private void addContributorQuery(final User user) {
-        if (user == null) {
+        if (user == null || !user.isActive()) {
             mLoading.setVisibility(View.GONE);
-            Toast.makeText(this, getString(R.string.toast_declined), Toast.LENGTH_SHORT).show();
+            //Toast.makeText(this, getString(R.string.story_settings_invalid_user_error), Toast.LENGTH_SHORT).show();
             return;
         }
 
@@ -315,18 +300,7 @@ public class StorySettingsActivity extends FirebaseActivity {
         k.put("name", user.getName());
         map.put(userKey, k);
 
-        mFirebaseRef.child("members/" + mId).runTransaction(new Transaction.Handler() {
-            @Override
-            public Transaction.Result doTransaction(MutableData mutableData) {
-                mutableData.setValue(map);
-                return Transaction.success(mutableData);
-            }
-
-            @Override
-            public void onComplete(DatabaseError databaseError, boolean b, DataSnapshot dataSnapshot) {
-                Log.d(TAG, "postTransaction:onComplete:" + databaseError);
-            }
-        });
+        mFirebaseRef.getRoot().child("members/" + mId).updateChildren(map);
 
         //Invites Query
         final Invite i = new Invite(mId, mStory.getTitle(), mUser.getName(), mUser.getProfile_picture());
@@ -335,21 +309,6 @@ public class StorySettingsActivity extends FirebaseActivity {
 
         mFirebaseRef.getRoot().child("users/" + userKey).child("/invites").updateChildren(invitesMap);
         mLoading.setVisibility(View.GONE);
-//        mFirebaseRef.child("users/" + userKey + "/invites").runTransaction(new Transaction.Handler() {
-//            @Override
-//            public Transaction.Result doTransaction(MutableData mutableData) {
-//
-//                mLoading.setVisibility(View.GONE);
-//                mutableData.setValue(invitesMap);
-//                return Transaction.success(mutableData);
-//            }
-//
-//            @Override
-//            public void onComplete(DatabaseError databaseError, boolean b, DataSnapshot dataSnapshot) {
-//                Log.d(TAG, "postTransaction:onComplete:" + databaseError);
-//            }
-//        });
-
         mTextContributor.setText("");
         mTextContributor.clearListSelection();
         mTextContributor.clearFocus();

@@ -133,36 +133,45 @@ public class ChatAdapter extends FirebaseListAdapter<Update> {
             h.mMessageView.setVisibility(View.GONE);
             h.mImgChatView.setVisibility(View.VISIBLE);
             if (mimeString.contains("image")) {
-                if(mimeString.contains("gif")){
-                    setupGifMessage(h,Utilities.cleanUrl(msg));
-                } else{
+                if (mimeString.contains("gif")) {
+                    setupGifMessage(h, Utilities.cleanUrl(msg));
+                } else {
                     setupImageMessage(h, Utilities.cleanUrl(msg));
 
                     View.OnClickListener openGallery = new View.OnClickListener() {
                         @Override
                         public void onClick(View v) {
-                            String [] list = { msg };
+                            String[] list = {msg};
                             new ImageViewer.Builder(mActivity, list)
                                     .setStartPosition(0)
                                     .show();
                         }
                     };
 
-
                     h.mImgChatView.setOnClickListener(openGallery);
+                    h.mImgChatView.setOnLongClickListener(new View.OnLongClickListener() {
+                        @Override
+                        public boolean onLongClick(View v) {
+                            String sender = m.getSender_key();
+                            if (mUsername != null && mUsername.equals(sender)) {
+                                showDialog(new ChatTag(key, m));
+                            }
+                            return true;
+                        }
+                    });
                 }
             } else if (mimeString.contains("video")) {
                 Matcher matcher = videoMessagePattern.matcher(msg);
-                if(matcher.matches())
-                    setupVideoMessageXml(h,matcher);
+                if (matcher.matches())
+                    setupVideoMessageXml(h, matcher);
                 else
-                    setupVideoMessage(h, Utilities.cleanUrl(msg),key);
+                    setupVideoMessage(h, Utilities.cleanUrl(msg), key);
             } else if (mimeString.contains("video")) {
                 Matcher matcher = videoMessagePattern.matcher(msg);
-                if(matcher.matches())
-                    setupVideoMessageXml(h,matcher);
+                if (matcher.matches())
+                    setupVideoMessageXml(h, matcher);
                 else
-                    setupVideoMessage(h, Utilities.cleanUrl(msg),key);
+                    setupVideoMessage(h, Utilities.cleanUrl(msg), key);
             }
             h.mBtnShareFacebook.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -173,7 +182,7 @@ public class ChatAdapter extends FirebaseListAdapter<Update> {
             h.mBtnShareTwitter.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                tweetPhoto(h.mImgChatView);
+                    tweetPhoto(h.mImgChatView);
                 }
             });
         } else {
@@ -185,10 +194,10 @@ public class ChatAdapter extends FirebaseListAdapter<Update> {
                 }
             });
             //Check if first character is < to avoid pattern matching in messages that don't look like xml
-            if (!TextUtils.isEmpty(msg)&& msg.charAt(0) == '<'){
+            if (!TextUtils.isEmpty(msg) && msg.charAt(0) == '<') {
                 Matcher matcher = videoMessagePattern.matcher(msg);
-                if(matcher.matches())
-                    setupVideoMessageXml(h,matcher);
+                if (matcher.matches())
+                    setupVideoMessageXml(h, matcher);
             } else {
                 setupTextMessage(h, msg);
             }
@@ -204,7 +213,7 @@ public class ChatAdapter extends FirebaseListAdapter<Update> {
             if (!TextUtils.isEmpty(timeMsg)) {
                 // TODO replace with strings.xml
                 String _str = "just posted";
-                timeMsg = timeMsg.equals("in 0 minutes") ? _str: timeMsg.equals("0 minutes ago") ? _str : timeMsg;
+                timeMsg = timeMsg.equals("in 0 minutes") ? _str : timeMsg.equals("0 minutes ago") ? _str : timeMsg;
                 h.mDateView.setText(timeMsg);
             }
         }
@@ -227,7 +236,8 @@ public class ChatAdapter extends FirebaseListAdapter<Update> {
                 .into(h.mImgChatView);
 
     }
-    private void setupGifMessage(final ChatViewHolder h, String msg){
+
+    private void setupGifMessage(final ChatViewHolder h, String msg) {
         final Uri uri = Uri.parse(msg);
         h.mPlayIcon.setVisibility(View.VISIBLE);
         final Context context = mActivity.getApplicationContext();
@@ -238,11 +248,11 @@ public class ChatAdapter extends FirebaseListAdapter<Update> {
                 .transcode(new BitmapToGlideDrawableTranscoder(context), GlideDrawable.class)
                 .diskCacheStrategy(DiskCacheStrategy.ALL)
                 .placeholder(R.drawable.default_placeholder)
-                .fitCenter()
-                ;
+                .fitCenter();
         thumbRequest.into(h.mImgChatView);
         h.mContentView.setOnClickListener(new View.OnClickListener() { // or any parent of imgFeed
-            @Override public void onClick(View v) {
+            @Override
+            public void onClick(View v) {
                 h.mProgressBar.setVisibility(View.VISIBLE);
                 Glide
                         .with(context)
@@ -303,7 +313,7 @@ public class ChatAdapter extends FirebaseListAdapter<Update> {
         // Store image to default external storage directory
         Uri bmpUri = null;
         try {
-            File file =  new File(Environment.getExternalStoragePublicDirectory(
+            File file = new File(Environment.getExternalStoragePublicDirectory(
                     Environment.DIRECTORY_DOWNLOADS), "share_image_" + System.currentTimeMillis() + ".png");
             file.getParentFile().mkdirs();
             FileOutputStream out = new FileOutputStream(file);
@@ -335,15 +345,16 @@ public class ChatAdapter extends FirebaseListAdapter<Update> {
         try {
             Bitmap bmp = Utilities.retriveVideoFrameFromVideo(msg);
             h.mImgChatView.setImageBitmap(bmp);
-            new UploadVideoThumbTask(FirebaseDatabase.getInstance().getReference("updates/"+mChatKey+"/"+key),h.mItem,mActivity)
+            new UploadVideoThumbTask(FirebaseDatabase.getInstance().getReference("updates/" + mChatKey + "/" + key), h.mItem, mActivity)
                     .execute(bmp);
-        }catch (Throwable e){
-            Log.e(TAG, "Error:"+e);
+        } catch (Throwable e) {
+            Log.e(TAG, "Error:" + e);
         }
         //Set video click callback
-        setVideoClickCallback(h,msg,null);
+        setVideoClickCallback(h, msg, null);
     }
-    private void setVideoClickCallback(final ChatViewHolder h, final String msg, final Matcher matcher){
+
+    private void setVideoClickCallback(final ChatViewHolder h, final String msg, final Matcher matcher) {
         h.mContentView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -354,12 +365,12 @@ public class ChatAdapter extends FirebaseListAdapter<Update> {
 
                 if (!TextUtils.isEmpty(mimeString) && mimeString.contains("video")) {
                     //Non-XML callback
-                    videoUrl =  msg;
-                } else if (matcher!=null && !TextUtils.isEmpty(matcher.group(1))) {
+                    videoUrl = msg;
+                } else if (matcher != null && !TextUtils.isEmpty(matcher.group(1))) {
                     //XML callback
                     videoUrl = matcher.group(1);
                 }
-                if(videoUrl !=null) {
+                if (videoUrl != null) {
                     Log.d(TAG, "Play Video");
                     Intent playIntent = new Intent(mActivity, PlayerActivity.class);
                     playIntent.putExtra(PlayerActivity.VIDEO_URL_KEY, videoUrl);
@@ -369,6 +380,7 @@ public class ChatAdapter extends FirebaseListAdapter<Update> {
             }
         });
     }
+
     private void setupVideoMessageXml(ChatViewHolder h, Matcher matcher) {
         h.mMessageView.setVisibility(View.GONE);
         h.mImgChatView.setVisibility(View.VISIBLE);
@@ -379,7 +391,7 @@ public class ChatAdapter extends FirebaseListAdapter<Update> {
                 .placeholder(R.drawable.default_placeholder)
                 .fitCenter()
                 .into(h.mImgChatView);
-        setVideoClickCallback(h,matcher.group(1),null);
+        setVideoClickCallback(h, matcher.group(1), null);
     }
 
     public class ChatViewHolder extends RecyclerView.ViewHolder {
@@ -417,7 +429,8 @@ public class ChatAdapter extends FirebaseListAdapter<Update> {
             bindClickListeners();
         }
 
-        private void bindClickListeners(){
+        private void bindClickListeners() {
+            mContentView.setLongClickable(true);
             mContentView.setOnLongClickListener(new View.OnLongClickListener() {
                 @Override
                 public boolean onLongClick(View v) {
@@ -435,7 +448,6 @@ public class ChatAdapter extends FirebaseListAdapter<Update> {
     }
 
 
-
     public class ChatTag implements Serializable {
         public Update update;
         public String key;
@@ -448,7 +460,8 @@ public class ChatAdapter extends FirebaseListAdapter<Update> {
             this.update = update;
         }
     }
-    private void setConnectivityObservers(Query ref){
+
+    private void setConnectivityObservers(Query ref) {
         ref.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
@@ -467,13 +480,13 @@ public class ChatAdapter extends FirebaseListAdapter<Update> {
                 boolean connected = snapshot.getValue(Boolean.class);
                 if (connected) {
                     System.out.println("connected");
-                    if(getItemCount()>0)
+                    if (getItemCount() > 0)
                         switchMainActivityView(StateLayout.VIEW_CONTENT);
                     else
                         switchMainActivityView(StateLayout.VIEW_EMPTY);
                 } else {
                     System.out.println("not connected");
-                    if(getItemCount()<=0){
+                    if (getItemCount() <= 0) {
                         switchMainActivityView(StateLayout.VIEW_ERROR);
                     }
                 }
@@ -486,8 +499,9 @@ public class ChatAdapter extends FirebaseListAdapter<Update> {
             }
         });
     }
-    private void switchMainActivityView(int state){
-        ((OnFragmentInteractionListener)mActivity).onFragmentInteraction(state,null);
+
+    private void switchMainActivityView(int state) {
+        ((OnFragmentInteractionListener) mActivity).onFragmentInteraction(state, null);
     }
 
 }

@@ -117,7 +117,6 @@ public class CreateStoryTask extends AsyncTask<Uri, String, String> {
         int largeThumbWidth = Math.round(TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, r.getDimension(R.dimen.large_thumb_side), d));
         int largeThumbMaxHeight = Math.round(TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, r.getDimension(R.dimen.max_large_thumb_side_height), d));
 
-
         int maxMediumWidth = Math.round(TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, r.getDimension(R.dimen.max_medium_width), d));
         int maxMediumHeight = Math.round(TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, r.getDimension(R.dimen.max_medium_height), d));
 
@@ -158,11 +157,10 @@ public class CreateStoryTask extends AsyncTask<Uri, String, String> {
             ref.child("timestamp").setValue(ServerValue.TIMESTAMP);
             //Set Timestamps
             ref.child("last_time").setValue(ServerValue.TIMESTAMP);
-            //(int count_likes, Map<String, Integer> likes, String message, String profile_picture, String sender, String sender_key, long timestamp)
-            Log.e(TAG,"FirebaseEntrying: "+ref.toString());
-            DatabaseReference r = mFirebaseRef.getRoot().child("updates/" + mKey).push();
-            r.setValue(new Update(0, null, mStory.getPosts_picture(), mUser.getProfile_picture(), mStory.getAuthor_name(), mStory.getAuthor()));
-            r.child(Story.TIMESTAMP_FIELD_STR).setValue(ServerValue.TIMESTAMP);
+//            Log.e(TAG,"FirebaseEntrying: "+ref.toString());
+//            DatabaseReference r = mFirebaseRef.getRoot().child("updates/" + mKey).push();
+//            r.setValue(new Update(0, null, mStory.getPosts_picture(), mUser.getProfile_picture(), mStory.getAuthor_name(), mStory.getAuthor()));
+//            r.child(Story.TIMESTAMP_FIELD_STR).setValue(ServerValue.TIMESTAMP);
 
             //Add post to "posts created"
             Map<String, Object> posts = new HashMap<String, Object>();

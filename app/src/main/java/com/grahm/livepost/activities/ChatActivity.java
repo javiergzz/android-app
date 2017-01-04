@@ -311,9 +311,14 @@ public class ChatActivity extends FirebaseActivity implements AbsListView.OnItem
         String input = mInputText.getText().toString();
         mUser = Utilities.getUser(mFirebaseRef, getBaseContext(), getIntent().getExtras());
         if (TextUtils.isEmpty(input)) {
-            Log.d(TAG_CLASS, "Choosing Image");
-            Long l = System.currentTimeMillis() / 1000L;
-            com.grahm.livepost.util.EasyImage.openChooserWithDocuments(this, mStory.getTitle(), 1);
+            if(Utilities.isOnline(ChatActivity.this)){
+                Log.d(TAG_CLASS, "Choosing Image");
+                Long l = System.currentTimeMillis() / 1000L;
+                com.grahm.livepost.util.EasyImage.openChooserWithDocuments(this, mStory.getTitle(), 1);
+            }else{
+                // TODO replace string
+                Toast.makeText(ChatActivity.this, "I can’t seem to connect to the internet. Try again later. Sorry!", Toast.LENGTH_LONG).show();
+            }
         } else {
             mFirebaseRef.getRoot().child("posts/" + mId + "/last_message").setValue(input);
             Update m = new Update(0, null, input, Utilities.trimProfilePic(mUser), mUser.getName(), mUser.getUserKey());
@@ -372,5 +377,6 @@ public class ChatActivity extends FirebaseActivity implements AbsListView.OnItem
     public void onFragmentInteraction(int state, Bundle args) {
         if (mStateLayout.getState() != state)
             mStateLayout.setState(state);
+            mBtnBottom.setVisibility(state != StateLayout.VIEW_ERROR ? View.VISIBLE : View.GONE);
     }
 }
