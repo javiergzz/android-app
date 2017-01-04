@@ -3,6 +3,7 @@ package com.grahm.livepost.activities;
 import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.DialogInterface;
+import android.graphics.drawable.GradientDrawable;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.v7.app.AlertDialog;
@@ -24,8 +25,6 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.MutableData;
-import com.google.firebase.database.Transaction;
 import com.google.firebase.database.ValueEventListener;
 import com.grahm.livepost.R;
 import com.grahm.livepost.adapters.ContributorsAdapter;
@@ -66,6 +65,7 @@ public class StorySettingsActivity extends FirebaseActivity {
     private User mContributor;
     private DatabaseReference mFirebaseRef = FirebaseDatabase.getInstance().getReference();
     private ContributorsAdapter mContributorsAdapter;
+    private long mChildrenCount = 0;
 
 
     private void restoreState(Bundle savedInstanceState) {
@@ -79,6 +79,10 @@ public class StorySettingsActivity extends FirebaseActivity {
         mTxtTitle.setText(mStory.getIsLive() ? getString(R.string.story_settings_url_title) : getString(R.string.story_settings_code_title));
         mTextStoryCode.setText(mStory.getIsLive() ? url : embed);
         mTextStoryCode.setEnabled(mStory.getIsLive());
+
+        if(!mStory.getIsLive()){
+            mTextStoryCode.setBackgroundResource(R.drawable.border_color);
+        }
 
         if (!mStory.getIsLive()) {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
@@ -239,6 +243,8 @@ public class StorySettingsActivity extends FirebaseActivity {
             mFirebaseRef.child("users").orderByChild("email").equalTo(q).addListenerForSingleValueEvent(new ValueEventListener() {
                 @Override
                 public void onDataChange(DataSnapshot dataSnapshot) {
+                    Log.i(TAG, "Children Count: " + dataSnapshot.getChildrenCount());
+                    mChildrenCount = dataSnapshot.getChildrenCount();
                     if (dataSnapshot != null && dataSnapshot.getValue() != null) {
                         for (DataSnapshot item : dataSnapshot.getChildren()) {
                             User u = item.getValue(User.class);
@@ -267,9 +273,7 @@ public class StorySettingsActivity extends FirebaseActivity {
                 if (dataSnapshot != null && dataSnapshot.getValue() != null) {
                     Log.i(TAG, dataSnapshot.getValue().toString());
                     User u = dataSnapshot.getChildren().iterator().next().getValue(User.class);
-                    String userKey = u.getUserKey();
-                    if (userKey != null)
-                        addContributorQuery(u);
+                    addContributorQuery(u);
                 } else {
                     mLoading.setVisibility(View.GONE);
                     Toast.makeText(getApplicationContext(), getString(R.string.story_settings_invalid_user_error), Toast.LENGTH_SHORT).show();
@@ -287,7 +291,9 @@ public class StorySettingsActivity extends FirebaseActivity {
     private void addContributorQuery(final User user) {
         if (user == null || !user.isActive()) {
             mLoading.setVisibility(View.GONE);
-            //Toast.makeText(this, getString(R.string.story_settings_invalid_user_error), Toast.LENGTH_SHORT).show();
+            if(mChildrenCount < 2){
+                Toast.makeText(this, getString(R.string.story_settings_invalid_user_error), Toast.LENGTH_SHORT).show();
+            }
             return;
         }
 

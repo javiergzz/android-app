@@ -334,8 +334,4 @@ public class MainActivity extends FirebaseActivity implements OnFragmentInteract
         }
     }
 
-    protected void launchLogin() {
-//        startActivityForResult(new Intent(this, Login.class), 1);
-    }
-
 }
