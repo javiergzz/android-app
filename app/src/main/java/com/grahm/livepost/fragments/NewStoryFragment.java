@@ -505,7 +505,9 @@ public class NewStoryFragment extends Fragment implements OnPutImageListener, Fr
             public void onImagePickerError(Exception e, EasyImage.ImageSource source, int type) {
                 TextInputLayout t = ButterKnife.findById(mViewPager, R.id.new_session_avatar_input);
                 if (t != null){
-                    // TODO replace strings
+                    Log.e(TAG, "onActivityResult::error: " + e.getMessage());
+                    ButterKnife.findById(mViewPager, R.id.new_session_selected_img).setVisibility(View.GONE);
+                    ButterKnife.findById(mViewPager, R.id.new_session_avatar_layout).setVisibility(View.VISIBLE);
                     t.setError("We can’t seem to find your camera. Please try again later.");
                 }
             }
@@ -513,8 +515,7 @@ public class NewStoryFragment extends Fragment implements OnPutImageListener, Fr
             @Override
             public void onImagePicked(File imageFile, EasyImage.ImageSource source, int type) {
                 //Handle the image
-                if(imageFile != null)
-                    onPhotoReturned(imageFile);
+                onPhotoReturned(imageFile);
             }
         });
 
@@ -525,8 +526,7 @@ public class NewStoryFragment extends Fragment implements OnPutImageListener, Fr
         mUri = Uri.fromFile(imageFile);
         Log.e(TAG, mUri.toString());
         mStory.setPosts_picture(mUri.toString());
-        final ImageView defaultImage = ButterKnife.findById(mViewPager, R.id.new_session_avatar_layout);
-        defaultImage.setVisibility(View.GONE);
+        ButterKnife.findById(mViewPager, R.id.new_session_avatar_layout).setVisibility(View.GONE);
         final ImageView resultView = ButterKnife.findById(mViewPager, R.id.new_session_selected_img);
         resultView.setVisibility(View.VISIBLE);
         resultView.setOnClickListener(new View.OnClickListener() {
@@ -538,12 +538,7 @@ public class NewStoryFragment extends Fragment implements OnPutImageListener, Fr
         Glide.with(this).load(mUri).asBitmap().centerCrop().into(new BitmapImageViewTarget(resultView) {
             @Override
             protected void setResource(Bitmap resource) {
-                if(resource != null){
-                    resultView.setImageBitmap(resource);
-                }else{
-                    defaultImage.setVisibility(View.VISIBLE);
-                    resultView.setVisibility(View.GONE);
-                }
+                resultView.setImageBitmap(resource);
             }
         });
         Bundle bundle = new Bundle();

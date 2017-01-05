@@ -2,7 +2,10 @@ package com.grahm.livepost.activities;
 
 import android.content.ClipData;
 import android.content.ClipboardManager;
+import android.content.Context;
 import android.content.DialogInterface;
+import android.content.SharedPreferences;
+import android.graphics.Color;
 import android.graphics.drawable.GradientDrawable;
 import android.os.Build;
 import android.os.Bundle;
@@ -12,6 +15,7 @@ import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.text.TextUtils;
 import android.util.Log;
+import android.view.MotionEvent;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.AutoCompleteTextView;
@@ -39,6 +43,7 @@ import java.util.Map;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
+import uk.co.samuelwall.materialtaptargetprompt.MaterialTapTargetPrompt;
 
 public class StorySettingsActivity extends FirebaseActivity {
     private static final String TAG = "StorySettingsActivity";
@@ -66,6 +71,8 @@ public class StorySettingsActivity extends FirebaseActivity {
     private DatabaseReference mFirebaseRef = FirebaseDatabase.getInstance().getReference();
     private ContributorsAdapter mContributorsAdapter;
     private long mChildrenCount = 0;
+    private int mTutorialCount = 0;
+    public static final String PREFS_TUTORIAL = "tutorial_story_settings";
 
 
     private void restoreState(Bundle savedInstanceState) {
@@ -117,10 +124,58 @@ public class StorySettingsActivity extends FirebaseActivity {
         restoreState(savedInstanceState);
         setupContributors();
         setupAddButton();
+        SharedPreferences settings = getSharedPreferences(getString(R.string.preference_file_key), MODE_PRIVATE);
+        if (!settings.getBoolean(PREFS_TUTORIAL, false)) {
+            mTextStoryCode.setTextColor(Color.rgb(255,255,255));
+            mTextContributor.setHintTextColor(Color.rgb(255,255,255));
+            loadTutorial();
+        }
         FirebaseAnalytics mFirebaseAnalytics = FirebaseAnalytics.getInstance(this);
         mFirebaseAnalytics.setCurrentScreen(this, "Story Settings", "onCreate");
     }
 
+    private void loadTutorial() {
+        String[] titles = {
+                "Share your Story",
+                "Add a Contributor"
+        };
+        String[] msg = {
+                "Here you'll see either an embed code or a link to your page on LivePost. Remember to share your link so others can read your story!",
+                "Invite another LivePoster to help you cover a story. Just add the email or twitter username they used to register on LivePost (Make sure to include the @symbol if they used Twitter to login.)"
+        };
+        View[] views = {
+                findViewById(R.id.text_story_code),
+                findViewById(R.id.add_contributor_edit_text)
+        };
+        new MaterialTapTargetPrompt.Builder(StorySettingsActivity.this)
+                .setTarget(views[mTutorialCount])
+                .setFocalColour(Color.rgb(51, 171, 164))
+                .setBackgroundColour(Color.rgb(51, 171, 164))
+                .setPrimaryText(titles[mTutorialCount])
+                .setSecondaryText(msg[mTutorialCount])
+                .setOnHidePromptListener(new MaterialTapTargetPrompt.OnHidePromptListener() {
+                    @Override
+                    public void onHidePrompt(MotionEvent event, boolean tappedTarget) {
+                        //Do something such as storing a value so that this prompt is never shown again
+                    }
+
+                    @Override
+                    public void onHidePromptComplete() {
+                        mTutorialCount++;
+                        if (mTutorialCount < 2) {
+                            loadTutorial();
+                        } else {
+                            mTextStoryCode.setTextColor(Color.rgb(129,128,129));
+                            mTextContributor.setHintTextColor(Color.rgb(234,234,234));
+                            SharedPreferences sharedPref = getSharedPreferences(getString(R.string.preference_file_key), Context.MODE_PRIVATE);
+                            SharedPreferences.Editor editor = sharedPref.edit();
+                            editor.putBoolean(PREFS_TUTORIAL, true);
+                            editor.commit();
+                        }
+                    }
+                })
+                .show();
+    }
     private void setupAddButton() {
         DatabaseReference usersRef = FirebaseDatabase.getInstance().getReference("users");
         mTextContributor.setThreshold(1);
