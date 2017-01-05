@@ -1,8 +1,10 @@
 package com.grahm.livepost.activities;
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Color;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -16,7 +18,9 @@ import android.util.Log;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.inputmethod.EditorInfo;
 import android.widget.AbsListView;
 import android.widget.AdapterView;
@@ -63,6 +67,7 @@ import butterknife.OnEditorAction;
 import butterknife.OnFocusChange;
 import butterknife.OnTextChanged;
 import io.fabric.sdk.android.Fabric;
+import uk.co.samuelwall.materialtaptargetprompt.MaterialTapTargetPrompt;
 
 public class ChatActivity extends FirebaseActivity implements AbsListView.OnItemClickListener, OnFragmentInteractionListener {
     private static final String TAG_CLASS = "ChatActivity";
@@ -115,6 +120,8 @@ public class ChatActivity extends FirebaseActivity implements AbsListView.OnItem
     private static final String TWITTER_KEY = "roDB8OWxSlYv3hiKXYnPusPUJ";
     private static final String TWITTER_SECRET = "hV1sxHw8CcQaFMnKU59F0ze5qFVEcxDrRtQCouf2sXWXoZ300w";
 
+    private int mTutorialCount = 0;
+
     @Override
     public void onSaveInstanceState(Bundle outState) {
         outState.putString(TAG_ID, mId);
@@ -163,16 +170,58 @@ public class ChatActivity extends FirebaseActivity implements AbsListView.OnItem
         KeyboardUtil keyboardUtil = new KeyboardUtil(this, findViewById(R.id.chat_container));
         keyboardUtil.enable();
         SharedPreferences settings = getSharedPreferences(getString(R.string.preference_file_key), MODE_PRIVATE);
-//        if (!settings.getBoolean(PREFS_TUTORIAL, false)) {
+        if (!settings.getBoolean(PREFS_TUTORIAL, false)) {
             loadTutorial();
-//        }
+        }
 
         FirebaseAnalytics mFirebaseAnalytics = FirebaseAnalytics.getInstance(this);
         mFirebaseAnalytics.setCurrentScreen(this, "Story Screen", "onCreate");
     }
 
-    private void loadTutorial(){
-        
+    private void loadTutorial() {
+        String[] titles = {
+                "Photos, Videos & Text",
+                "Settings"
+        };
+        String[] msg = {
+                "This is your first story! You can start typing in the text bar at the bottom.",
+                "Here you'll be able to access your story's settings where you can invite others to help contribute in the story and access the embed code or link where your story lives."
+        };
+        View[] views = {
+                mInputText,
+                findViewById(R.id.action_settings_chat)
+        };
+
+        int[] colors = {
+                Color.rgb(51, 171, 164),
+                Color.argb(180, 54, 68, 87)
+        };
+        new MaterialTapTargetPrompt.Builder(ChatActivity.this)
+                .setTarget(views[mTutorialCount])
+                .setFocalColour(colors[mTutorialCount])
+                .setBackgroundColour(Color.rgb(51, 171, 164))
+                .setPrimaryText(titles[mTutorialCount])
+                .setSecondaryText(msg[mTutorialCount])
+                .setOnHidePromptListener(new MaterialTapTargetPrompt.OnHidePromptListener() {
+                    @Override
+                    public void onHidePrompt(MotionEvent event, boolean tappedTarget) {
+                        //Do something such as storing a value so that this prompt is never shown again
+                    }
+
+                    @Override
+                    public void onHidePromptComplete() {
+                        mTutorialCount++;
+                        if (mTutorialCount < 2) {
+                            loadTutorial();
+                        } else {
+                            SharedPreferences sharedPref = getSharedPreferences(getString(R.string.preference_file_key), Context.MODE_PRIVATE);
+                            SharedPreferences.Editor editor = sharedPref.edit();
+                            editor.putBoolean(PREFS_TUTORIAL, true);
+                            editor.commit();
+                        }
+                    }
+                })
+                .show();
     }
 
     @OnTextChanged(R.id.messageInput)
@@ -208,9 +257,9 @@ public class ChatActivity extends FirebaseActivity implements AbsListView.OnItem
                 @Override
                 public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
                     super.onScrolled(recyclerView, dx, dy);
-                    if(mLinearLayoutManager.findLastCompletelyVisibleItemPosition()+3 < mMessagesListAdapter.getItemCount()){
-                        if(!mBtnBottom.isShown())mBtnBottom.setVisibility(View.VISIBLE);
-                    }else if(mBtnBottom.isShown()){
+                    if (mLinearLayoutManager.findLastCompletelyVisibleItemPosition() + 3 < mMessagesListAdapter.getItemCount()) {
+                        if (!mBtnBottom.isShown()) mBtnBottom.setVisibility(View.VISIBLE);
+                    } else if (mBtnBottom.isShown()) {
                         mBtnBottom.setVisibility(View.GONE);
                     }
                 }
@@ -251,14 +300,14 @@ public class ChatActivity extends FirebaseActivity implements AbsListView.OnItem
         Uri uri = Uri.fromFile(file);
 
         mPostVideoTask = new PostVideoTask(this, putImageListener, true);
-        if (uri != null) mPostVideoTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR,uri);
+        if (uri != null) mPostVideoTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, uri);
     }
 
     private void onPhotoReturned(File imageFile) {
         Uri uri = Uri.fromFile(imageFile);
 
-        mPostImageTask = new PostImageTask(this,  putImageListener, true);
-        if (uri != null) mPostImageTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR,uri);
+        mPostImageTask = new PostImageTask(this, putImageListener, true);
+        if (uri != null) mPostImageTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, uri);
     }
 
     @Override
@@ -267,7 +316,7 @@ public class ChatActivity extends FirebaseActivity implements AbsListView.OnItem
     }
 
     @OnFocusChange(R.id.messageInput)
-    public void collapse(){
+    public void collapse() {
         mAppBar.setExpanded(false);
         gotoBottom(null);
     }
@@ -277,11 +326,11 @@ public class ChatActivity extends FirebaseActivity implements AbsListView.OnItem
         String input = mInputText.getText().toString();
         mUser = Utilities.getUser(mFirebaseRef, getBaseContext(), getIntent().getExtras());
         if (TextUtils.isEmpty(input)) {
-            if(Utilities.isOnline(ChatActivity.this)){
+            if (Utilities.isOnline(ChatActivity.this)) {
                 Log.d(TAG_CLASS, "Choosing Image");
                 Long l = System.currentTimeMillis() / 1000L;
                 com.grahm.livepost.util.EasyImage.openChooserWithDocuments(this, mStory.getTitle(), 1);
-            }else{
+            } else {
                 // TODO replace string
                 Toast.makeText(ChatActivity.this, "I can’t seem to connect to the internet. Try again later. Sorry!", Toast.LENGTH_LONG).show();
             }
@@ -327,7 +376,7 @@ public class ChatActivity extends FirebaseActivity implements AbsListView.OnItem
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        if(mUser.getUid().equals(mStory.getAuthor())){
+        if (mUser.getUid().equals(mStory.getAuthor())) {
             getMenuInflater().inflate(R.menu.menu_chat, menu);
         }
         return super.onCreateOptionsMenu(menu);
@@ -343,6 +392,6 @@ public class ChatActivity extends FirebaseActivity implements AbsListView.OnItem
     public void onFragmentInteraction(int state, Bundle args) {
         if (mStateLayout.getState() != state)
             mStateLayout.setState(state);
-            mBtnBottom.setVisibility(state != StateLayout.VIEW_ERROR ? View.VISIBLE : View.GONE);
+        mBtnBottom.setVisibility(state != StateLayout.VIEW_ERROR ? View.VISIBLE : View.GONE);
     }
 }
