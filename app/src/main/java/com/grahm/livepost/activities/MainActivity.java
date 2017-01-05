@@ -4,24 +4,17 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
-import android.graphics.Point;
 import android.os.Bundle;
-import android.support.design.widget.TabItem;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
-import android.view.Display;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
+import android.view.MotionEvent;
 import android.view.ViewGroup;
 import android.widget.RelativeLayout;
 
-import com.braunster.tutorialview.object.Tutorial;
-import com.braunster.tutorialview.object.TutorialBuilder;
-import com.braunster.tutorialview.object.TutorialIntentBuilder;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.grahm.livepost.R;
@@ -37,11 +30,11 @@ import com.grahm.livepost.util.Utilities;
 import com.objectlife.statelayout.StateLayout;
 
 import java.io.Serializable;
-import java.util.ArrayList;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
+import uk.co.samuelwall.materialtaptargetprompt.MaterialTapTargetPrompt;
 
 public class MainActivity extends FirebaseActivity implements OnFragmentInteractionListener, TabLayout.OnTabSelectedListener {
 
@@ -78,6 +71,8 @@ public class MainActivity extends FirebaseActivity implements OnFragmentInteract
     public TabLayout mTabLayout;
 
     private DatabaseReference mFirebaseRef;
+    private int mTutorialCount = 0;
+    public static boolean canContinue = true;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -94,57 +89,49 @@ public class MainActivity extends FirebaseActivity implements OnFragmentInteract
         mUser = Utilities.getUser(mFirebaseRef, this, args);
         SharedPreferences settings = getSharedPreferences(getString(R.string.preference_file_key), MODE_PRIVATE);
         if (!settings.getBoolean(PREFS_TUTORIAL, false)) {
+            canContinue = false;
             loadTutorial();
         }
     }
 
-    private boolean hasStories() {
-        return mUser.getPosts_created() != null && mUser.getPosts_created().size() > 0 || mUser.getPosts_contributed_to() != null && mUser.getPosts_contributed_to().size() > 0;
-    }
-
-    private Tutorial getTutorial(int posX, int posY, String str){
-        Tutorial tutorial = new Tutorial();
-        tutorial.setPositionToSurroundX(posX);
-        tutorial.setPositionToSurroundY(posY);
-        tutorial.setPositionToSurroundHeight(200);
-        tutorial.setPositionToSurroundWidth(200);
-        tutorial.setTutorialInfoTextPosition(Tutorial.InfoPosition.BELOW);
-        tutorial.setTutorialText(str);
-        tutorial.setTutorialBackgroundColor(randomColor());
-        tutorial.setTutorialTextColor(Color.WHITE);
-        tutorial.setTutorialTextTypeFace("fonts/Roboto-Regular.ttf");
-        tutorial.setTutorialTextSize(20);
-        tutorial.setTutorialGotItPosition(Tutorial.GotItPosition.BOTTOM);
-        tutorial.setAnimationDuration(500);
-        return tutorial;
-    }
-
     private void loadTutorial() {
-        Display display = getWindowManager().getDefaultDisplay();
-        Point size = new Point();
-        display.getSize(size);
-        int centerX = (size.x / 2) - 100;
-        int rigthX = size.x - 150;
-        if (!hasStories()) {
-            TutorialIntentBuilder builder = new TutorialIntentBuilder(MainActivity.this);
-            builder.changeSystemUiColor(false);
-            ArrayList<Tutorial> tutorials = new ArrayList<>();
-            tutorials.add(getTutorial(50, 45, "This is where all your stories will live. When you create a New Story it will appear here."));
-            tutorials.add(getTutorial(centerX, 45, "Here you can create a new story and choose where to publish it."));
-            tutorials.add(getTutorial(rigthX, 45, "This is your profile, you'll be able to see the stories you've created and edit your profile information."));
-            builder.skipTutorialOnBackPressed(true);
-            builder.setWalkThroughList(tutorials);
-            SharedPreferences sharedPref = getSharedPreferences(getString(R.string.preference_file_key), Context.MODE_PRIVATE);
-            SharedPreferences.Editor editor = sharedPref.edit();
-            editor.putBoolean(PREFS_TUTORIAL, true);
-            editor.commit();
-            startActivity(builder.getIntent());
-            overridePendingTransition(R.anim.dummy, R.anim.dummy);
-        }
-    }
+        String[] titles = {
+                "Your Stories",
+                "New Stories",
+                "Your Profile"
+        };
+        String[] msg = {
+                "This is where all your stories will live. When you create a New Story it will appear here.",
+                "Here you can create a new story and choose where to publish it.",
+                "This is your profile, you'll be able to see the stories you've created and edit your profile information."
+        };
+        new MaterialTapTargetPrompt.Builder(MainActivity.this)
+                .setTarget(((ViewGroup) mTabLayout.getChildAt(0)).getChildAt(mTutorialCount))
+                .setFocalColour(Color.argb(180, 54, 68, 87))
+                .setBackgroundColour(Color.rgb(51,171,164))
+                .setPrimaryText(titles[mTutorialCount])
+                .setSecondaryText(msg[mTutorialCount])
+                .setOnHidePromptListener(new MaterialTapTargetPrompt.OnHidePromptListener() {
+                    @Override
+                    public void onHidePrompt(MotionEvent event, boolean tappedTarget) {
+                        //Do something such as storing a value so that this prompt is never shown again
+                    }
 
-    private int randomColor() {
-        return Color.argb(220, 54, 68, 87);
+                    @Override
+                    public void onHidePromptComplete() {
+                        mTutorialCount++;
+                        if(mTutorialCount < 3){
+                            loadTutorial();
+                        }else{
+                            SharedPreferences sharedPref = getSharedPreferences(getString(R.string.preference_file_key), Context.MODE_PRIVATE);
+                            SharedPreferences.Editor editor = sharedPref.edit();
+                            editor.putBoolean(PREFS_TUTORIAL, true);
+                            editor.commit();
+                            canContinue = true;
+                        }
+                    }
+                })
+                .show();
     }
 
     private void setupTabs() {
@@ -153,8 +140,6 @@ public class MainActivity extends FirebaseActivity implements OnFragmentInteract
 
     private void setupNavigation(Bundle savedInstanceState) {
         mCurrentPage = savedInstanceState != null && savedInstanceState.containsKey(PAGE_KEY) ? (FragmentsEnum) savedInstanceState.getSerializable(PAGE_KEY) : FragmentsEnum.HOME;
-        // Create the adapter that will return a fragment for each of the three
-        // primary sections of the activity.
         mSectionsFragmentManager = new SectionsFragmentManager(this.getBaseContext(), getSupportFragmentManager(), R.id.container);
         if (savedInstanceState == null) {
             mSectionsFragmentManager.setPage(mCurrentPage, savedInstanceState);

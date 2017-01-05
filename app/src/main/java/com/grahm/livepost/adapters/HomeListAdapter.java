@@ -141,7 +141,9 @@ public class HomeListAdapter extends FirebaseListJointAdapter<Story> {
                     Bundle args = new Bundle();
                     args.putString("key", key);
                     args.putSerializable("story", iholder.mItem);
-                    mOnFragmentInteractionListener.onFragmentInteraction(MainActivity.CHAT_IDX, args);
+                    if(MainActivity.canContinue){
+                        mOnFragmentInteractionListener.onFragmentInteraction(MainActivity.CHAT_IDX, args);
+                    }
                 }
             });
             if (story.getPosts_picture() != null && !story.getPosts_picture().isEmpty()) {
