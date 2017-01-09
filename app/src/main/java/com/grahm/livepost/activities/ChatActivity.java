@@ -8,6 +8,7 @@ import android.graphics.Color;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Environment;
 import android.support.design.widget.AppBarLayout;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.widget.LinearLayoutManager;
@@ -39,15 +40,20 @@ import com.grahm.livepost.R;
 import com.grahm.livepost.adapters.ChatAdapter;
 import com.grahm.livepost.asynctask.PostImageTask;
 import com.grahm.livepost.asynctask.PostVideoTask;
+import com.grahm.livepost.asynctask.VideoCompressor;
+import com.grahm.livepost.file.FileUtils;
 import com.grahm.livepost.interfaces.OnFragmentInteractionListener;
 import com.grahm.livepost.interfaces.OnPutImageListener;
+import com.grahm.livepost.interfaces.OnPutVideoListener;
 import com.grahm.livepost.objects.FirebaseActivity;
 import com.grahm.livepost.objects.Story;
 import com.grahm.livepost.objects.Update;
 import com.grahm.livepost.objects.User;
+import com.grahm.livepost.objects.VideoMessageObject;
 import com.grahm.livepost.util.KeyboardUtil;
 import com.grahm.livepost.util.Util;
 import com.grahm.livepost.util.Utilities;
+import com.grahm.livepost.utils.Config;
 import com.objectlife.statelayout.StateLayout;
 import com.twitter.sdk.android.Twitter;
 import com.twitter.sdk.android.core.TwitterAuthConfig;
@@ -104,15 +110,25 @@ public class ChatActivity extends FirebaseActivity implements AbsListView.OnItem
 
     private ChatAdapter mMessagesListAdapter;
     private User mUser;
+
+    private void pushMediaToStory(Update u) {
+        mFirebaseRef.getRoot().child("posts/" + mId + "/last_message").setValue(u.getMessage());
+        DatabaseReference r = mFirebaseRef.push();
+        r.setValue(u);
+        r.child(Update.TIMESTAMP_FIELD_STR).setValue(ServerValue.TIMESTAMP);
+    }
+
     private OnPutImageListener putImageListener = new OnPutImageListener() {
         @Override
         public void onSuccess(String url) {
-            mFirebaseRef.getRoot().child("posts/" + mId + "/last_message").setValue(url);
-            Update m = new Update(0, null, url, mUser.getProfile_picture(), mUser.getName(), mUser.getUserKey());
-            // Create a new, auto-generated child of that chat location, and save our chat data there
-            DatabaseReference r = mFirebaseRef.push();
-            r.setValue(m);
-            r.child(Update.TIMESTAMP_FIELD_STR).setValue(ServerValue.TIMESTAMP);
+            if (url.contains("video")) {
+                String[] videoData = VideoMessageObject.parserXMLVideo(url);
+                Update m = new Update(0, null, videoData[0], videoData[1], mUser.getProfile_picture(), mUser.getName(), mUser.getUserKey());
+                pushMediaToStory(m);
+            } else {
+                Update m = new Update(0, null, url, mUser.getProfile_picture(), mUser.getName(), mUser.getUserKey());
+                pushMediaToStory(m);
+            }
         }
     };
 
@@ -153,9 +169,7 @@ public class ChatActivity extends FirebaseActivity implements AbsListView.OnItem
         ButterKnife.bind(this);
         TwitterAuthConfig authConfig = new TwitterAuthConfig(TWITTER_KEY, TWITTER_SECRET);
         Fabric.with(this, new TwitterCore(authConfig), new TweetUi(), new Twitter(authConfig), new TweetUi(), new TweetComposer());
-
         FacebookSdk.sdkInitialize(getApplicationContext());
-
         setSupportActionBar(mToolbar);
         restoreState(savedInstanceState);
         mFirebaseRef = FirebaseDatabase.getInstance().getReference("updates").child(mId);
@@ -285,7 +299,7 @@ public class ChatActivity extends FirebaseActivity implements AbsListView.OnItem
                 } else {
                     onPhotoReturned(file);
                 }
-                Log.e(TAG_CLASS, "imagefile:" + file.getName() + " type:" + type + " requestCode:" + requestCode + " resultCode:" + resultCode);
+                Log.i(TAG_CLASS, "imagefile:" + file.getName() + " type:" + type + " requestCode:" + requestCode + " resultCode:" + resultCode);
             }
 
             @Override
@@ -295,17 +309,38 @@ public class ChatActivity extends FirebaseActivity implements AbsListView.OnItem
         });
     }
 
+    private OnPutVideoListener mCompressorListener = new OnPutVideoListener() {
+        @Override
+        public void onSuccess(String video) {
+            File cacheFile = new File(
+                    Environment.getExternalStorageDirectory()
+                            + File.separator
+                            + Config.VIDEO_COMPRESSOR_APPLICATION_DIR_NAME
+                            + Config.VIDEO_COMPRESSOR_COMPRESSED_VIDEOS_DIR,
+                    video + ".mp4"
+            );
+            Uri imageUri = Uri.fromFile(cacheFile);
+            mPostVideoTask = new PostVideoTask(ChatActivity.this, putImageListener, mId, true);
+            if (imageUri != null) mPostVideoTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, imageUri);
+        }
+    };
+
+    private void compressVideo(Uri uri) {
+        long time = System.currentTimeMillis() / 1000L;
+        File tempFile = FileUtils.saveTempFile(mId + "_" + time, this, uri);
+        new VideoCompressor(tempFile, mId + "_" + time, mCompressorListener).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+    }
+
     private void onVideoReturned(File file) {
         Uri uri = Uri.fromFile(file);
-
-        mPostVideoTask = new PostVideoTask(this, putImageListener, true);
-        if (uri != null) mPostVideoTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, uri);
+        compressVideo(uri);
+//        mPostVideoTask = new PostVideoTask(this, putImageListener, mId, true);
+//        if (uri != null) mPostVideoTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, uri);
     }
 
     private void onPhotoReturned(File imageFile) {
         Uri uri = Uri.fromFile(imageFile);
-
-        mPostImageTask = new PostImageTask(this, putImageListener, true);
+        mPostImageTask = new PostImageTask(this, putImageListener, mId, true);
         if (uri != null) mPostImageTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, uri);
     }
 
@@ -364,8 +399,8 @@ public class ChatActivity extends FirebaseActivity implements AbsListView.OnItem
                 Intent intent = new Intent(ChatActivity.this, StorySettingsActivity.class);
                 intent.putExtra(TAG_STORY, mStory);
                 intent.putExtra(TAG_ID, mId);
+                intent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
                 startActivityForResult(intent, 1);
-//                ChatActivity.this.finish();
                 return true;
         }
         getSupportActionBar().setTitle(mStory.getTitle());

@@ -10,6 +10,7 @@ import com.facebook.drawee.backends.pipeline.Fresco;
 import com.google.firebase.database.FirebaseDatabase;
 import com.grahm.livepost.R;
 import com.grahm.livepost.activities.InitActivity;
+import com.grahm.livepost.file.FileUtils;
 import com.jcmore2.appcrash.AppCrash;
 import com.percolate.foam.FoamApiKeys;
 import com.percolate.foam.FoamMultiDexApplication;
@@ -43,6 +44,7 @@ public class LoadData extends FoamMultiDexApplication {
         }
         FirebaseDatabase.getInstance().setPersistenceEnabled(true);
         Fresco.initialize(this);
+        FileUtils.createApplicationFolder();
     }
 
 }

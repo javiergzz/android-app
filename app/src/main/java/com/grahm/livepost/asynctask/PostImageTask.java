@@ -35,22 +35,13 @@ public class PostImageTask extends AsyncTask<Uri, String, String> {
     private OnPutImageListener mListener;
     private String mPictureName;
     private Boolean mShowDialog;
-    private String mUid;
-    private User mUser;
     private String mExtension;
-    SharedPreferences mSharedPref;
 
-    public PostImageTask(Context context, OnPutImageListener listener, Boolean showDialog) {
-        mUid = null;
+    public PostImageTask(Context context, OnPutImageListener listener, String storyId, Boolean showDialog) {
         mContext = context;
         mListener = listener;
         mShowDialog = showDialog;
-        mSharedPref = context.getSharedPreferences(context.getString(R.string.preference_file_key), Context.MODE_PRIVATE);
-
-        String s = mSharedPref.getString("user", null);
-        if (!TextUtils.isEmpty(s)) {
-            mUser = new Gson().fromJson(s, User.class);
-        }
+        mPictureName = storyId;
     }
 
     protected void onPreExecute() {
@@ -100,14 +91,14 @@ public class PostImageTask extends AsyncTask<Uri, String, String> {
         int maxMediumWidth = Math.round(TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, r.getDimension(R.dimen.max_medium_width), d));
         int maxMediumHeight = Math.round(TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, r.getDimension(R.dimen.max_medium_height), d));
         long l = System.currentTimeMillis() / 1000L;
-        mPictureName = mUser.getName() + l;
+        mPictureName = mPictureName + "_" + l;
 
         url = uploadImage(mPictureName + "." + mExtension, srcUri, maxMediumWidth, maxMediumHeight);
         return url;
     }
 
     private Bitmap getScaledBitmap(Uri srcUri, int mDstWidth, int mDstHeight) {
-        Bitmap unscaledBitmap = Util.loadBitmapFromUri(mContext,srcUri);
+        Bitmap unscaledBitmap = Util.loadBitmapFromUri(mContext, srcUri);
 
         Bitmap scaledBitmap;
         ImageSize srcSize = new ImageSize(unscaledBitmap.getWidth(), unscaledBitmap.getHeight());
@@ -119,7 +110,7 @@ public class PostImageTask extends AsyncTask<Uri, String, String> {
         else {
             unscaledBitmap.recycle();
             ImageSize s = getScaledDimension(srcSize, boundarySize);
-            return Bitmap.createScaledBitmap(Util.loadBitmapFromUri(mContext,srcUri), s.getWidth(), s.getHeight(), false);
+            return Bitmap.createScaledBitmap(Util.loadBitmapFromUri(mContext, srcUri), s.getWidth(), s.getHeight(), false);
         }
     }
 
@@ -150,7 +141,7 @@ public class PostImageTask extends AsyncTask<Uri, String, String> {
         }
         try {
             if (is != null) {
-                    url = AzureUtils.uploadBlob(pictureName, is, GV.PICTURE_BUCKET);
+                url = AzureUtils.uploadBlob(pictureName, is, GV.PICTURE_BUCKET);
             }
         } catch (Exception exception) {
             Log.e("AsyncTask", "Error: " + exception);

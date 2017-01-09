@@ -81,7 +81,6 @@ dependencies {
     compile 'com.firebaseui:firebase-ui-database:0.5.1'
     compile 'com.firebaseui:firebase-ui-auth:0.5.1'
     compile 'com.android.volley:volley:1.0.0'
-    compile 'com.writingminds:FFmpegAndroid:0.3.2'
     compile 'com.github.bumptech.glide:glide:3.7.0'
     compile 'com.afollestad:easyvideoplayer:0.2.13'
     compile 'com.github.rtoshiro.fullscreenvideoview:fullscreenvideoview:1.1.2'
@@ -102,6 +101,8 @@ dependencies {
     compile 'com.facebook.fresco:fresco:0.12.0'
     compile 'com.github.stfalcon:frescoimageviewer:0.3.1'
     compile 'uk.co.samuelwall:material-tap-target-prompt:1.6.3'
+    compile files('libs/aspectjrt-1.7.3 (1).jar')
+    compile files('libs/isoparser-1.0.6.jar')
 }
 
 apply plugin: 'com.google.gms.google-services'

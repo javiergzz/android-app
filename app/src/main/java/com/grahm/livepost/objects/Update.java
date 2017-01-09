@@ -21,6 +21,16 @@ public class Update implements Serializable{
     private String profile_picture;
     private Map<String,Integer> likes;
     private Integer count_likes;
+
+    public String getThumb() {
+        return thumb;
+    }
+
+    public void setThumb(String thumb) {
+        this.thumb = thumb;
+    }
+
+    private String thumb;
     //Empty constructor mandatory for Firebase
     public Update(){}
     public Update(int count_likes, Map<String, Integer> likes, String message, String profile_picture, String sender, String sender_key) {
@@ -30,6 +40,16 @@ public class Update implements Serializable{
         this.profile_picture = profile_picture;
         this.sender = sender;
         this.sender_key = sender_key;
+    }
+
+    public Update(int count_likes, Map<String, Integer> likes, String message, String thumb, String profile_picture, String sender, String sender_key) {
+        this.count_likes = count_likes;
+        this.likes = likes;
+        this.message = message;
+        this.profile_picture = profile_picture;
+        this.sender = sender;
+        this.sender_key = sender_key;
+        this.thumb = thumb;
     }
     //Getters & setters
     public Integer getCount_likes() {

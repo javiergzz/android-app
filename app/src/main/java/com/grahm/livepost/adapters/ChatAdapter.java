@@ -3,6 +3,7 @@ package com.grahm.livepost.adapters;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.graphics.Color;
 import android.net.Uri;
 import android.os.Environment;
 import android.support.v4.app.FragmentActivity;
@@ -46,12 +47,15 @@ import com.grahm.livepost.fragments.EditPostDialogFragment;
 import com.grahm.livepost.interfaces.OnFragmentInteractionListener;
 import com.grahm.livepost.objects.Update;
 import com.grahm.livepost.objects.User;
+import com.grahm.livepost.objects.VideoMessageObject;
 import com.grahm.livepost.specialViews.SwipeLayout;
 import com.grahm.livepost.util.Util;
 import com.grahm.livepost.util.Utilities;
 import com.objectlife.statelayout.StateLayout;
 import com.stfalcon.frescoimageviewer.ImageViewer;
 import com.twitter.sdk.android.tweetcomposer.TweetComposer;
+
+import org.w3c.dom.Text;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -130,6 +134,16 @@ public class ChatAdapter extends FirebaseListAdapter<Update> {
         String mimeString = Util.getMimeTypeFromUrl(Utilities.cleanUrl(m.getMessage()));
 
         if (!TextUtils.isEmpty(mimeString)) {
+            h.mImgChatView.setOnLongClickListener(new View.OnLongClickListener() {
+                @Override
+                public boolean onLongClick(View v) {
+                    String sender = m.getSender_key();
+                    if (mUsername != null && mUsername.equals(sender)) {
+                        showDialog(new ChatTag(key, m));
+                    }
+                    return true;
+                }
+            });
             h.mMessageView.setVisibility(View.GONE);
             h.mImgChatView.setVisibility(View.VISIBLE);
             if (mimeString.contains("image")) {
@@ -147,44 +161,42 @@ public class ChatAdapter extends FirebaseListAdapter<Update> {
                                     .show();
                         }
                     };
-
                     h.mImgChatView.setOnClickListener(openGallery);
-                    h.mImgChatView.setOnLongClickListener(new View.OnLongClickListener() {
+                    h.mBtnShareFacebook.setOnClickListener(new View.OnClickListener() {
                         @Override
-                        public boolean onLongClick(View v) {
-                            String sender = m.getSender_key();
-                            if (mUsername != null && mUsername.equals(sender)) {
-                                showDialog(new ChatTag(key, m));
-                            }
-                            return true;
+                        public void onClick(View v) {
+                            shareOnFacebook(h.mImgChatView);
+                        }
+                    });
+                    h.mBtnShareTwitter.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            tweetPhoto(h.mImgChatView);
                         }
                     });
                 }
             } else if (mimeString.contains("video")) {
-                Matcher matcher = videoMessagePattern.matcher(msg);
-                if (matcher.matches())
-                    setupVideoMessageXml(h, matcher);
-                else
-                    setupVideoMessage(h, Utilities.cleanUrl(msg), key);
-            } else if (mimeString.contains("video")) {
-                Matcher matcher = videoMessagePattern.matcher(msg);
-                if (matcher.matches())
-                    setupVideoMessageXml(h, matcher);
-                else
-                    setupVideoMessage(h, Utilities.cleanUrl(msg), key);
+                if(TextUtils.isEmpty(m.getThumb())){
+                    setupVideoMessage(h, msg);
+                }else{
+                    setupVideoMessageXml(h, msg, m.getThumb());
+                }
+                h.mImgChatView.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        Log.i(TAG, "Video Play: " + msg);
+                        if (TextUtils.isEmpty(msg)) return;
+                        String mimeString = Util.getMimeTypeFromUrl(msg);
+                        if (!TextUtils.isEmpty(mimeString) && mimeString.contains("video")) {
+                            Log.i(TAG, "Play Video");
+                            Intent playIntent = new Intent(mActivity, PlayerActivity.class);
+                            playIntent.putExtra(PlayerActivity.VIDEO_URL_KEY, msg);
+                            mActivity.startActivity(playIntent);
+                        }
+
+                    }
+                });
             }
-            h.mBtnShareFacebook.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    shareOnFacebook(h.mImgChatView);
-                }
-            });
-            h.mBtnShareTwitter.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    tweetPhoto(h.mImgChatView);
-                }
-            });
         } else {
             h.mViewShareFacebook.setVisibility(View.GONE);
             h.mBtnShareTwitter.setOnClickListener(new View.OnClickListener() {
@@ -193,14 +205,7 @@ public class ChatAdapter extends FirebaseListAdapter<Update> {
                     tweet(msg);
                 }
             });
-            //Check if first character is < to avoid pattern matching in messages that don't look like xml
-            if (!TextUtils.isEmpty(msg) && msg.charAt(0) == '<') {
-                Matcher matcher = videoMessagePattern.matcher(msg);
-                if (matcher.matches())
-                    setupVideoMessageXml(h, matcher);
-            } else {
-                setupTextMessage(h, msg);
-            }
+            setupTextMessage(h, msg);
         }
 
         // TODO do smart tweet
@@ -332,66 +337,22 @@ public class ChatAdapter extends FirebaseListAdapter<Update> {
         iholder.mSwipeLayout.addDrag(SwipeLayout.DragEdge.Right, iholder.mSwipeLayout.findViewById(R.id.view_share));
     }
 
-    private void setupVideoMessage(ChatViewHolder h, String msg, String key) {
-        //Set placeholder to image view
+    private void setupVideoMessage(ChatViewHolder h, String msg) {
+        h.mMessageView.setVisibility(View.GONE);
+        h.mImgChatView.setBackgroundColor(Color.BLACK);
         h.mPlayIcon.setVisibility(View.VISIBLE);
-        h.mImgChatView.setImageResource(R.drawable.default_placeholder);
-        //Normalize message:
-        //1.Generate thumbnail from video.
-        //2.Set thumbnail to the image view.
-        //3.Upload thumbnail to s3
-        //4.Update firebase entry as XML
-        Log.d(TAG, "video:" + Utilities.cleanVideoUrl(h.mItem.getMessage()));
-        try {
-            Bitmap bmp = Utilities.retriveVideoFrameFromVideo(msg);
-            h.mImgChatView.setImageBitmap(bmp);
-            new UploadVideoThumbTask(FirebaseDatabase.getInstance().getReference("updates/" + mChatKey + "/" + key), h.mItem, mActivity)
-                    .execute(bmp);
-        } catch (Throwable e) {
-            Log.e(TAG, "Error:" + e);
-        }
-        //Set video click callback
-        setVideoClickCallback(h, msg, null);
     }
 
-    private void setVideoClickCallback(final ChatViewHolder h, final String msg, final Matcher matcher) {
-        h.mContentView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Log.d(TAG, "Click event");
-                if (TextUtils.isEmpty(msg)) return;
-                String mimeString = Util.getMimeTypeFromUrl(msg);
-                String videoUrl = null;
-
-                if (!TextUtils.isEmpty(mimeString) && mimeString.contains("video")) {
-                    //Non-XML callback
-                    videoUrl = msg;
-                } else if (matcher != null && !TextUtils.isEmpty(matcher.group(1))) {
-                    //XML callback
-                    videoUrl = matcher.group(1);
-                }
-                if (videoUrl != null) {
-                    Log.d(TAG, "Play Video");
-                    Intent playIntent = new Intent(mActivity, PlayerActivity.class);
-                    playIntent.putExtra(PlayerActivity.VIDEO_URL_KEY, videoUrl);
-                    mActivity.startActivity(playIntent);
-                }
-
-            }
-        });
-    }
-
-    private void setupVideoMessageXml(ChatViewHolder h, Matcher matcher) {
+    private void setupVideoMessageXml(ChatViewHolder h, String videoUrl, String thumbUrl) {
         h.mMessageView.setVisibility(View.GONE);
         h.mImgChatView.setVisibility(View.VISIBLE);
         h.mPlayIcon.setVisibility(View.VISIBLE);
         Glide.with(mActivity)
-                .load(matcher.group(2))
+                .load(thumbUrl)
                 .diskCacheStrategy(DiskCacheStrategy.RESULT)
                 .placeholder(R.drawable.default_placeholder)
                 .fitCenter()
                 .into(h.mImgChatView);
-        setVideoClickCallback(h, matcher.group(1), null);
     }
 
     public class ChatViewHolder extends RecyclerView.ViewHolder {
@@ -438,7 +399,6 @@ public class ChatAdapter extends FirebaseListAdapter<Update> {
                     ChatTag u = (ChatTag) v.getTag();
                     String sender = u.update.getSender_key();
                     if (mUsername != null && mUsername.equals(sender)) {
-                        //Edition dialog
                         showDialog((ChatTag) v.getTag());
                     }
                     return true;

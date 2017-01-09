@@ -145,7 +145,7 @@ public class NewStory extends ActionBarActivity implements OnPutImageListener{
                     saveSession(url);
                 }
             };
-            new PostImageTask(NewStory.this, putImageListener, true).execute(mIimageUri);
+            new PostImageTask(NewStory.this, putImageListener, "", true).execute(mIimageUri);
         }
     }
 

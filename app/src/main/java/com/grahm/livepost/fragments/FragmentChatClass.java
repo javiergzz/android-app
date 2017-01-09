@@ -246,7 +246,7 @@ public class FragmentChatClass extends Fragment implements AbsListView.OnItemCli
     private void onPhotoReturned(File imageFile){
         Uri uri = Uri.fromFile(imageFile);
 
-        mPostTask = new PostImageTask(getActivity(),putImageListener,true);
+        mPostTask = new PostImageTask(getActivity(),putImageListener, "",true);
         if(uri!= null) mPostTask.execute(uri);
     }
 

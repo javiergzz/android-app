@@ -159,7 +159,7 @@ public class EditPostDialogFragment extends DialogFragment {
     private void editAction() {
         switch (mChatType) {
             case Utilities.MSG_TYPE_IMAGE:
-                mPostTask = new PostImageTask(getActivity(), putImageListener, true);
+                mPostTask = new PostImageTask(getActivity(), putImageListener, mStoryKey, true);
                 if (mLoadedUri != null) mPostTask.execute(mLoadedUri);
                 break;
             case Utilities.MSG_TYPE_VIDEO://TODO

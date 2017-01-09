@@ -16,7 +16,6 @@
     <uses-permission android:name="android.permission.READ_CONTACTS" />
     <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
 
-
     <application
         android:name=".application.LoadData"
         android:allowBackup="true"
@@ -55,6 +54,7 @@
         <activity
             android:name=".activities.SettingsActivity"
             android:label="@string/title_activity_settings"
+            android:launchMode="singleInstance"
             android:parentActivityName=".activities.MainActivity" />
         <activity
             android:name=".activities.LoginActivity"
@@ -77,19 +77,18 @@
                 android:value="com.grahm.livepost.activities.MainActivity" />
         </activity>
         <activity android:name="com.soundcloud.android.crop.CropImageActivity" />
-        <activity android:name="com.braunster.tutorialview.TutorialActivity"
-            android:theme="@android:style/Theme.Translucent.NoTitleBar.Fullscreen"
-            android:screenOrientation="portrait"/>
         <activity
             android:name=".activities.ChatActivity"
             android:hardwareAccelerated="false"
             android:parentActivityName=".activities.MainActivity"
+            android:launchMode="singleInstance"
             android:theme="@style/AppTheme.NoActionBar"/>
         <activity
             android:name=".activities.StorySettingsActivity"
             android:label="@string/title_activity_contributors"
             android:parentActivityName=".activities.ChatActivity"
             android:windowSoftInputMode="stateHidden|adjustPan"
+            android:launchMode="singleInstance"
             android:theme="@style/AppTheme.NoActionBar">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
@@ -103,6 +102,7 @@
         <activity
             android:name=".activities.EditProfile"
             android:label="@string/title_activity_edit_profile"
+            android:launchMode="singleInstance"
             android:parentActivityName=".activities.MainActivity" />
 
         <meta-data

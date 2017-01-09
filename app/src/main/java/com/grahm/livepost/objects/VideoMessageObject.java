@@ -14,6 +14,7 @@ public class VideoMessageObject {
     public final String videoUrl;
     public final String thumbnailUrl;
     public final Matcher matcher;
+
     public VideoMessageObject(final String message){
         matcher = videoMessagePattern.matcher(message);
         if(matcher.matches()){
@@ -23,5 +24,18 @@ public class VideoMessageObject {
             videoUrl = Utilities.cleanUrl(message);
             thumbnailUrl = null;
         }
+    }
+
+    public static String[] parserXMLVideo(String message){
+        String[] str = new String[2];
+        Matcher _matcher = videoMessagePattern.matcher(message);
+        if(_matcher.matches()){
+            str[0] = _matcher.group(1);
+            str[1] = _matcher.group(2);
+        }else{
+            str[0] = Utilities.cleanUrl(message);
+            str[1] = null;
+        }
+        return str;
     }
 }

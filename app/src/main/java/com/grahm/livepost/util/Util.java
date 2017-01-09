@@ -22,10 +22,6 @@ import android.provider.MediaStore;
 import android.util.Log;
 import android.webkit.MimeTypeMap;
 
-import com.github.hiteshsondhi88.libffmpeg.FFmpeg;
-import com.github.hiteshsondhi88.libffmpeg.LoadBinaryResponseHandler;
-import com.github.hiteshsondhi88.libffmpeg.exceptions.FFmpegNotSupportedException;
-
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -192,32 +188,32 @@ public class Util {
         return "com.android.providers.media.documents".equals(uri.getAuthority());
     }
 
-    public static void setupFfmpeg(Context context) {
-        FFmpeg ffmpeg = FFmpeg.getInstance(context);
-        try {
-            ffmpeg.loadBinary(new LoadBinaryResponseHandler() {
-
-                @Override
-                public void onStart() {
-                }
-
-                @Override
-                public void onFailure() {
-                }
-
-                @Override
-                public void onSuccess() {
-                }
-
-                @Override
-                public void onFinish() {
-                }
-            });
-        } catch (FFmpegNotSupportedException e) {
-            // Handle if FFmpeg is not supported by device
-            Log.e(TAG, e.getMessage());
-        }
-    }
+//    public static void setupFfmpeg(Context context) {
+//        FFmpeg ffmpeg = FFmpeg.getInstance(context);
+//        try {
+//            ffmpeg.loadBinary(new LoadBinaryResponseHandler() {
+//
+//                @Override
+//                public void onStart() {
+//                }
+//
+//                @Override
+//                public void onFailure() {
+//                }
+//
+//                @Override
+//                public void onSuccess() {
+//                }
+//
+//                @Override
+//                public void onFinish() {
+//                }
+//            });
+//        } catch (FFmpegNotSupportedException e) {
+//            // Handle if FFmpeg is not supported by device
+//            Log.e(TAG, e.getMessage());
+//        }
+//    }
 
     public static Intent buildIntent(Context context, String chooserTitle, int type) {
         try {
