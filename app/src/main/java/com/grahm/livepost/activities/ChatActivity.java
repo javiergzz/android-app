@@ -21,6 +21,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.Window;
 import android.view.inputmethod.EditorInfo;
 import android.widget.AbsListView;
 import android.widget.AdapterView;
@@ -110,6 +111,7 @@ public class ChatActivity extends FirebaseActivity implements AbsListView.OnItem
 
     private ChatAdapter mMessagesListAdapter;
     private User mUser;
+    private File mCacheFile;
 
     private void pushMediaToStory(Update u) {
         mFirebaseRef.getRoot().child("posts/" + mId + "/last_message").setValue(u.getMessage());
@@ -128,6 +130,9 @@ public class ChatActivity extends FirebaseActivity implements AbsListView.OnItem
             } else {
                 Update m = new Update(0, null, url, mUser.getProfile_picture(), mUser.getName(), mUser.getUserKey());
                 pushMediaToStory(m);
+            }
+            if(mCacheFile != null && mCacheFile.exists()){
+                mCacheFile.delete();
             }
         }
     };
@@ -312,14 +317,14 @@ public class ChatActivity extends FirebaseActivity implements AbsListView.OnItem
     private OnPutVideoListener mCompressorListener = new OnPutVideoListener() {
         @Override
         public void onSuccess(String video) {
-            File cacheFile = new File(
+            mCacheFile = new File(
                     Environment.getExternalStorageDirectory()
                             + File.separator
                             + Config.VIDEO_COMPRESSOR_APPLICATION_DIR_NAME
                             + Config.VIDEO_COMPRESSOR_COMPRESSED_VIDEOS_DIR,
                     video + ".mp4"
             );
-            Uri imageUri = Uri.fromFile(cacheFile);
+            Uri imageUri = Uri.fromFile(mCacheFile);
             mPostVideoTask = new PostVideoTask(ChatActivity.this, putImageListener, mId, true);
             if (imageUri != null) mPostVideoTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, imageUri);
         }
@@ -334,8 +339,6 @@ public class ChatActivity extends FirebaseActivity implements AbsListView.OnItem
     private void onVideoReturned(File file) {
         Uri uri = Uri.fromFile(file);
         compressVideo(uri);
-//        mPostVideoTask = new PostVideoTask(this, putImageListener, mId, true);
-//        if (uri != null) mPostVideoTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, uri);
     }
 
     private void onPhotoReturned(File imageFile) {
@@ -419,6 +422,7 @@ public class ChatActivity extends FirebaseActivity implements AbsListView.OnItem
     private void setupMenu() {
         getSupportActionBar().setTitle(mStory.getTitle());
         setTitle(mStory.getTitle());
+//        mBackdropImageView.setAlpha(0.8f);
         Glide.with(this).load(mStory.getPosts_picture()).into(mBackdropImageView);
     }
 

@@ -57,7 +57,6 @@ dependencies {
     compile ('com.papertrailapp:logback-syslog4j:1.0.0' ){
         exclude group: 'ch.qos.logback'
     }
-    //compile 'com.flurry.android:analytics:6.2.0'
 
     compile 'com.android.support:appcompat-v7:24.2.1'
     compile 'com.android.support:support-v4:24.2.1'
@@ -82,7 +81,7 @@ dependencies {
     compile 'com.firebaseui:firebase-ui-auth:0.5.1'
     compile 'com.android.volley:volley:1.0.0'
     compile 'com.github.bumptech.glide:glide:3.7.0'
-    compile 'com.afollestad:easyvideoplayer:0.2.13'
+    compile 'com.afollestad:easyvideoplayer:0.3.0'
     compile 'com.github.rtoshiro.fullscreenvideoview:fullscreenvideoview:1.1.2'
     compile 'com.objectlife.statelayout:statelayout:1.0.3'
     compile 'com.android.support:multidex:1.0.+'

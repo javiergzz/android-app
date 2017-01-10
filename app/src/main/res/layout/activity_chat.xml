@@ -29,6 +29,8 @@
                 android:layout_height="match_parent"
                 android:adjustViewBounds="false"
                 android:elevation="5dp"
+                android:background="@color/colorPrimary"
+                android:alpha="0.7"
                 android:fitsSystemWindows="true"
                 android:scaleType="centerCrop"
                 app:layout_collapseMode="parallax" />

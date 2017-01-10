@@ -7,6 +7,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.DialogFragment;
 import android.support.v7.app.AlertDialog;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -51,6 +52,9 @@ public class EditPostDialogFragment extends DialogFragment {
     @BindView(R.id.chat_img)
     public ImageView mImageEdit;
 
+    private AlertDialog mAlertDialog;
+    private boolean photoIsChanged = false;
+
     private OnPutImageListener putImageListener = new OnPutImageListener() {
         @Override
         public void onSuccess(String url) {
@@ -80,6 +84,21 @@ public class EditPostDialogFragment extends DialogFragment {
         mLoadedUri = new Gson().fromJson(args.getString(IMAGE_URI_KEY), Uri.class);
     }
 
+    private String getText() {
+        String str = "";
+        switch (mChatType) {
+            case Utilities.MSG_TYPE_IMAGE:
+            case Utilities.MSG_TYPE_VIDEO:
+            case Utilities.MSG_TYPE_VIDEO_W_THUMBNAIL:
+                str = getString(R.string.dialog_cancel);
+                break;
+            default:
+                str = getString(R.string.dialog_edit);
+                break;
+        }
+        return str;
+    }
+
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         // Use the Builder class for convenient dialog construction
@@ -92,7 +111,7 @@ public class EditPostDialogFragment extends DialogFragment {
         // Inflate and set the layout for the dialog
         // Pass null as the parent view because its going in the dialog layout
         builder.setView(v)
-                .setPositiveButton(getString(R.string.dialog_edit), new DialogInterface.OnClickListener() {
+                .setPositiveButton(getText(), new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int id) {
                         editAction();
                     }
@@ -104,48 +123,47 @@ public class EditPostDialogFragment extends DialogFragment {
                 });
 
         // Create the AlertDialog object and return it
-        return builder.create();
+        mAlertDialog = builder.create();
+        return mAlertDialog;
     }
 
     private void chooseViewElements() {
         final String message = mMsg != null ? mMsg.getMessage() : null;
         if (message == null) return;
-
         switch (mChatType) {
             case Utilities.MSG_TYPE_IMAGE:
                 mTextEdit.setVisibility(View.GONE);
                 mImageEdit.setVisibility(View.VISIBLE);
                 Glide.with(this).load(Utilities.cleanUrl(message)).into(mImageEdit);
-                mImageEdit.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        Log.i(TAG, "Add picture callback");
-                        addPictureCallback();
-                    }
-                });
                 break;
             case Utilities.MSG_TYPE_VIDEO:
                 mTextEdit.setVisibility(View.GONE);
                 mImageEdit.setVisibility(View.VISIBLE);
-                Glide.with(this).load(R.drawable.default_placeholder).into(mImageEdit);
+                if (TextUtils.isEmpty(mMsg.getThumb())) {
+                    Glide.with(this).load(R.drawable.default_placeholder).into(mImageEdit);
+                } else {
+                    Glide.with(this).load(mMsg.getThumb()).into(mImageEdit);
+                }
                 mImageEdit.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {//Do nothing
                     }
                 });
-                mImageEdit.setVisibility(View.GONE);
                 break;
             case Utilities.MSG_TYPE_VIDEO_W_THUMBNAIL:
                 VideoMessageObject v = new VideoMessageObject(message);
                 mTextEdit.setVisibility(View.GONE);
                 mImageEdit.setVisibility(View.VISIBLE);
-                Glide.with(this).load(v.thumbnailUrl).into(mImageEdit);
+                if (TextUtils.isEmpty(mMsg.getThumb())) {
+                    Glide.with(this).load(R.drawable.default_placeholder).into(mImageEdit);
+                } else {
+                    Glide.with(this).load(mMsg.getThumb()).into(mImageEdit);
+                }
                 mImageEdit.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {//Do nothing
                     }
                 });
-                mImageEdit.setVisibility(View.GONE);
                 break;
             default:
                 mImageEdit.setVisibility(View.GONE);
@@ -158,12 +176,8 @@ public class EditPostDialogFragment extends DialogFragment {
 
     private void editAction() {
         switch (mChatType) {
-            case Utilities.MSG_TYPE_IMAGE:
-                mPostTask = new PostImageTask(getActivity(), putImageListener, mStoryKey, true);
-                if (mLoadedUri != null) mPostTask.execute(mLoadedUri);
-                break;
-            case Utilities.MSG_TYPE_VIDEO://TODO
-
+            case Utilities.MSG_TYPE_IMAGE: //TODO
+            case Utilities.MSG_TYPE_VIDEO:
                 break;
             case Utilities.MSG_TYPE_TEXT:
                 String input = mTextEdit.getText().toString();
@@ -186,7 +200,7 @@ public class EditPostDialogFragment extends DialogFragment {
             default:
                 VideoMessageObject v = new VideoMessageObject(mMsg.getMessage());
 
-                new DeleteVideoTask(getActivity(), v.videoUrl,v.thumbnailUrl);
+                new DeleteVideoTask(getActivity(), v.videoUrl, v.thumbnailUrl);
                 break;
         }
         mFirebaseRef.removeValue();
@@ -201,34 +215,6 @@ public class EditPostDialogFragment extends DialogFragment {
         outState.putInt(TYPE_KEY, mChatType);
         outState.putString(IMAGE_URI_KEY, new Gson().toJson(mLoadedUri));
         super.onSaveInstanceState(outState);
-    }
-
-    public void addPictureCallback() {
-        Log.d("FragmentChatClass", "Choosing Image");
-        Long l = System.currentTimeMillis() / 1000L;
-        EasyImage.openChooserWithDocuments(this, mStoryKey + "_" + mKey + "_" + l, 1);
-    }
-
-    @Override
-    public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-        EasyImage.handleActivityResult(requestCode, resultCode, data, getActivity(), new DefaultCallback() {
-            @Override
-            public void onImagePickerError(Exception e, EasyImage.ImageSource source, int type) {
-                Toast toast = Toast.makeText(getActivity(), e.getMessage(), Toast.LENGTH_SHORT);
-            }
-
-            @Override
-            public void onImagePicked(File imageFile, EasyImage.ImageSource source, int type) {
-                //Handle the image
-                onPhotoReturned(imageFile);
-            }
-        });
-    }
-
-    private void onPhotoReturned(File imageFile) {
-        mLoadedUri = Uri.fromFile(imageFile);
-        Glide.with(this).load(mLoadedUri.toString()).into(mImageEdit);
     }
 
 }

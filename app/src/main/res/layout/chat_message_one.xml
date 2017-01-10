@@ -33,6 +33,7 @@
             </RelativeLayout>
 
             <RelativeLayout
+                android:id="@+id/view_share_twitter"
                 android:layout_width="70dp"
                 android:layout_height="match_parent"
                 android:background="#4099FF">
@@ -85,6 +86,14 @@
                     android:layout_height="wrap_content"
                     android:layout_centerInParent="true"
                     android:src="@android:drawable/ic_media_play"
+                    android:visibility="gone" />
+
+                <ImageView
+                    android:id="@+id/icon_gif"
+                    android:layout_width="60dp"
+                    android:layout_height="60dp"
+                    android:layout_centerInParent="true"
+                    android:src="@drawable/ic_gif"
                     android:visibility="gone" />
 
                 <ProgressBar

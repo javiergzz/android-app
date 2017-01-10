@@ -210,6 +210,8 @@
     <string name="edit_delete">Delete Post</string>
     <string name="dialog_delete">Delete</string>
     <string name="dialog_edit">Edit</string>
+    <string name="dialog_cancel">Cancel</string>
+    <string name="dialog_change">Change</string>
 
     <string name="title_activity_settings">Settings</string>
 
