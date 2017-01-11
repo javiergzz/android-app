@@ -2,7 +2,6 @@ package com.grahm.livepost.fragments;
 
 import android.app.Dialog;
 import android.content.DialogInterface;
-import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.DialogFragment;
@@ -13,7 +12,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageView;
-import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 import com.google.firebase.database.DatabaseReference;
@@ -29,12 +27,8 @@ import com.grahm.livepost.objects.Update;
 import com.grahm.livepost.objects.VideoMessageObject;
 import com.grahm.livepost.util.Utilities;
 
-import java.io.File;
-
 import butterknife.BindView;
 import butterknife.ButterKnife;
-import pl.aprilapps.easyphotopicker.DefaultCallback;
-import pl.aprilapps.easyphotopicker.EasyImage;
 
 public class EditPostDialogFragment extends DialogFragment {
     private static final String TAG = "EditPostDialogFragment";
@@ -82,6 +76,7 @@ public class EditPostDialogFragment extends DialogFragment {
         mChatType = args.getInt(TYPE_KEY, Utilities.deduceMessageType(mMsg.getMessage()));
         mFirebaseRef = FirebaseDatabase.getInstance().getReference("updates/" + mStoryKey + "/" + mKey);
         mLoadedUri = new Gson().fromJson(args.getString(IMAGE_URI_KEY), Uri.class);
+        Log.i(TAG, "query: updates/" + mStoryKey + "/" + mKey);
     }
 
     private String getText() {
@@ -199,7 +194,6 @@ public class EditPostDialogFragment extends DialogFragment {
                 break;
             default:
                 VideoMessageObject v = new VideoMessageObject(mMsg.getMessage());
-
                 new DeleteVideoTask(getActivity(), v.videoUrl, v.thumbnailUrl);
                 break;
         }

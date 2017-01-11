@@ -10,6 +10,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import com.android.volley.Request;
@@ -29,11 +30,9 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.ServerValue;
 import com.google.firebase.database.ValueEventListener;
 import com.google.gson.Gson;
 import com.grahm.livepost.R;
-import com.grahm.livepost.activities.Login;
 import com.grahm.livepost.activities.MainActivity;
 import com.grahm.livepost.activities.SplashScreen;
 import com.grahm.livepost.ui.Controls;
@@ -66,6 +65,7 @@ public class LoginFragment extends Fragment {
     private Callback<TwitterSession> callbackTwitter = new Callback<TwitterSession>() {
         @Override
         public void success(Result<TwitterSession> result) {
+            mLoading.setVisibility(View.VISIBLE);
             handleTwitterSession(result.data);
         }
 
@@ -76,6 +76,7 @@ public class LoginFragment extends Fragment {
     };
 
     SharedPreferences sharedPref;
+    private ProgressBar mLoading;
 
     public LoginFragment() {
 
@@ -96,6 +97,7 @@ public class LoginFragment extends Fragment {
         View view = inflater.inflate(R.layout.fragment_login, container, false);
         loginButton = (TwitterLoginButton) view.findViewById(R.id.btn_login_twitter);
         loginButton.setCallback(callbackTwitter);
+        mLoading = (ProgressBar) view.findViewById(R.id.l_loaging);
         mAuth = FirebaseAuth.getInstance();
         mAuthListener = new FirebaseAuth.AuthStateListener() {
             @Override
@@ -143,7 +145,6 @@ public class LoginFragment extends Fragment {
     private void transformUser(final String uid, final TwitterSession session) {
         RequestQueue queue = Volley.newRequestQueue(getApplicationContext());
         String url = "http://rest-livepost-dev.herokuapp.com/v1.1/twitter/transform";
-//        Controls.createDialog(getApplicationContext(), "Loading", true);
         StringRequest stringRequest = new StringRequest(Request.Method.POST, url,
                 new Response.Listener<String>() {
                     @Override
@@ -155,11 +156,12 @@ public class LoginFragment extends Fragment {
                             if (json.getBoolean("success")) {
                                 getProfilePicture(session);
                             } else {
-                                Controls.dismissDialog();
+                                mLoading.setVisibility(View.GONE);
                                 Toast.makeText(getApplicationContext(), (json.getJSONObject("msg")).getString(Locale.getDefault().getDisplayLanguage()), Toast.LENGTH_LONG).show();
                             }
                         } catch (Throwable tx) {
                             Log.e("My App", "Could not parse malformed JSON: \"" + response + "\"");
+                            mLoading.setVisibility(View.GONE);
                         }
                     }
                 }, new Response.ErrorListener() {
@@ -189,7 +191,7 @@ public class LoginFragment extends Fragment {
                 if (u != null && u.isActive()) {
                     saveOnProperties(u);
                     Intent mainIntent = new Intent(getActivity(), MainActivity.class);
-                    Controls.dismissDialog();
+                    mLoading.setVisibility(View.GONE);
                     startActivity(mainIntent);
                     getActivity().finish();
                 } else {
@@ -199,7 +201,6 @@ public class LoginFragment extends Fragment {
 
             @Override
             public void onCancelled(DatabaseError databaseError) {
-                Controls.dismissDialog();
                 Log.e(TAG_CLASS, databaseError.getMessage());
             }
         });
@@ -242,7 +243,7 @@ public class LoginFragment extends Fragment {
                 _user.setTwitter(session.getUserName());
                 saveTwitterOnFirebase(_user);
                 saveOnProperties(_user);
-                Controls.dismissDialog();
+                mLoading.setVisibility(View.GONE);
                 Intent mainIntent = new Intent(getActivity(), MainActivity.class);
                 startActivity(mainIntent);
                 getActivity().finish();
@@ -250,6 +251,7 @@ public class LoginFragment extends Fragment {
 
             @Override
             public void failure(TwitterException exc) {
+                mLoading.setVisibility(View.GONE);
                 Log.d("TwitterKit", "Verify Credentials Failure", exc);
             }
         };

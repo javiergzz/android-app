@@ -21,7 +21,6 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
-import android.view.Window;
 import android.view.inputmethod.EditorInfo;
 import android.widget.AbsListView;
 import android.widget.AdapterView;
@@ -203,7 +202,7 @@ public class ChatActivity extends FirebaseActivity implements AbsListView.OnItem
         };
         String[] msg = {
                 "This is your first story! You can start typing in the text bar at the bottom.",
-                "Here you'll be able to access your story's settings where you can invite others to help contribute in the story and access the embed code or link where your story lives."
+                "You'll find your story's embed code/link here. You can also invite others to help contribute in the story."
         };
         View[] views = {
                 mInputText,

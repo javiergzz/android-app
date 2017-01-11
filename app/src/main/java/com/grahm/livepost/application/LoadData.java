@@ -11,6 +11,7 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.grahm.livepost.R;
 import com.grahm.livepost.activities.InitActivity;
 import com.grahm.livepost.file.FileUtils;
+import com.grahm.livepost.ui.TypefaceUtil;
 import com.jcmore2.appcrash.AppCrash;
 import com.percolate.foam.FoamApiKeys;
 import com.percolate.foam.FoamMultiDexApplication;
@@ -25,6 +26,7 @@ public class LoadData extends FoamMultiDexApplication {
     @Override
     public void onCreate() {
         super.onCreate();
+        TypefaceUtil.overrideFont(getApplicationContext(), "SERIF", "fonts/Roboto-Regular.ttf");
         FacebookSdk.sdkInitialize(getApplicationContext());
         //Foam Logger
         AppEventsLogger.activateApp(this);

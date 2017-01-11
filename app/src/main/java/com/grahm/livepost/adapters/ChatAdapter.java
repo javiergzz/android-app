@@ -255,25 +255,25 @@ public class ChatAdapter extends FirebaseListAdapter<Update> {
 //            @Override
 //            public void onClick(View v) {
 //                h.mProgressBar.setVisibility(View.VISIBLE);
-                Glide
-                        .with(context)
-                        .load(uri) // load as usual (Gif as animated, other formats as Bitmap)
-                        .diskCacheStrategy(DiskCacheStrategy.SOURCE)
-                        .thumbnail(thumbRequest)
-                        .dontAnimate()
-                        .listener(new RequestListener<Uri, GlideDrawable>() {
-                            @Override
-                            public boolean onException(Exception e, Uri model, Target<GlideDrawable> target, boolean isFirstResource) {
-                                return false;
-                            }
+        Glide
+                .with(context)
+                .load(uri) // load as usual (Gif as animated, other formats as Bitmap)
+                .diskCacheStrategy(DiskCacheStrategy.SOURCE)
+                .thumbnail(thumbRequest)
+                .dontAnimate()
+                .listener(new RequestListener<Uri, GlideDrawable>() {
+                    @Override
+                    public boolean onException(Exception e, Uri model, Target<GlideDrawable> target, boolean isFirstResource) {
+                        return false;
+                    }
 
-                            @Override
-                            public boolean onResourceReady(GlideDrawable resource, Uri model, Target<GlideDrawable> target, boolean isFromMemoryCache, boolean isFirstResource) {
-                                h.mProgressBar.setVisibility(View.GONE);
-                                return false;
-                            }
-                        })
-                        .into(h.mImgChatView);
+                    @Override
+                    public boolean onResourceReady(GlideDrawable resource, Uri model, Target<GlideDrawable> target, boolean isFromMemoryCache, boolean isFirstResource) {
+                        h.mProgressBar.setVisibility(View.GONE);
+                        return false;
+                    }
+                })
+                .into(h.mImgChatView);
 //                h.mGifIcon.setVisibility(View.GONE);
 //            }
 //        });
@@ -403,7 +403,7 @@ public class ChatAdapter extends FirebaseListAdapter<Update> {
     }
 
     private void setConnectivityObservers(Query ref) {
-        ref.addListenerForSingleValueEvent(new ValueEventListener() {
+        ref.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 switchMainActivityView(StateLayout.VIEW_CONTENT);

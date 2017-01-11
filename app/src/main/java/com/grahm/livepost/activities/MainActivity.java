@@ -103,7 +103,7 @@ public class MainActivity extends FirebaseActivity implements OnFragmentInteract
         String[] msg = {
                 "This is where all your stories will live. When you create a New Story it will appear here.",
                 "Here you can create a new story and choose where to publish it.",
-                "This is your profile, you'll be able to see the stories you've created and edit your profile information."
+                "Here you'll be able to see the stories you've created and edit your profile information."
         };
         new MaterialTapTargetPrompt.Builder(MainActivity.this)
                 .setTarget(((ViewGroup) mTabLayout.getChildAt(0)).getChildAt(mTutorialCount))

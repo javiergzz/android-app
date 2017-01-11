@@ -4,37 +4,31 @@ package com.grahm.livepost.adapters;
  * Created by javiergonzalez on 6/21/16.
  */
 
-import android.app.Activity;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
-import android.view.LayoutInflater;
 
 import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.GenericTypeIndicator;
 import com.google.firebase.database.Query;
-import com.grahm.livepost.objects.Story;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
 /**
+ * @param <T> The class type to use as a model for the data contained in the children of the given Firebase location
  * @author greg
  * @since 6/21/13
- *
+ * <p>
  * This class is a generic way of backing an Android ListView with a Firebase location.
  * It handles all of the child events at the given Firebase location. It marshals received data into the given
  * class type. Extend this class and provide an implementation of <code>populateView</code>, which will be given an
  * instance of your list item mLayout and an instance your class that holds your data. Simply populate the view however
  * you like and this class will handle updating the list as the data changes.
- *
- * @param <T> The class type to use as a model for the data contained in the children of the given Firebase location
  */
-public abstract class FirebaseListAdapter<T> extends  RecyclerView.Adapter<RecyclerView.ViewHolder> {
+public abstract class FirebaseListAdapter<T> extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
     private Query mRef;
     private Class<T> mModelClass;
@@ -42,7 +36,7 @@ public abstract class FirebaseListAdapter<T> extends  RecyclerView.Adapter<Recyc
     private Map<String, T> mModelKeys;
     private List<String> mKeys;
     private ChildEventListener mListener;
-    private boolean mSearchingFlag ;
+    private boolean mSearchingFlag;
 
 
     /**
@@ -51,10 +45,11 @@ public abstract class FirebaseListAdapter<T> extends  RecyclerView.Adapter<Recyc
      * @param mModelClass Firebase will marshall the data at a location into an instance of a class that you provide
      */
     public FirebaseListAdapter(Query mRef, final Class<T> mModelClass) {
-        this(mRef, mModelClass,false);
+        this(mRef, mModelClass, false);
     }
-    public FirebaseListAdapter(Query mRef, final Class<T> mModelClass,final boolean keepsynced) {
-        this.mSearchingFlag=mSearchingFlag;
+
+    public FirebaseListAdapter(Query mRef, final Class<T> mModelClass, final boolean keepsynced) {
+        this.mSearchingFlag = mSearchingFlag;
         this.mRef = mRef;
         this.mModelClass = mModelClass;
         mModels = new ArrayList<T>();
@@ -68,13 +63,13 @@ public abstract class FirebaseListAdapter<T> extends  RecyclerView.Adapter<Recyc
                 T model;
                 String key;
                 try {
-                    if(dataSnapshot.hasChild("_source")){
+                    if (dataSnapshot.hasChild("_source")) {
                         model = dataSnapshot.child("_source").getValue(FirebaseListAdapter.this.mModelClass);
-                        Log.d("Snapshot:",dataSnapshot.toString());
-                    }else {
+                        Log.d("Snapshot:", dataSnapshot.toString());
+                    } else {
                         model = dataSnapshot.getValue(FirebaseListAdapter.this.mModelClass);
                     }
-                    key = dataSnapshot.hasChild("_id")? dataSnapshot.child("_id").getValue().toString():dataSnapshot.getKey();
+                    key = dataSnapshot.hasChild("_id") ? dataSnapshot.child("_id").getValue().toString() : dataSnapshot.getKey();
                     mModelKeys.put(key, model);
                     // Insert into the correct location, based on previousChildName
                     if (previousChildName == null) {
@@ -92,10 +87,10 @@ public abstract class FirebaseListAdapter<T> extends  RecyclerView.Adapter<Recyc
                             mKeys.add(nextIndex, key);
                         }
                     }
-                }catch(Exception e){
-                    key = dataSnapshot.hasChild("_id")? dataSnapshot.child("_id").getValue().toString():dataSnapshot.getKey();
-                    Log.e("FirebaseListAdapter",key+" has a bad model: "+dataSnapshot.toString());
-                }finally {
+                } catch (Exception e) {
+                    key = dataSnapshot.hasChild("_id") ? dataSnapshot.child("_id").getValue().toString() : dataSnapshot.getKey();
+                    Log.e("FirebaseListAdapter", key + " has a bad model: " + dataSnapshot.toString());
+                } finally {
                     notifyDataSetChanged();
                 }
             }
@@ -103,19 +98,19 @@ public abstract class FirebaseListAdapter<T> extends  RecyclerView.Adapter<Recyc
             @Override
             public void onChildChanged(DataSnapshot dataSnapshot, String s) {
                 // One of the mModels changed. Replace it in our list and name mapping
-                String modelName = dataSnapshot.hasChild("_id")? dataSnapshot.child("_id").getValue().toString():dataSnapshot.getKey();
-                Log.d("change",s+dataSnapshot.getKey());
+                String modelName = dataSnapshot.hasChild("_id") ? dataSnapshot.child("_id").getValue().toString() : dataSnapshot.getKey();
+                Log.d("change", s + dataSnapshot.getKey());
                 T oldModel = mModelKeys.get(modelName);
                 T newModel;
-                if(dataSnapshot.hasChild("_source")){
+                if (dataSnapshot.hasChild("_source")) {
                     newModel = dataSnapshot.child("_source").getValue(FirebaseListAdapter.this.mModelClass);
-                }else {
+                } else {
                     newModel = dataSnapshot.getValue(FirebaseListAdapter.this.mModelClass);
                 }
 
                 int index = mModels.indexOf(oldModel);
                 //Return if model is no longer found
-                if(index == -1) return;
+                if (index == -1) return;
                 mModels.set(index, newModel);
                 mModelKeys.put(modelName, newModel);
                 mKeys.set(index, modelName);
@@ -125,13 +120,13 @@ public abstract class FirebaseListAdapter<T> extends  RecyclerView.Adapter<Recyc
 
             @Override
             public void onChildRemoved(DataSnapshot dataSnapshot) {
-                if(!dataSnapshot.hasChild("_id")){
-                    Log.e("childReMoved","snap:"+dataSnapshot.getKey());
+                if (!dataSnapshot.hasChild("_id")) {
+                    Log.e("childReMoved", "snap:" + dataSnapshot.getKey());
                     String modelName = dataSnapshot.getKey();
                     // A model was removed from <></>he list. Remove it from our list and the name mapping
                     T oldModel = mModelKeys.get(modelName);
                     mModels.remove(oldModel);
-                    mKeys.remove(oldModel);
+                    mKeys.remove(modelName);
                     mModelKeys.remove(modelName);
                     notifyDataSetChanged();
                 }
@@ -139,23 +134,23 @@ public abstract class FirebaseListAdapter<T> extends  RecyclerView.Adapter<Recyc
 
             @Override
             public void onChildMoved(DataSnapshot dataSnapshot, String previousChildName) {
-                if(dataSnapshot.hasChild("_id")){
+                if (dataSnapshot.hasChild("_id")) {
                     return;
                 }
-                Log.e("childMoved","snap:"+dataSnapshot.getKey());
+                Log.e("childMoved", "snap:" + dataSnapshot.getKey());
                 // A model changed position in the list. Update our list accordingly
-                String modelName = dataSnapshot.hasChild("_id")? dataSnapshot.child("_id").getValue().toString():dataSnapshot.getKey();
+                String modelName = dataSnapshot.hasChild("_id") ? dataSnapshot.child("_id").getValue().toString() : dataSnapshot.getKey();
                 T oldModel = mModelKeys.get(modelName);
 
                 T newModel;
-                if(dataSnapshot.hasChild("_source")){
+                if (dataSnapshot.hasChild("_source")) {
                     newModel = dataSnapshot.child("_source").getValue(FirebaseListAdapter.this.mModelClass);
-                }else {
+                } else {
                     newModel = dataSnapshot.getValue(FirebaseListAdapter.this.mModelClass);
                 }
                 int index = mModels.indexOf(oldModel);
                 //Return if old model is no longer found
-                if(index==-1)return;
+                if (index == -1) return;
 
                 mModels.remove(index);
                 mKeys.remove(index);
@@ -186,7 +181,7 @@ public abstract class FirebaseListAdapter<T> extends  RecyclerView.Adapter<Recyc
 
     public void cleanup() {
         // We're being destroyed, let go of our mListener and forget about all of the mModels
-        Log.d("FirebaseListAdapter","cleanup()");
+        Log.d("FirebaseListAdapter", "cleanup()");
         mRef.removeEventListener(mListener);
         mModels.clear();
         mModelKeys.clear();
@@ -203,10 +198,11 @@ public abstract class FirebaseListAdapter<T> extends  RecyclerView.Adapter<Recyc
         return i;
     }
 
-    public T getItem(int i){
+    public T getItem(int i) {
         return mModels.get(i);
     }
-    public String getItemKey(int i){
+
+    public String getItemKey(int i) {
         return mKeys.get(i);
     }
 }
