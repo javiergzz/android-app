@@ -67,7 +67,6 @@ public class StorySettingsActivity extends FirebaseActivity {
 
     private Story mStory;
     private String mId;
-    private User mContributor;
     private DatabaseReference mFirebaseRef = FirebaseDatabase.getInstance().getReference();
     private ContributorsAdapter mContributorsAdapter;
     private long mChildrenCount = 0;
@@ -81,25 +80,16 @@ public class StorySettingsActivity extends FirebaseActivity {
         mId = b.getString(ChatActivity.TAG_ID);
         String url = getString(R.string.embed_url) + mId;
         String embed = "<iframe width=\"100%\" height=\"900\" src=\"" + url + "\" frameborder=\"0\" allowfullscreen></iframe>";
-
-
         mTxtTitle.setText(mStory.getIsLive() ? getString(R.string.story_settings_url_title) : getString(R.string.story_settings_code_title));
         mTextStoryCode.setText(mStory.getIsLive() ? url : embed);
         mTextStoryCode.setEnabled(mStory.getIsLive());
-
-        if(!mStory.getIsLive()){
-            mTextStoryCode.setBackgroundResource(R.drawable.border_color);
-        }
-
+        mTextStoryCode.setBackgroundResource(R.drawable.border_color);
         if (!mStory.getIsLive()) {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
                 mTextStoryCode.setTextAlignment(View.TEXT_ALIGNMENT_TEXT_START);
             }
         }
-
-        //TODO Uncomment this
         mEditStoryLayout.setVisibility(View.VISIBLE);
-
     }
 
     @Override
@@ -123,7 +113,6 @@ public class StorySettingsActivity extends FirebaseActivity {
         setSupportActionBar(toolbar);
         restoreState(savedInstanceState);
         setupContributors();
-        setupAddButton();
         SharedPreferences settings = getSharedPreferences(getString(R.string.preference_file_key), MODE_PRIVATE);
         if (!settings.getBoolean(PREFS_TUTORIAL, false)) {
             mTextStoryCode.setTextColor(Color.rgb(255,255,255));
@@ -135,12 +124,14 @@ public class StorySettingsActivity extends FirebaseActivity {
     }
 
     private void loadTutorial() {
+
+        String str = mStory.getIsLive() ? "Share it with the world by sharing your link on Facebook or Twitter." : "Share it with the world by copying your embed code and pasting it on your site. Then watch how all the content syncs up.";
         String[] titles = {
                 "Share your Story",
                 "Add a Contributor"
         };
         String[] msg = {
-                "Here you'll see either an embed code or a link to your page on LivePost. Remember to share your link so others can read your story!",
+                str,
                 "Invite another LivePoster to help you cover a story. Just add the email or twitter username they used to register on LivePost (Make sure to include the @symbol if they used Twitter to login.)"
         };
         View[] views = {
@@ -176,29 +167,6 @@ public class StorySettingsActivity extends FirebaseActivity {
                 })
                 .show();
     }
-    private void setupAddButton() {
-        DatabaseReference usersRef = FirebaseDatabase.getInstance().getReference("users");
-        mTextContributor.setThreshold(1);
-        mTextContributor.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            @Override
-            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                mContributor = (User) view.getTag();
-                Log.e(TAG, mContributor.toString());
-            }
-            @Override
-            public void onNothingSelected(AdapterView<?> parent) {
-
-            }
-        });
-        mTextContributor.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                mContributor = (User) view.getTag();
-                Log.e(TAG, mContributor.toString());
-            }
-        });
-    }
-
 
     private void setupContributors() {
         mFirebaseRef.child("members/" + mId).orderByChild("role").addValueEventListener(new ValueEventListener() {
@@ -206,10 +174,12 @@ public class StorySettingsActivity extends FirebaseActivity {
             public void onDataChange(DataSnapshot dataSnapshot) {
                 Map<String, Object> map = (Map<String, Object>) dataSnapshot.getValue();
                 if (map != null) {
+                    mListContributors.setVisibility(View.VISIBLE);
                     mContributorsAdapter = new ContributorsAdapter(getApplicationContext(), FirebaseDatabase.getInstance().getReference("users"), mId, map);
                     mListContributors.setLayoutManager(new LinearLayoutManager(StorySettingsActivity.this));
                     mListContributors.setAdapter(mContributorsAdapter);
                 } else {
+                    mListContributors.setVisibility(View.GONE);
                     mListContributors.removeAllViewsInLayout();
                 }
             }

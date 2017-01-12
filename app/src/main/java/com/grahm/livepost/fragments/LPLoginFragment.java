@@ -40,6 +40,7 @@ import com.grahm.livepost.activities.MainActivity;
 import com.grahm.livepost.activities.SplashScreen;
 import com.grahm.livepost.objects.User;
 import com.grahm.livepost.ui.Controls;
+import com.grahm.livepost.utils.Config;
 
 import org.json.JSONObject;
 
@@ -234,7 +235,7 @@ public class LPLoginFragment extends Fragment {
 
         private void transformUser(){
             RequestQueue queue = Volley.newRequestQueue(mContext);
-                        String url ="http://rest-livepost-dev.herokuapp.com/v1.1/login";
+                        String url = Config.WS_URL_BASE + "/v1.1/login";
 
             StringRequest stringRequest = new StringRequest(Request.Method.POST, url,
                     new Response.Listener<String>() {

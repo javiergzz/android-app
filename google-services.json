@@ -1,27 +1,27 @@
 {
   "project_info": {
-    "project_number": "191198007413",
-    "firebase_url": "https://sandbox-lp.firebaseio.com",
-    "project_id": "sandbox-lp",
-    "storage_bucket": "sandbox-lp.appspot.com"
+    "project_number": "579641317343",
+    "firebase_url": "https://developer-livepost.firebaseio.com",
+    "project_id": "developer-livepost",
+    "storage_bucket": "developer-livepost.appspot.com"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:191198007413:android:1ab65b4ee6ff448d",
+        "mobilesdk_app_id": "1:579641317343:android:1ab65b4ee6ff448d",
         "android_client_info": {
           "package_name": "com.grahm.livepost"
         }
       },
       "oauth_client": [
         {
-          "client_id": "191198007413-3e2e57pkr9krigqaut8vgrf8qdpnuobi.apps.googleusercontent.com",
+          "client_id": "579641317343-818v4pknrci9cfi6e571clfqcnvomhbi.apps.googleusercontent.com",
           "client_type": 3
         }
       ],
       "api_key": [
         {
-          "current_key": "AIzaSyAX8ZyIRt_cHdPmusz7W8O1P_2TaG9JlTU"
+          "current_key": "AIzaSyCykG1aIfQoPkuTQ2Z2lhn7uzlH9y2a-c4"
         }
       ],
       "services": {

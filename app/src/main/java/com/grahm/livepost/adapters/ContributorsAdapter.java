@@ -34,6 +34,7 @@ public class ContributorsAdapter extends FirebaseListFilteredAdapter<User> {
     Context mContext;
     Map<String, Object> mMap;
     private static final String TAG_PENDING = "pending";
+
     public ContributorsAdapter(Context context, Query query, String storyId, Map<String, Object> filter) {
         super(query.getRef(), User.class, filter);
         mFirebaseRef = FirebaseDatabase.getInstance().getReference();
@@ -58,7 +59,6 @@ public class ContributorsAdapter extends FirebaseListFilteredAdapter<User> {
 
         Map<String, Object> contributor = (Map<String, Object>) mMap.values().toArray()[position];
         String role = contributor.get("role").toString();
-        Log.i(TAG, "role: " + role);
         if (role.equals(TAG_PENDING)) {
             postfix = "(Pending)";
             h.mTextView.setTextColor(mContext.getResources().getColor(R.color.light_grey));

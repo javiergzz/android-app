@@ -107,7 +107,9 @@ public class Utilities {
         user.put("profile_picture", _user.getProfile_picture());
         user.put("timestamp", ts);
         user.put("uid", _user.getUid());
+        user.put("active", true);
         user.put("twitter", _user.getTwitter());
+        user.put("screenName", _user.getScreenName());
         usersRef.updateChildren(user);
     }
 

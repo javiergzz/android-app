@@ -22,6 +22,7 @@ import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.inputmethod.EditorInfo;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.AbsListView;
 import android.widget.AdapterView;
 import android.widget.Button;
@@ -42,6 +43,7 @@ import com.grahm.livepost.asynctask.PostImageTask;
 import com.grahm.livepost.asynctask.PostVideoTask;
 import com.grahm.livepost.asynctask.VideoCompressor;
 import com.grahm.livepost.file.FileUtils;
+import com.grahm.livepost.interfaces.OnCustomListener;
 import com.grahm.livepost.interfaces.OnFragmentInteractionListener;
 import com.grahm.livepost.interfaces.OnPutImageListener;
 import com.grahm.livepost.interfaces.OnPutVideoListener;
@@ -74,12 +76,15 @@ import butterknife.OnTextChanged;
 import io.fabric.sdk.android.Fabric;
 import uk.co.samuelwall.materialtaptargetprompt.MaterialTapTargetPrompt;
 
+import static com.objectlife.statelayout.StateLayout.VIEW_CONTENT;
+
 public class ChatActivity extends FirebaseActivity implements AbsListView.OnItemClickListener, OnFragmentInteractionListener {
     private static final String TAG_CLASS = "ChatActivity";
     public static final String TAG_ID = "key";
     public static final String TAG_USER = "user";
     public static final String TAG_STORY = "story";
-    public static final String PREFS_TUTORIAL = "tutorial_chat";
+    public static final String PREFS_TUTORIAL = "tutorial_story_bar";
+    public static final String PREFS_TUTORIAL_SET = "tutorial_story_settings";
 
     public static Activity mChat;
 
@@ -139,8 +144,6 @@ public class ChatActivity extends FirebaseActivity implements AbsListView.OnItem
     private static final String TWITTER_KEY = "roDB8OWxSlYv3hiKXYnPusPUJ";
     private static final String TWITTER_SECRET = "hV1sxHw8CcQaFMnKU59F0ze5qFVEcxDrRtQCouf2sXWXoZ300w";
 
-    private int mTutorialCount = 0;
-
     @Override
     public void onSaveInstanceState(Bundle outState) {
         outState.putString(TAG_ID, mId);
@@ -188,37 +191,33 @@ public class ChatActivity extends FirebaseActivity implements AbsListView.OnItem
         keyboardUtil.enable();
         SharedPreferences settings = getSharedPreferences(getString(R.string.preference_file_key), MODE_PRIVATE);
         if (!settings.getBoolean(PREFS_TUTORIAL, false)) {
-            loadTutorial();
+            OnCustomListener listener = new OnCustomListener() {
+                @Override
+                public void complete() {
+                    SharedPreferences sharedPref = getSharedPreferences(getString(R.string.preference_file_key), Context.MODE_PRIVATE);
+                    SharedPreferences.Editor editor = sharedPref.edit();
+                    editor.putBoolean(PREFS_TUTORIAL, true);
+                    editor.commit();
+                }
+            };
+            String title = "Photos, Videos & Text";
+            String msgContentBar = "You can start telling everybody what’s happening right here.";
+            View v = mInputText;
+            int color = Color.rgb(51, 171, 164);
+            loadTutorial(title, msgContentBar, v, color, listener);
         }
-
         FirebaseAnalytics mFirebaseAnalytics = FirebaseAnalytics.getInstance(this);
         mFirebaseAnalytics.setCurrentScreen(this, "Story Screen", "onCreate");
     }
 
-    private void loadTutorial() {
-        String[] titles = {
-                "Photos, Videos & Text",
-                "Settings"
-        };
-        String[] msg = {
-                "This is your first story! You can start typing in the text bar at the bottom.",
-                "You'll find your story's embed code/link here. You can also invite others to help contribute in the story."
-        };
-        View[] views = {
-                mInputText,
-                findViewById(R.id.action_settings_chat)
-        };
+    private void loadTutorial(String title, String msg, View v, int color, final OnCustomListener listener) {
 
-        int[] colors = {
-                Color.rgb(51, 171, 164),
-                Color.argb(180, 54, 68, 87)
-        };
         new MaterialTapTargetPrompt.Builder(ChatActivity.this)
-                .setTarget(views[mTutorialCount])
-                .setFocalColour(colors[mTutorialCount])
+                .setTarget(v)
+                .setFocalColour(color)
                 .setBackgroundColour(Color.rgb(51, 171, 164))
-                .setPrimaryText(titles[mTutorialCount])
-                .setSecondaryText(msg[mTutorialCount])
+                .setPrimaryText(title)
+                .setSecondaryText(msg)
                 .setOnHidePromptListener(new MaterialTapTargetPrompt.OnHidePromptListener() {
                     @Override
                     public void onHidePrompt(MotionEvent event, boolean tappedTarget) {
@@ -227,15 +226,7 @@ public class ChatActivity extends FirebaseActivity implements AbsListView.OnItem
 
                     @Override
                     public void onHidePromptComplete() {
-                        mTutorialCount++;
-                        if (mTutorialCount < 2) {
-                            loadTutorial();
-                        } else {
-                            SharedPreferences sharedPref = getSharedPreferences(getString(R.string.preference_file_key), Context.MODE_PRIVATE);
-                            SharedPreferences.Editor editor = sharedPref.edit();
-                            editor.putBoolean(PREFS_TUTORIAL, true);
-                            editor.commit();
-                        }
+                        listener.complete();
                     }
                 })
                 .show();
@@ -274,10 +265,12 @@ public class ChatActivity extends FirebaseActivity implements AbsListView.OnItem
                 @Override
                 public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
                     super.onScrolled(recyclerView, dx, dy);
-                    if (mLinearLayoutManager.findLastCompletelyVisibleItemPosition() + 3 < mMessagesListAdapter.getItemCount()) {
-                        if (!mBtnBottom.isShown()) mBtnBottom.setVisibility(View.VISIBLE);
-                    } else if (mBtnBottom.isShown()) {
-                        mBtnBottom.setVisibility(View.GONE);
+                    if(mStateLayout.getState() == StateLayout.VIEW_CONTENT){
+                        if (mLinearLayoutManager.findLastCompletelyVisibleItemPosition() + 3 < mMessagesListAdapter.getItemCount()) {
+                            if (!mBtnBottom.isShown()) mBtnBottom.setVisibility(View.VISIBLE);
+                        } else if (mBtnBottom.isShown()) {
+                            mBtnBottom.setVisibility(View.GONE);
+                        }
                     }
                 }
             });
@@ -384,7 +377,36 @@ public class ChatActivity extends FirebaseActivity implements AbsListView.OnItem
             mFirebaseRef.getRoot().child("users/" + mUser.getUid() + "/posts_contributed").updateChildren(mUser.getPosts_contributed_to());
             mInputText.setText("");
         }
+        loadTutorialSettings();
+    }
 
+    private void hideKeyBoard(){
+        InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+        imm.hideSoftInputFromWindow(getCurrentFocus().getWindowToken(), 0);
+    }
+
+    private void loadTutorialSettings(){
+
+        SharedPreferences settings = getSharedPreferences(getString(R.string.preference_file_key), MODE_PRIVATE);
+        if (!settings.getBoolean(PREFS_TUTORIAL_SET, false)) {
+            if(mUser.getUid().equals(mStory.getAuthor())){
+                hideKeyBoard();
+                OnCustomListener listener = new OnCustomListener() {
+                    @Override
+                    public void complete() {
+                        SharedPreferences sharedPref = getSharedPreferences(getString(R.string.preference_file_key), Context.MODE_PRIVATE);
+                        SharedPreferences.Editor editor = sharedPref.edit();
+                        editor.putBoolean(PREFS_TUTORIAL_SET, true);
+                        editor.commit();
+                    }
+                };
+                String title = "Let’s Share Your Story";
+                String msgContentBar = "Here you can share your story and invite contributors. Let’s check it out.";
+                View v = findViewById(R.id.action_settings_chat);
+                int color = Color.argb(180, 54, 68, 87);
+                loadTutorial(title, msgContentBar, v, color, listener);
+            }
+        }
     }
 
     @OnClick(R.id.btnBottom)
@@ -398,11 +420,16 @@ public class ChatActivity extends FirebaseActivity implements AbsListView.OnItem
         int id = item.getItemId();
         switch (id) {
             case R.id.action_settings_chat:
-                Intent intent = new Intent(ChatActivity.this, StorySettingsActivity.class);
-                intent.putExtra(TAG_STORY, mStory);
-                intent.putExtra(TAG_ID, mId);
-                intent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
-                startActivityForResult(intent, 1);
+                SharedPreferences settings = getSharedPreferences(getString(R.string.preference_file_key), MODE_PRIVATE);
+                if (settings.getBoolean(PREFS_TUTORIAL_SET, false)) {
+                    Intent intent = new Intent(ChatActivity.this, StorySettingsActivity.class);
+                    intent.putExtra(TAG_STORY, mStory);
+                    intent.putExtra(TAG_ID, mId);
+                    intent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
+                    startActivityForResult(intent, 1);
+                }else{
+                    loadTutorialSettings();
+                }
                 return true;
         }
         getSupportActionBar().setTitle(mStory.getTitle());
@@ -421,7 +448,6 @@ public class ChatActivity extends FirebaseActivity implements AbsListView.OnItem
     private void setupMenu() {
         getSupportActionBar().setTitle(mStory.getTitle());
         setTitle(mStory.getTitle());
-//        mBackdropImageView.setAlpha(0.8f);
         Glide.with(this).load(mStory.getPosts_picture()).into(mBackdropImageView);
     }
 

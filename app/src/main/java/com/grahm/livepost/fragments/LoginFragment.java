@@ -36,6 +36,7 @@ import com.grahm.livepost.R;
 import com.grahm.livepost.activities.MainActivity;
 import com.grahm.livepost.activities.SplashScreen;
 import com.grahm.livepost.ui.Controls;
+import com.grahm.livepost.utils.Config;
 import com.twitter.sdk.android.core.Callback;
 import com.twitter.sdk.android.core.Result;
 import com.twitter.sdk.android.core.TwitterApiClient;
@@ -144,7 +145,7 @@ public class LoginFragment extends Fragment {
 
     private void transformUser(final String uid, final TwitterSession session) {
         RequestQueue queue = Volley.newRequestQueue(getApplicationContext());
-        String url = "http://rest-livepost-dev.herokuapp.com/v1.1/twitter/transform";
+        String url = Config.WS_URL_BASE + "/v1.1/twitter/transform";
         StringRequest stringRequest = new StringRequest(Request.Method.POST, url,
                 new Response.Listener<String>() {
                     @Override
@@ -153,14 +154,10 @@ public class LoginFragment extends Fragment {
                             JSONObject json = new JSONObject(response);
                             Log.d("My App", json.toString());
                             Log.d("phonetype value ", json.getBoolean("success") + "");
-                            if (json.getBoolean("success")) {
-                                getProfilePicture(session);
-                            } else {
-                                mLoading.setVisibility(View.GONE);
-                                Toast.makeText(getApplicationContext(), (json.getJSONObject("msg")).getString(Locale.getDefault().getDisplayLanguage()), Toast.LENGTH_LONG).show();
-                            }
+                            getProfilePicture(session);
                         } catch (Throwable tx) {
                             Log.e("My App", "Could not parse malformed JSON: \"" + response + "\"");
+                            Log.e("My App", tx.getMessage());
                             mLoading.setVisibility(View.GONE);
                         }
                     }
@@ -240,6 +237,8 @@ public class LoginFragment extends Fragment {
                 _user.setName(name);
                 _user.setProfile_picture(photoUrlNormalSize);
                 _user.setUid(mAuth.getCurrentUser().getUid());
+                _user.setActive(true);
+                _user.setScreenName("@" + session.getUserName().toLowerCase());
                 _user.setTwitter(session.getUserName());
                 saveTwitterOnFirebase(_user);
                 saveOnProperties(_user);
