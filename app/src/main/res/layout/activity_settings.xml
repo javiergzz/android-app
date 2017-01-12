@@ -247,4 +247,13 @@
         </LinearLayout>
     </LinearLayout>
 
+    <TextView
+        android:id="@+id/txt_version"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="15dp"
+        android:textColor="#888"
+        android:textSize="14dp"
+        android:textAlignment="center"/>
+
 </LinearLayout>
