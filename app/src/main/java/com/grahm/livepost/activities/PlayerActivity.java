@@ -3,6 +3,9 @@ package com.grahm.livepost.activities;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
+import android.view.View;
+import android.webkit.WebView;
 
 import com.afollestad.easyvideoplayer.EasyVideoCallback;
 import com.afollestad.easyvideoplayer.EasyVideoPlayer;
@@ -20,6 +23,9 @@ public class PlayerActivity extends AppCompatActivity implements EasyVideoCallba
 
     @BindView(R.id.player_video)
     public EasyVideoPlayer mPlayer;
+
+    @BindView(R.id.web_view_player)
+    public WebView mWebView;
 
     @Override
     protected void onSaveInstanceState(Bundle outState) {
@@ -40,8 +46,13 @@ public class PlayerActivity extends AppCompatActivity implements EasyVideoCallba
         ButterKnife.bind(this);
         restoreState(savedInstanceState);
         mPlayer.setCallback(this);
-        mPlayer.setAutoPlay(true);
-        mPlayer.setSource(Uri.parse(mVideoUrl));
+        if(mVideoUrl.contains("https://livepostrocks.s3.amazonaws.com")){
+            mPlayer.setVisibility(View.GONE);
+            mWebView.loadUrl(mVideoUrl);
+        }else{
+            mWebView.setVisibility(View.GONE);
+            mPlayer.setSource(Uri.parse(mVideoUrl));
+        }
         FirebaseAnalytics mFirebaseAnalytics = FirebaseAnalytics.getInstance(this);
         mFirebaseAnalytics.setCurrentScreen(this, "Player", "onCreate");
     }
@@ -69,7 +80,7 @@ public class PlayerActivity extends AppCompatActivity implements EasyVideoCallba
 
     @Override
     public void onPrepared(EasyVideoPlayer player) {
-
+        player.start();
     }
 
     @Override
@@ -79,7 +90,7 @@ public class PlayerActivity extends AppCompatActivity implements EasyVideoCallba
 
     @Override
     public void onError(EasyVideoPlayer player, Exception e) {
-
+        Log.e("EasyVideoPlayer", e.getMessage());
     }
 
     @Override

@@ -85,7 +85,6 @@ public class CreateStoryTask extends AsyncTask<Uri, String, String> {
         if (selectedImage != null) {
             url = uploadImages(selectedImage);
             mStory.setPosts_picture(url);
-            mStory.setLast_message(url);
             addFirebaseEntry();
         }
         return url;
