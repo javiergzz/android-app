@@ -252,7 +252,7 @@ public class ChatActivity extends FirebaseActivity implements AbsListView.OnItem
             mLinearLayoutManager = new LinearLayoutManager(this);
             mLinearLayoutManager.setOrientation(LinearLayoutManager.VERTICAL);
             mListView.setLayoutManager(mLinearLayoutManager);
-            mMessagesListAdapter = new ChatAdapter(mFirebaseRef.limitToLast(50), this, mId, mUser);
+            mMessagesListAdapter = new ChatAdapter(mFirebaseRef, this, mId, mUser);
             mListView.setAdapter(mMessagesListAdapter);
             mMessagesListAdapter.registerAdapterDataObserver(new RecyclerView.AdapterDataObserver() {
                 @Override

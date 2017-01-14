@@ -80,7 +80,7 @@ public class HomeFragment extends Fragment {
 
     private void setupAdapter(final RecyclerView recyclerView) {
         Log.d(TAG, mFirebaseRef.toString());
-        mHomeListAdapter = new HomeListAdapter(mFirebaseRef.orderByChild("author").equalTo(mUser.getUid()).limitToLast(50),mFirebaseRef.orderByChild("last_time").getRef(),(AppCompatActivity) getActivity(), mUser.getPosts_contributed_to());
+        mHomeListAdapter = new HomeListAdapter(mFirebaseRef.orderByChild("author").equalTo(mUser.getUid()),mFirebaseRef.orderByChild("last_time").getRef(),(AppCompatActivity) getActivity(), mUser.getPosts_contributed_to());
         recyclerView.setAdapter(mHomeListAdapter);
         mHomeListAdapter.registerAdapterDataObserver(new RecyclerView.AdapterDataObserver() {
             @Override

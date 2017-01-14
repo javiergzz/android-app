@@ -135,7 +135,7 @@ public class EditPostDialogFragment extends DialogFragment {
                 mTextEdit.setVisibility(View.GONE);
                 mImageEdit.setVisibility(View.VISIBLE);
                 if (TextUtils.isEmpty(mMsg.getThumb())) {
-                    Glide.with(this).load(R.drawable.default_placeholder).into(mImageEdit);
+                    mImageEdit.setImageResource(android.R.drawable.ic_media_play);
                 } else {
                     Glide.with(this).load(mMsg.getThumb()).into(mImageEdit);
                 }
@@ -150,7 +150,7 @@ public class EditPostDialogFragment extends DialogFragment {
                 mTextEdit.setVisibility(View.GONE);
                 mImageEdit.setVisibility(View.VISIBLE);
                 if (TextUtils.isEmpty(mMsg.getThumb())) {
-                    Glide.with(this).load(R.drawable.default_placeholder).into(mImageEdit);
+                    mImageEdit.setImageResource(android.R.drawable.ic_media_play);
                 } else {
                     Glide.with(this).load(mMsg.getThumb()).into(mImageEdit);
                 }

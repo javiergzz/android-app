@@ -130,9 +130,7 @@ public class ChatAdapter extends FirebaseListAdapter<Update> {
             @Override
             public boolean onLongClick(View v) {
                 String sender = m.getSender_key();
-                if (mUsername != null && mUsername.equals(sender)) {
-                    showDialog(new ChatTag(key, m));
-                }
+                showDialog(new ChatTag(key, m));
                 return true;
             }
         };

@@ -46,10 +46,10 @@ public class PlayerActivity extends AppCompatActivity implements EasyVideoCallba
         ButterKnife.bind(this);
         restoreState(savedInstanceState);
         mPlayer.setCallback(this);
-        if(mVideoUrl.contains("https://livepostrocks.s3.amazonaws.com")){
+        if (mVideoUrl.contains("https://livepostrocks.s3.amazonaws.com")) {
             mPlayer.setVisibility(View.GONE);
             mWebView.loadUrl(mVideoUrl);
-        }else{
+        } else {
             mWebView.setVisibility(View.GONE);
             mPlayer.setSource(Uri.parse(mVideoUrl));
         }
