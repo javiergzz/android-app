@@ -61,7 +61,7 @@ public class CreateStoryTask extends AsyncTask<Uri, String, String> {
             mUser = new Gson().fromJson(s, User.class);
             mStory.setAuthor(mUser.getUid());
         }
-        Log.e(TAG,"constructor: "+s);
+        Log.e(TAG, "constructor: " + s);
     }
 
     protected void onPreExecute() {
@@ -71,12 +71,12 @@ public class CreateStoryTask extends AsyncTask<Uri, String, String> {
         if (mShowDialog) {
             dialog.show();
         }
-        Log.e(TAG,"onPreExecute: "+mUid);
+        Log.e(TAG, "onPreExecute: " + mUid);
     }
 
     protected String doInBackground(Uri... uris) {
         String url = "";
-        Log.e(TAG,"doInBackground: "+uris[0]);
+        Log.e(TAG, "doInBackground: " + uris[0]);
         if (uris == null || uris.length < 1) {
             return null;
         }
@@ -130,7 +130,7 @@ public class CreateStoryTask extends AsyncTask<Uri, String, String> {
     }
 
     private Bitmap getScaledBitmap(Uri srcUri, int mDstWidth, int mDstHeight) {
-        Bitmap unscaledBitmap = Util.loadBitmapFromUri(mContext,srcUri);
+        Bitmap unscaledBitmap = Util.loadBitmapFromUri(mContext, srcUri);
 
         Bitmap scaledBitmap;
         ImageSize srcSize = new ImageSize(unscaledBitmap.getWidth(), unscaledBitmap.getHeight());
@@ -142,7 +142,7 @@ public class CreateStoryTask extends AsyncTask<Uri, String, String> {
         else {
             unscaledBitmap.recycle();
             ImageSize s = getScaledDimension(srcSize, boundarySize);
-            return Bitmap.createScaledBitmap(Util.loadBitmapFromUri(mContext,srcUri), s.getWidth(), s.getHeight(), false);
+            return Bitmap.createScaledBitmap(Util.loadBitmapFromUri(mContext, srcUri), s.getWidth(), s.getHeight(), false);
         }
     }
 
@@ -156,16 +156,12 @@ public class CreateStoryTask extends AsyncTask<Uri, String, String> {
             ref.child("timestamp").setValue(ServerValue.TIMESTAMP);
             //Set Timestamps
             ref.child("last_time").setValue(ServerValue.TIMESTAMP);
-//            Log.e(TAG,"FirebaseEntrying: "+ref.toString());
-//            DatabaseReference r = mFirebaseRef.getRoot().child("updates/" + mKey).push();
-//            r.setValue(new Update(0, null, mStory.getPosts_picture(), mUser.getProfile_picture(), mStory.getAuthor_name(), mStory.getAuthor()));
-//            r.child(Story.TIMESTAMP_FIELD_STR).setValue(ServerValue.TIMESTAMP);
 
             //Add post to "posts created"
             Map<String, Object> posts = new HashMap<String, Object>();
             posts.put(mKey, mStory);
-            mFirebaseRef.getRoot().child("users/"+mUser.getUid()).child("/posts_created").updateChildren(posts);
-
+            mFirebaseRef.getRoot().child("users/" + mUser.getUid()).child("/posts_created").updateChildren(posts);
+            mFirebaseRef.getRoot().child("users/" + mUser.getUid()).child("/posts_created").child(mKey).child("timestamp").child("timestamp").setValue(ServerValue.TIMESTAMP);
         } catch (Exception e) {
             Log.e(TAG, e.getMessage().toString());
             e.printStackTrace();
@@ -184,7 +180,7 @@ public class CreateStoryTask extends AsyncTask<Uri, String, String> {
         ByteArrayInputStream bs = new ByteArrayInputStream(bitmapdata);
         try {
             url = AzureUtils.uploadBlob(pictureName, bs, GV.PICTURE_BUCKET);
-        }catch (Exception exception) {
+        } catch (Exception exception) {
             Log.e("AsyncTask", "Error: " + exception);
         }
         return url;

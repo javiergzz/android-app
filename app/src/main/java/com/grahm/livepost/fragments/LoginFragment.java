@@ -35,7 +35,6 @@ import com.google.gson.Gson;
 import com.grahm.livepost.R;
 import com.grahm.livepost.activities.MainActivity;
 import com.grahm.livepost.activities.SplashScreen;
-import com.grahm.livepost.ui.Controls;
 import com.grahm.livepost.utils.Config;
 import com.twitter.sdk.android.core.Callback;
 import com.twitter.sdk.android.core.Result;
@@ -49,7 +48,6 @@ import com.twitter.sdk.android.core.models.User;
 import org.json.JSONObject;
 
 import java.util.HashMap;
-import java.util.Locale;
 import java.util.Map;
 
 import static com.facebook.FacebookSdk.getApplicationContext;
@@ -265,6 +263,7 @@ public class LoginFragment extends Fragment {
         editor.putString("user", json);
         editor.putString("uid", user.getUid());
         editor.putString("username", user.getName());
+        editor.putString("email", user.getEmail());
         editor.putBoolean(SplashScreen.PREFS_LOGIN, true);
         editor.putString(SplashScreen.PREFS_AUTH, SplashScreen.PREFS_LIVEPOST);
         editor.commit();

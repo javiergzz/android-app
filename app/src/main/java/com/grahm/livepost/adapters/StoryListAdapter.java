@@ -23,6 +23,7 @@ import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.RecyclerView;
 import android.text.Html;
+import android.text.TextUtils;
 import android.util.Log;
 import android.util.LruCache;
 import android.view.LayoutInflater;
@@ -114,8 +115,15 @@ public class StoryListAdapter extends FirebaseListAdapter<Story> {
             String authorStr = s.getAuthor_name() == null ? s.getAuthor() : s.getAuthor_name();
             String stringFormat = "By <b>" + authorStr + "</b>" + " in " + "<b>" + s.getCategory() + "</b>";
             iholder.mCategoryView.setText(Html.fromHtml(stringFormat));
-            String lastTime = Utilities.getTimeMsg(s.getLast_time());
-            iholder.mDateTimeView.setText(lastTime);
+            String timeMsg = null;
+            Long timelong = s.getLast_time();
+            if (timelong != null) {
+                Timestamp t = new Timestamp(timelong);
+                timeMsg = Utilities.getTimeMsg(timelong);
+                if (!TextUtils.isEmpty(timeMsg)) {
+                    iholder.mDateTimeView.setText(timeMsg);
+                }
+            }
             Glide.with(mCtx).load(Utilities.trimPicture(s.getPosts_picture())).asBitmap().centerCrop().into(new BitmapImageViewTarget(iholder.mIconView) {
                 @Override
                 protected void setResource(Bitmap resource) {
@@ -123,6 +131,7 @@ public class StoryListAdapter extends FirebaseListAdapter<Story> {
                             RoundedBitmapDrawableFactory.create(mCtx.getResources(), resource);
                     circularBitmapDrawable.setCircular(true);
                     iholder.mIconView.setImageDrawable(circularBitmapDrawable);
+                    iholder.mProgressImgView.setVisibility(View.GONE);
                 }
             });
             iholder.mSelArea.setOnClickListener(new View.OnClickListener() {
@@ -162,46 +171,6 @@ public class StoryListAdapter extends FirebaseListAdapter<Story> {
         // Create the AlertDialog
         AlertDialog dialog = builder.create();
         dialog.show();
-    }
-
-
-    public void loadBitmap(final String resUrl, final ImageView imageView, final ProgressBar progressBar, final boolean retry) {
-
-        String rawName;
-        if (resUrl.contains("/")) {
-            List<String> tempList = Arrays.asList(resUrl.split("/"));
-            rawName = tempList.get(tempList.size() - 1);
-        } else {
-            rawName = resUrl;
-        }
-        String extLess = FilenameUtils.removeExtension(rawName);
-        String resString;
-        /*We first try to load a thumbnail or medium sized image for List and staggered versions respectively, if we fail we load the original image*/
-//        if (retry)
-//            resString = extLess;
-//        else
-//            resString = mListType == LIST ? extLess + "_thumb" : extLess + "_l_thumb";
-//
-//        resString = mCtx.getString(R.string.amazon_image_path) + resString + ".jpg";
-
-        progressBar.setVisibility(View.VISIBLE);
-        Glide.with(mCtx)
-                .load(resUrl)
-                .diskCacheStrategy(DiskCacheStrategy.RESULT)
-                .listener(new RequestListener<String, GlideDrawable>() {
-                    @Override
-                    public boolean onException(Exception e, String model, Target<GlideDrawable> target, boolean isFirstResource) {
-                        return false;
-                    }
-
-                    @Override
-                    public boolean onResourceReady(GlideDrawable resource, String model, Target<GlideDrawable> target, boolean isFromMemoryCache, boolean isFirstResource) {
-                        progressBar.setVisibility(View.GONE);
-                        return false;
-                    }
-                })
-                .into(imageView);
-
     }
 
     public class ViewHolderI extends RecyclerView.ViewHolder {

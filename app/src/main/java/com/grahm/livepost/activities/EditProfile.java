@@ -111,19 +111,20 @@ public class EditProfile extends AppCompatActivity{
         if(!TextUtils.isEmpty(mTxtName.getText())){
             user.put("name", mTxtName.getText().toString());
         }
-        isValid = !TextUtils.isEmpty(mTxtEmail.getText()) && !TextUtils.isEmpty(mTxtName.getText()) && !TextUtils.isEmpty(mImageUrl);
+        isValid = !TextUtils.isEmpty(mTxtName.getText()) || !TextUtils.isEmpty(mImageUrl);
         if(isValid){
-            //  TODO fix this shit
-            FirebaseUser fUser = FirebaseAuth.getInstance().getCurrentUser();
-            fUser.updateEmail(mTxtEmail.getText().toString())
-                    .addOnCompleteListener(new OnCompleteListener<Void>() {
-                        @Override
-                        public void onComplete(@NonNull Task<Void> task) {
-                            if (task.isSuccessful()) {
-                                Log.d(TAG, "User email address updated.");
+            if(TextUtils.isEmpty(mTxtEmail.getText())){
+                FirebaseUser fUser = FirebaseAuth.getInstance().getCurrentUser();
+                fUser.updateEmail(mTxtEmail.getText().toString())
+                        .addOnCompleteListener(new OnCompleteListener<Void>() {
+                            @Override
+                            public void onComplete(@NonNull Task<Void> task) {
+                                if (task.isSuccessful()) {
+                                    Log.d(TAG, "User email address updated.");
+                                }
                             }
-                        }
-                    });
+                        });
+            }
             mFirebaseRef.child("users").child(mUser.getUserKey()).updateChildren(user, new DatabaseReference.CompletionListener() {
                 @Override
                 public void onComplete(DatabaseError databaseError, DatabaseReference databaseReference) {

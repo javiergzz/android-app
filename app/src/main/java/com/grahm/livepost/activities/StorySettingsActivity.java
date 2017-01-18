@@ -71,7 +71,7 @@ public class StorySettingsActivity extends FirebaseActivity {
     private ContributorsAdapter mContributorsAdapter;
     private long mChildrenCount = 0;
     private int mTutorialCount = 0;
-    public static final String PREFS_TUTORIAL = "tutorial_story_settings";
+    public static final String PREFS_TUTORIAL = "tutorial_story_settings_";
 
 
     private void restoreState(Bundle savedInstanceState) {

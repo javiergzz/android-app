@@ -116,6 +116,7 @@ public class ChatActivity extends FirebaseActivity implements AbsListView.OnItem
     private ChatAdapter mMessagesListAdapter;
     private User mUser;
     private File mCacheFile;
+    private boolean mShowTutorial = true;
 
     private void pushMediaToStory(Update u) {
         mFirebaseRef.getRoot().child("posts/" + mId + "/last_message").setValue(u.getMessage());
@@ -173,6 +174,7 @@ public class ChatActivity extends FirebaseActivity implements AbsListView.OnItem
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_chat);
         mChat = this;
+        Log.i("", null);
         ButterKnife.bind(this);
         TwitterAuthConfig authConfig = new TwitterAuthConfig(TWITTER_KEY, TWITTER_SECRET);
         Fabric.with(this, new TwitterCore(authConfig), new TweetUi(), new Twitter(authConfig), new TweetUi(), new TweetComposer());
@@ -291,7 +293,7 @@ public class ChatActivity extends FirebaseActivity implements AbsListView.OnItem
             @Override
             public void onImagePicked(File file, com.grahm.livepost.util.EasyImage.ImageSource source, int type) {
                 String mimeType = Util.getMimeTypeFromUri(getBaseContext(), Uri.fromFile(file));
-                if (mimeType.contains("video")) {
+                if (mimeType.contains("video") || mimeType.contains("3gpp")) {
                     onVideoReturned(file);
                 } else {
                     onPhotoReturned(file);
@@ -386,7 +388,7 @@ public class ChatActivity extends FirebaseActivity implements AbsListView.OnItem
     }
 
     private void loadTutorialSettings(){
-
+        mShowTutorial = false;
         SharedPreferences settings = getSharedPreferences(getString(R.string.preference_file_key), MODE_PRIVATE);
         if (!settings.getBoolean(PREFS_TUTORIAL_SET, false)) {
             if(mUser.getUid().equals(mStory.getAuthor())){
@@ -428,7 +430,9 @@ public class ChatActivity extends FirebaseActivity implements AbsListView.OnItem
                     intent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
                     startActivityForResult(intent, 1);
                 }else{
-                    loadTutorialSettings();
+                    if(mShowTutorial){
+                        loadTutorialSettings();
+                    }
                 }
                 return true;
         }

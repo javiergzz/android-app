@@ -61,13 +61,14 @@ public class HomeListAdapter extends FirebaseListJointAdapter<Story> {
         setConnectivityObservers(query);
 
     }
-    private void setConnectivityObservers(Query ref){
+
+    private void setConnectivityObservers(Query ref) {
         ref.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
-                if(getItemCount()<=0){
+                if (getItemCount() <= 0) {
                     switchMainActivityView(StateLayout.VIEW_EMPTY);
-                }else {
+                } else {
                     switchMainActivityView(StateLayout.VIEW_CONTENT);
                 }
             }
@@ -83,14 +84,14 @@ public class HomeListAdapter extends FirebaseListJointAdapter<Story> {
             public void onDataChange(DataSnapshot snapshot) {
                 boolean connected = snapshot.getValue(Boolean.class);
                 if (connected) {
-                    if(getItemCount()<=0){
+                    if (getItemCount() <= 0) {
                         switchMainActivityView(StateLayout.VIEW_EMPTY);
-                    }else {
+                    } else {
                         switchMainActivityView(StateLayout.VIEW_CONTENT);
                     }
                 } else {
                     System.out.println("not connected");
-                    if(getItemCount()<=0){
+                    if (getItemCount() <= 0) {
                         switchMainActivityView(StateLayout.VIEW_ERROR);
                     }
                 }
@@ -114,49 +115,51 @@ public class HomeListAdapter extends FirebaseListJointAdapter<Story> {
         final Story story = getItem(position);
         final String key = getItemKey(position);
 
-        if (holder instanceof ViewHolderH) {//Header View
-            ViewHolderH hholder = (ViewHolderH) holder;
-            hholder.mIdView.setText(story.getTitle());
-        } else {//Item view
-            final ViewHolderI iholder = (ViewHolderI) holder;
-            iholder.mItem = story;
-            final String lastMessage = story.getLast_message();
-            if (!TextUtils.isEmpty(lastMessage)) {
-                String mimeString =  MimeTypeMap.getSingleton().getMimeTypeFromExtension(MimeTypeMap.getFileExtensionFromUrl(lastMessage));
-                if(!TextUtils.isEmpty(mimeString) && (mimeString.contains("image"))){
-                    iholder.mLastMsgView.setText("Image");
-                } else if (!TextUtils.isEmpty(mimeString) && mimeString.contains("video")) {
-                    iholder.mLastMsgView.setText("Video");
-                } else {
-                    iholder.mLastMsgView.setText(lastMessage);
-                }
-            }
-            iholder.mTitleView.setText(story.getTitle());
-            String stringFormat = "<b>" + story.getAuthor_name() + "</b>" + " in " + "<b>" + story.getCategory() + "</b>";
-            iholder.mCategoryView.setText(Html.fromHtml(stringFormat));
-
-            iholder.mView.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    Bundle args = new Bundle();
-                    args.putString("key", key);
-                    args.putSerializable("story", iholder.mItem);
-                    if(MainActivity.canContinue){
-                        mOnFragmentInteractionListener.onFragmentInteraction(MainActivity.CHAT_IDX, args);
+        if (story != null) {
+            if (holder instanceof ViewHolderH) {//Header View
+                ViewHolderH hholder = (ViewHolderH) holder;
+                hholder.mIdView.setText(story.getTitle());
+            } else {//Item view
+                final ViewHolderI iholder = (ViewHolderI) holder;
+                iholder.mItem = story;
+                final String lastMessage = story.getLast_message();
+                if (!TextUtils.isEmpty(lastMessage)) {
+                    String mimeString = MimeTypeMap.getSingleton().getMimeTypeFromExtension(MimeTypeMap.getFileExtensionFromUrl(lastMessage));
+                    if (!TextUtils.isEmpty(mimeString) && (mimeString.contains("image"))) {
+                        iholder.mLastMsgView.setText("Image");
+                    } else if (!TextUtils.isEmpty(mimeString) && mimeString.contains("video")) {
+                        iholder.mLastMsgView.setText("Video");
+                    } else {
+                        iholder.mLastMsgView.setText(lastMessage);
                     }
                 }
-            });
-            if (story.getPosts_picture() != null && !story.getPosts_picture().isEmpty()) {
-                String[] parts = story.getPosts_picture().split("\\?");
-                loadBitmap(parts[0], iholder.mIconView, iholder.mProgressImgView, false);
-            }
-            String timeMsg = null;
-            Long timelong = story.getLast_time();
-            if (timelong != null) {
-                Timestamp t = new Timestamp(timelong);
-                timeMsg = Utilities.getTimeMsg(timelong);
-                if (!TextUtils.isEmpty(timeMsg)) {
-                    iholder.mTimestamp.setText(timeMsg);
+                iholder.mTitleView.setText(story.getTitle());
+                String stringFormat = "<b>" + story.getAuthor_name() + "</b>" + " in " + "<b>" + story.getCategory() + "</b>";
+                iholder.mCategoryView.setText(Html.fromHtml(stringFormat));
+
+                iholder.mView.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        Bundle args = new Bundle();
+                        args.putString("key", key);
+                        args.putSerializable("story", iholder.mItem);
+                        if (MainActivity.canContinue) {
+                            mOnFragmentInteractionListener.onFragmentInteraction(MainActivity.CHAT_IDX, args);
+                        }
+                    }
+                });
+                if (story.getPosts_picture() != null && !story.getPosts_picture().isEmpty()) {
+                    String[] parts = story.getPosts_picture().split("\\?");
+                    loadBitmap(parts[0], iholder.mIconView, iholder.mProgressImgView, false);
+                }
+                String timeMsg = null;
+                Long timelong = story.getLast_time();
+                if (timelong != null) {
+                    Timestamp t = new Timestamp(timelong);
+                    timeMsg = Utilities.getTimeMsg(timelong);
+                    if (!TextUtils.isEmpty(timeMsg)) {
+                        iholder.mTimestamp.setText(timeMsg);
+                    }
                 }
             }
         }
@@ -224,10 +227,10 @@ public class HomeListAdapter extends FirebaseListJointAdapter<Story> {
         return TYPE_ITEM;
     }
 
-    private void switchMainActivityView(int state){
+    private void switchMainActivityView(int state) {
         Bundle b = new Bundle();
         b.putInt(MainActivity.STATE_KEY, state);
-        mOnFragmentInteractionListener.onFragmentInteraction(MainActivity.VIEW_INTERACTIONS,b);
+        mOnFragmentInteractionListener.onFragmentInteraction(MainActivity.VIEW_INTERACTIONS, b);
     }
 
 
