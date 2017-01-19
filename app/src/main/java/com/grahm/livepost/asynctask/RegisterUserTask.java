@@ -22,6 +22,7 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.ServerValue;
 import com.google.gson.Gson;
 import com.grahm.livepost.R;
+import com.grahm.livepost.activities.SplashScreen;
 import com.grahm.livepost.interfaces.OnPutImageListener;
 import com.grahm.livepost.objects.ImageSize;
 import com.grahm.livepost.objects.User;
@@ -142,6 +143,7 @@ public class RegisterUserTask extends AsyncTask<Uri, String, String> {
                     editor.putString("user", json);
                     editor.putString("uid", mUid);
                     editor.putString("username", mUser.getEmail());
+                    editor.putBoolean(SplashScreen.PREFS_LOGIN, true);
                     editor.commit();
                     Log.i(TAG, "User " + mUser.getEmail() + " was registerd successfully!");
 //                    Controls.dismissDialog();

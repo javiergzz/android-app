@@ -174,7 +174,6 @@ public class ChatActivity extends FirebaseActivity implements AbsListView.OnItem
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_chat);
         mChat = this;
-        Log.i("", null);
         ButterKnife.bind(this);
         TwitterAuthConfig authConfig = new TwitterAuthConfig(TWITTER_KEY, TWITTER_SECRET);
         Fabric.with(this, new TwitterCore(authConfig), new TweetUi(), new Twitter(authConfig), new TweetUi(), new TweetComposer());
